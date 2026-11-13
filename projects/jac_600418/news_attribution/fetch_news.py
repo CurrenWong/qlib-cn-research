@@ -13,6 +13,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 from pathlib import Path
 
@@ -104,20 +105,26 @@ def _build_em_param(keyword, page_index, page_size, sort):
     }
 
 
+def _em_cookie() -> str:
+    """东财会话 Cookie：环境变量 EM_SEARCH_COOKIE 优先，其次 ~/.em_search_cookie。
+
+    以前是写死在这里的。会话 Cookie 属于个人凭据，不能进仓库，
+    所以改成外部注入；两个来源都没有就发空 cookie（多数情况下仍能拿到结果）。
+    """
+    val = os.environ.get("EM_SEARCH_COOKIE", "").strip()
+    if val:
+        return val
+    p = Path.home() / ".em_search_cookie"
+    return p.read_text(encoding="utf-8").strip() if p.exists() else ""
+
+
 _EM_HEADERS = {
     "accept": "*/*",
     "accept-encoding": "gzip, deflate, br, zstd",
     "accept-language": "en,zh-CN;q=0.9,zh;q=0.8",
     "cache-control": "no-cache",
     "connection": "keep-alive",
-    "cookie": (
-        "qgqp_b_id=652bf4c98a74e210088f372a17d4e27b; st_nvi=ulN5JAj9FUocz3p4klMME9f20; "
-        "emshistory=%5B%22603777%22%5D; nid18=010d039dd427dc4d187090491f47d7ad; "
-        "nid18_create_time=1764582801999; gviem=gSdeY51VWSuTzM3kWaagtf560; "
-        "gviem_create_time=1764582801999; st_si=55269775884615; st_pvi=66803244437563; "
-        "st_sp=2025-11-19%2014%3A19%3A16; st_inirUrl=https%3A%2F%2Fso.eastmoney.com%2Fnews%2Fs; "
-        "st_sn=2; st_psi=20251201223210488-118000300905-0940816858; st_asi=delete"
-    ),
+    "cookie": _em_cookie(),
     "host": "search-api-web.eastmoney.com",
     "pragma": "no-cache",
     "referer": "https://so.eastmoney.com/news/s?keyword=603777",

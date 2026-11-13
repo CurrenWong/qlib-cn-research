@@ -4,10 +4,25 @@
 """
 
 import json
+import os
+from pathlib import Path
 
 import requests
 
 URL = "https://search-api-web.eastmoney.com/search/jsonp"
+
+
+def _em_cookie() -> str:
+    """东财会话 Cookie：环境变量 EM_SEARCH_COOKIE 优先，其次 ~/.em_search_cookie。
+
+    会话 Cookie 属于个人凭据，不写死在仓库里。
+    """
+    val = os.environ.get("EM_SEARCH_COOKIE", "").strip()
+    if val:
+        return val
+    p = Path.home() / ".em_search_cookie"
+    return p.read_text(encoding="utf-8").strip() if p.exists() else ""
+
 
 HEADERS = {
     "accept": "*/*",
@@ -15,7 +30,7 @@ HEADERS = {
     "referer": "https://so.eastmoney.com/news/s?keyword=600418",
     "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36",
-    "cookie": "qgqp_b_id=652bf4c98a74e210088f372a17d4e27b; nid18=010d039dd427dc4d187090491f47d7ad",
+    "cookie": _em_cookie(),
 }
 
 

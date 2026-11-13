@@ -175,6 +175,11 @@ cd /d D:\Project\qlib
   `daily`/`adj_factor` 需 **120 积分**，`index_classify`/`index_member_all` 需 2000 积分。
   → `call_with_retry` 已改成**对权限错误立刻失败**（不再白等 14 秒再抛误导信息）。
   → token 存放：`%USERPROFILE%\.tushare_token`（单行），或环境变量 `TUSHARE_TOKEN`，或 `--token`。
+  → **凭据一律不进仓库**（2026-11-13 清理过一轮）：东财搜索会话 Cookie 从 `EM_SEARCH_COOKIE`
+  环境变量或 `%USERPROFILE%\.em_search_cookie` 读取（`projects/*/news_attribution/fetch_news.py`
+  的 `_em_cookie()`），以前是写死的；微信各平台 appid/secret 只从环境变量读
+  （`docs/wechat_attrib/check_creds.py` 只看变量名和长度，不打印明文）。
+  入库前跑一次密钥扫描：`tools/scratch/_secret_scan.py`（sha256 / commit hash 命中属误报）。
 - **免费源可用性矩阵（2026-11-13 本机实测，别再重复试错）**：
 
 | 数据 | 来源 | 状态 |
