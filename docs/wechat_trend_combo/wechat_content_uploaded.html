@@ -1,0 +1,378 @@
+<!DOCTYPE html><html lang='zh-CN'><head><meta charset='utf-8'><title>trend_combo article (uploaded)</title></head><body style='max-width:677px;margin:0 auto;padding:24px 18px;'><section style="font-size:16px;line-height:1.85;color:#2c2c2c;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;"><blockquote style="margin:20px 0;padding:12px 16px;background:#F7F7F7;border-left:3px solid #ddd;color:#555;font-size:15px;line-height:1.8;">
+<p style="margin:4px 0;font-size:15px;line-height:1.8;color:#555;">一句话版：教科书给你方向，测试期 IC 是 <strong style="font-weight:700;color:#000;">−0.0074</strong>（负的，等于反向信号）；
+把方向交给数据，同一批因子变成 <strong style="font-weight:700;color:#000;">+0.0332</strong>。</p>
+</blockquote>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">我做了一件之前一直想做但没做的事：把<strong style="font-weight:700;color:#000;">基本面</strong>塞进 qlib 的<strong style="font-weight:700;color:#000;">高频价量</strong>里，混成一个趋势分，
+然后把它变成能下注的组合，含换手、成本、基线对照。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">结果比预想的诚实，也比预想的难看——先给结论，再讲过程。</p>
+<p style="margin:22px 0 6px;text-align:center;"><img data-src="http://mmbiz.qpic.cn/sz_mmbiz_png/8aETljw86fxydUotRI8HzmLWAvRzf6ppJDlXUGL3N9TdGa99gAuADNQskicTpnlFkdpvszgGfE7FK7nlp89WCte89dEKa6BF8SfoIicZGGWQg/0?from=appmsg" style="max-width:100%;display:block;margin:0 auto;border-radius:2px;"/></p><p style="margin:6px 0 24px;text-align:center;font-size:13px;color:#999;line-height:1.6;">同一批价量因子，方向定错整块信号就是反的</p>
+<section style="border-left:4px solid #E67E22;padding-left:11px;margin:40px 0 18px;"><span style="font-size:19px;font-weight:700;color:#1a1a1a;line-height:1.45;">一、先回答三个问题</span></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">① 还要不要用 qlib</strong>？</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">要。但只让它干一半的活：<strong style="font-weight:700;color:#000;">价量高频、标签、回测/组合模拟</strong>留在 qlib；
+<strong style="font-weight:700;color:#000;">基本面不进 qlib 的 bin</strong>，改成外置的 PIT 财务库（parquet + 披露日对齐）；
+<strong style="font-weight:700;color:#000;">不重训 LightGBM</strong>，用「标准化 + 自动定向 + 线性加权」合成。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">换框架的收益是负的。这个仓库里已经有 18 条 qlib 踩坑记录（bin 对齐、复权因子、
+<code style="font-family:Consolas,Monaco,'Courier New',monospace;background:#F5F5F5;padding:1px 4px;border-radius:2px;font-size:14px;color:#333;">col_set</code> 必须是元组、Windows 下 <code style="font-family:Consolas,Monaco,'Courier New',monospace;background:#F5F5F5;padding:1px 4px;border-radius:2px;font-size:14px;color:#333;">D.features</code> 会无限 fork……），换个框架等于全部重踩一遍，
+换到的还是同一个信号。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">② 框架怎么搭</strong>？</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">四层：</p>
+<section style="margin:20px 0;padding:14px 16px;background:#FAFAFA;border:1px solid #EEE;border-radius:4px;overflow-x:auto;"><pre style="margin:0;padding:0;background:transparent;font-family:Consolas,Monaco,'Courier New',monospace;font-size:13px;line-height:1.8;white-space:pre-wrap;word-break:break-all;color:#333;"><code style="font-family:Consolas,Monaco,'Courier New',monospace;background:transparent;padding:0;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;">数据层   qlib 价量面板  +  东财 F10 三个接口（财务 / 估值 / 业绩预告）
+对齐层   按「披露日 ≤ t」as-of 对齐成日频面板，杜绝前视
+打分层   winsorize → 行业中性化 → z-score → 限幅 → 分域加权
+验证层   因子级 IC → 自动定向 → 权重网格 → 一次性测试期
+</code></pre></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">③ 选哪些指标、参数怎么调</strong>？</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">45 个因子（价量 30 + 基本面 19）。方向不靠教科书，靠<strong style="font-weight:700;color:#000;">训练期 RankIC 的符号</strong>；
+筛选门槛是 <code style="font-family:Consolas,Monaco,'Courier New',monospace;background:#F5F5F5;padding:1px 4px;border-radius:2px;font-size:14px;color:#333;">|IC| ≥ 0.008 且 |t| ≥ 2</code>，留下 34 个。跨域权重<strong style="font-weight:700;color:#000;">只在验证期选</strong>，测试期只跑一次。</p>
+<section style="border-left:4px solid #E67E22;padding-left:11px;margin:40px 0 18px;"><span style="font-size:19px;font-weight:700;color:#1a1a1a;line-height:1.45;">二、最贵的坑：基本面数据源，比想象中便宜</span></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">基本面数据的难点从来不是「哪里有」，而是<strong style="font-weight:700;color:#000;">能不能拿到带披露日的版本</strong>——不然就是前视偏差。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">我实测了三个东方财富的公开接口，全部可用，而且免费：</p>
+<section style="margin:20px 0;overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:14px;table-layout:auto;margin:0;">
+<thead>
+<tr>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:left;line-height:1.6;color:#222;">接口</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">拿到什么</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">关键字段</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">F10 财务指标</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">每期财报 165 个字段</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><code style="font-family:Consolas,Monaco,'Courier New',monospace;background:#F5F5F5;padding:1px 4px;border-radius:2px;font-size:14px;color:#333;">REPORT_DATE</code> + <strong style="font-weight:700;color:#000;"><code style="font-family:Consolas,Monaco,'Courier New',monospace;background:#F5F5F5;padding:1px 4px;border-radius:2px;font-size:14px;color:#333;">NOTICE_DATE</code>（披露日）</strong></td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">个股估值分析</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">日频 PE/PB/PS/PEG + 行业名</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><code style="font-family:Consolas,Monaco,'Courier New',monospace;background:#F5F5F5;padding:1px 4px;border-radius:2px;font-size:14px;color:#333;">BOARD_NAME</code>（行业中性化要用）</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">业绩预告</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">预增幅度 + 公告日</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><code style="font-family:Consolas,Monaco,'Courier New',monospace;background:#F5F5F5;padding:1px 4px;border-radius:2px;font-size:14px;color:#333;">ADD_AMP_LOWER/UPPER</code></td>
+</tr>
+</tbody>
+</table></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">有了 <code style="font-family:Consolas,Monaco,'Courier New',monospace;background:#F5F5F5;padding:1px 4px;border-radius:2px;font-size:14px;color:#333;">NOTICE_DATE</code>，PIT 就是一行 <code style="font-family:Consolas,Monaco,'Courier New',monospace;background:#F5F5F5;padding:1px 4px;border-radius:2px;font-size:14px;color:#333;">merge_asof</code>：</p>
+<blockquote style="margin:20px 0;padding:12px 16px;background:#F7F7F7;border-left:3px solid #ddd;color:#555;font-size:15px;line-height:1.8;">
+<p style="margin:4px 0;font-size:15px;line-height:1.8;color:#555;">想知道 2023 年 5 月 10 日你<strong style="font-weight:700;color:#000;">当时能知道</strong>什么，就取披露日 ≤ 这一天的那一期财报。</p>
+</blockquote>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">637 只股票、3117 个交易日，一次全量抓取 390 秒：财务 35,866 行、估值 1,260,947 行、预告 14,128 行。
+财务类因子覆盖率 82%~95%，估值类从 2018 年才有数据（三年分位需要 250 日最小窗口）。</p>
+<p style="margin:22px 0 6px;text-align:center;"><img data-src="http://mmbiz.qpic.cn/mmbiz_png/8aETljw86fzvOQR83MoFcDkRE9bwUhYAW9RFPeyAKxiaME6HcInd4Q4vFsLfsL8leYjRPqicRSz7bBbEH4UKNtWEvGThaC1R2wYReaib4HrKxs/0?from=appmsg" style="max-width:100%;display:block;margin:0 auto;border-radius:2px;"/></p><p style="margin:6px 0 24px;text-align:center;font-size:13px;color:#999;line-height:1.6;">基本面因子在 2014-2026 面板上的覆盖率</p>
+<section style="border-left:4px solid #E67E22;padding-left:11px;margin:40px 0 18px;"><span style="font-size:19px;font-weight:700;color:#1a1a1a;line-height:1.45;">三、45 个因子，四个域</span></section>
+<section style="margin:20px 0;overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:14px;table-layout:auto;margin:0;">
+<thead>
+<tr>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:left;line-height:1.6;color:#222;">域</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">因子</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">数据源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">价量 30 个</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">动量 / 反转 / 波动 / 均线 / RSI / 量能</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">qlib 现成面板</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">估值</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">PE·PB·PS 三年分位、绝对估值、市值</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">东财估值</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">成长</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">营收与净利同比环比、剪刀差</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">东财 F10</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">质量</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">ROE、ROIC、毛利率、负债率、现金流含金量</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">东财 F10</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">边际变化</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">ROE 同比、每股净资产同比</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">东财 F10</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">事件</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">业绩预告增幅、预告新鲜度</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">东财预告</td>
+</tr>
+</tbody>
+</table></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">两个容易被忽略的设计：</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">估值用分位，不用绝对值</strong>。 PE=20 在白酒里是常态，在银行里是高位，绝对值没法比，
+三年滚动分位才能跨行业比较。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">基本面必须放「边际变化」</strong>。 只放水平值（ROE 多高、毛利率多高），高分股永远是高分股，
+分数一年不动；变化量（ROE 同比、每股净资产同比）才带趋势信息。</p>
+<section style="border-left:4px solid #E67E22;padding-left:11px;margin:40px 0 18px;"><span style="font-size:19px;font-weight:700;color:#1a1a1a;line-height:1.45;">四、方向定错了，整块信号就是反的</span></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">这是整件事里最贵的一个教训。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">我一开始按教科书给方向：动量正向、反转负向、低波动正向、低估值正向。跑完一看——</p>
+<section style="margin:20px 0;overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:14px;table-layout:auto;margin:0;">
+<thead>
+<tr>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:left;line-height:1.6;color:#222;">变体</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">训练 IC</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">验证 IC</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">测试 IC</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">纯价量（教科书先验方向）</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">−0.0099</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">−0.0138</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">−0.0074</strong></td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">纯价量（训练期自动定向）</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+0.0372</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+0.0338</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">+0.0332</strong></td>
+</tr>
+</tbody>
+</table></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">同一批因子、同一份数据，方向一改，信号从负的变成正的</strong>。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">45 个因子里 <strong style="font-weight:700;color:#000;">18 个先验方向被数据推翻</strong>。最有代表性的是 20 日动量：在 5 日的持有期上，
+它的 IC 是 −0.035（t = −9.6）——<strong style="font-weight:700;color:#000;">涨得越猛，未来 5 天越差</strong>。A 股短周期是「短期动量 + 中期反转」，
+而教科书默认你买的是中期动量。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">所以参数的第一条规则是：<strong style="font-weight:700;color:#000;">方向由训练期 RankIC 的符号决定，不许拍脑袋</strong>。
+第二条规则是<strong style="font-weight:700;color:#000;">门槛</strong>：<code style="font-family:Consolas,Monaco,'Courier New',monospace;background:#F5F5F5;padding:1px 4px;border-radius:2px;font-size:14px;color:#333;">|IC| ≥ 0.008 且 |t| ≥ 2</code>，不达标的因子直接扔掉，别让噪声混进加权。</p>
+<p style="margin:22px 0 6px;text-align:center;"><img data-src="http://mmbiz.qpic.cn/mmbiz_png/8aETljw86fwvhgZmiaE5gnQj2MJO7ntE9pqkCKpej0s4XqjVNvjRSgnafROUXUR0OWcEVwX41ZhrtTC8jKWX4qViavibrhUpibxR7kr1fjDnsYM/0?from=appmsg" style="max-width:100%;display:block;margin:0 auto;border-radius:2px;"/></p><p style="margin:6px 0 24px;text-align:center;font-size:13px;color:#999;line-height:1.6;">三个单域与混合分的三期 RankIC</p>
+<p style="margin:22px 0 6px;text-align:center;"><img data-src="http://mmbiz.qpic.cn/sz_mmbiz_png/8aETljw86fyFkrDSCNqwTlkaibTuXBo460NFicxjSetpwSLWuEbsaC2roGscibDdjfneh6JZr3SwZFwfnGtHiaQMaw2nSUZ6vpRCK5kzRMXb7QU/0?from=appmsg" style="max-width:100%;display:block;margin:0 auto;border-radius:2px;"/></p><p style="margin:6px 0 24px;text-align:center;font-size:13px;color:#999;line-height:1.6;">因子级 RankIC 前 18 名，训练/验证/测试三段同号才算数</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">顺带一句：基本面块的 IC 是正的（测试期 +0.0093，t = 3.1），但<strong style="font-weight:700;color:#000;">比价量块弱一半以上，而且衰减更快</strong>
+（训练 +0.0221 → 测试 +0.0093）。这跟直觉相反——很多人以为「基本面更稳」，
+数据说的是：基本面在 A 股更稳地<strong style="font-weight:700;color:#000;">没有</strong>超额。</p>
+<section style="border-left:4px solid #E67E22;padding-left:11px;margin:40px 0 18px;"><span style="font-size:19px;font-weight:700;color:#1a1a1a;line-height:1.45;">五、基本面该给多少权重？</span></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">验证期最优解把基本面给到 <strong style="font-weight:700;color:#000;">0.4</strong>，测试期最优却在 <strong style="font-weight:700;color:#000;">0.2~0.3</strong>。
+选型不可外推，这仓库的老毛病又犯了一次。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">所以我取两段曲线的<strong style="font-weight:700;color:#000;">共同高台区</strong>：基本面 0.2~0.4。</p>
+<section style="margin:20px 0;overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:14px;table-layout:auto;margin:0;">
+<thead>
+<tr>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:left;line-height:1.6;color:#222;">权重（价量/基本面）</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">验证 IC</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">测试 IC</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">测试 IR</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">1.0 / 0.0</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+0.0361</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+0.0344</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+0.309</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">0.8 / 0.2</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+0.0368</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+0.0341</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+0.309</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">0.7 / 0.3</strong></td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+0.0364</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+0.0331</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+0.304</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">0.5 / 0.5</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+0.0336</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+0.0283</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+0.275</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">0.4 / 0.6</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+0.0308</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+0.0248</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+0.250</td>
+</tr>
+</tbody>
+</table></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">建议 0.65 / 0.30 / 0.05</strong>（价量 / 基本面 / 事件）。不赌任何一段的极值，落在两段都靠前的地方。</p>
+<p style="margin:22px 0 6px;text-align:center;"><img data-src="http://mmbiz.qpic.cn/mmbiz_png/8aETljw86fwvZK8bLbj37RgR6UFO2ymh26zib1drkBuZCOVCfqvJj4O0RMRazcfbS2WicWmV9e5IwnyV1E9pBQniaiaqpxrpK4tn3n4ibgxpDia2E/0?from=appmsg" style="max-width:100%;display:block;margin:0 auto;border-radius:2px;"/></p><p style="margin:6px 0 24px;text-align:center;font-size:13px;color:#999;line-height:1.6;">基本面权重敏感性，验证期与测试期的甜点区并不重合</p>
+<section style="border-left:4px solid #E67E22;padding-left:11px;margin:40px 0 18px;"><span style="font-size:19px;font-weight:700;color:#1a1a1a;line-height:1.45;">六、IC 好看 ≠ 能赚钱</span></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">这里有个必须说的事实。测试期按分数分五档，看未来 20 日平均收益：</p>
+<section style="margin:20px 0;overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:14px;table-layout:auto;margin:0;">
+<thead>
+<tr>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:left;line-height:1.6;color:#222;">档位</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">Q1</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">Q2</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">Q3</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">Q4</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">Q5</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">平均收益</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+0.63%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+0.81%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+0.86%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+0.79%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+0.61%</td>
+</tr>
+</tbody>
+</table></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">不单调</strong>。 最高分档比中间档还差。IC 稳（+0.028，t = 11.3），
+但「挑最高的那一档」拿不到超额——<strong style="font-weight:700;color:#000;">IC 的信息分布在中段，不在极端</strong>。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">这直接决定了这套框架的定位：<strong style="font-weight:700;color:#000;">它是个打分/过滤信号，不是选股器</strong>。</p>
+<section style="border-left:4px solid #E67E22;padding-left:11px;margin:40px 0 18px;"><span style="font-size:19px;font-weight:700;color:#1a1a1a;line-height:1.45;">七、变成策略：换手才是胜负手</span></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">参数搜索严格按协议来：<strong style="font-weight:700;color:#000;">K × 调仓频率 × 行业上限 × 权重方式，共 96 组，只用验证期 2020-2022 跑</strong>，
+选出 <code style="font-family:Consolas,Monaco,'Courier New',monospace;background:#F5F5F5;padding:1px 4px;border-radius:2px;font-size:14px;color:#333;">K=50 / 每 40 个交易日调仓 / 每行业≤3 只 / 等权</code>，然后测试期只跑一次。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">成本按仓库老口径：买入 0.05%、卖出 0.15%、单笔最低 5 元、账户 100 万；
+停牌不可交易、收盘涨停买不进；信号 T 日收盘出、T+1 日收盘成交。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">测试期 2023-01 ~ 2026-10 的结果</strong>：</p>
+<section style="margin:20px 0;overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:14px;table-layout:auto;margin:0;">
+<thead>
+<tr>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:left;line-height:1.6;color:#222;">策略</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">年化</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">超额年化</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">MDD</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">换手/年</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">成本/年</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">策略（验证期选参）</strong></td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">+5.87%</strong></td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">+5.34%</strong></td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">−28.97%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">4.12</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">1.05pct</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">同上，零成本对照</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+6.89%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+6.36%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">−28.40%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">4.12</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">0</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">默认 top20 月调</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+7.05%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+6.90%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">−33.69%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">8.87</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">2.05pct</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">纯价量分 top20 月调</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">−0.66%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">−1.02%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">−35.33%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">9.49</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">2.03pct</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">纯基本面分 top20 月调</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">−3.33%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">−3.45%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">−42.54%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">3.02</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">0.51pct</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">池内等权 300 只</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+3.00%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+2.25%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">−25.09%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">0</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">0</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">沪深300 买入持有</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+0.65%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">0</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">−24.80%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">0</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">0</td>
+</tr>
+</tbody>
+</table></section>
+<p style="margin:22px 0 6px;text-align:center;"><img data-src="http://mmbiz.qpic.cn/mmbiz_png/8aETljw86fytWwqcR4EU6gcFMLHxFcKGSblibWPzBJlhUrrS8ZAU6MTSJKbpz4EN6DuicMOia8mnohclICmpvYuZTyfa7oq5OFrc2TA71ctyHU/0?from=appmsg" style="max-width:100%;display:block;margin:0 auto;border-radius:2px;"/></p><p style="margin:6px 0 24px;text-align:center;font-size:13px;color:#999;line-height:1.6;">测试期净值曲线（含成本，对数刻度）</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">三件事必须一起看：</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">第一，测试期最高的那个不能用</strong>。 top20 月调 +7.05% 是全场最高，
+但它在训练期是 −4.02%、验证期 −5.51%、全区间 −3.54%——<strong style="font-weight:700;color:#000;">只在测试期好看的配置不能上线</strong>。
+验证期选出来的那套是训练 +1.47% / 验证 +1.24% / 测试 +5.87% / 全区间 +2.10%，三段都是正的。
+这才是「分数能变钱」的最低证据。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">第二，换手比因子更决定生死</strong>。 每 5 个交易日调仓的三个配置<strong style="font-weight:700;color:#000;">全部亏损</strong>（成本 4.3~4.7pct/年），
+每 10 日勉强打平（+0.7%~+1.2%），只有 ≥20 日才转正。</p>
+<p style="margin:22px 0 6px;text-align:center;"><img data-src="http://mmbiz.qpic.cn/sz_mmbiz_png/8aETljw86fx2gick3VWSic8p4B51JyGyDo5pXYSZwaa8UiaoznM2LwAD3JMYibXwfup3oO8YO1vnYWH4Zib0NYQQajj1iasj2kQ8PokrmuF6x8ENI/0?from=appmsg" style="max-width:100%;display:block;margin:0 auto;border-radius:2px;"/></p><p style="margin:6px 0 24px;text-align:center;font-size:13px;color:#999;line-height:1.6;">调仓越频繁，收益越被成本吃掉</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">所以「基本面该不该加」这个问题，一半的答案是「<strong style="font-weight:700;color:#000;">别乱换手</strong>」。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">第三，纯价量、纯基本面单独用都不行，混起来才行</strong>。 −0.66% 与 −3.33%，混起来 +5.87%。
+基本面在组合里不是自己赚钱的角色，是<strong style="font-weight:700;color:#000;">改选股排序、砍掉价量信号里的坑</strong>。
+这恰好是我最初设想「加权求和共同判断趋势」时没想到的收益来源。</p>
+<section style="border-left:4px solid #E67E22;padding-left:11px;margin:40px 0 18px;"><span style="font-size:19px;font-weight:700;color:#1a1a1a;line-height:1.45;">八、诚实的结论</span></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">分期体检</strong>（同一套参数，只换时间窗）：</p>
+<section style="margin:20px 0;overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:14px;table-layout:auto;margin:0;">
+<thead>
+<tr>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:left;line-height:1.6;color:#222;">区间</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">年化</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">IR</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">MDD</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">训练 2016-2019</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+1.47%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">−0.40</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">−33.95%</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">验证 2020-2022</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+1.24%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+0.39</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">−44.76%</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">测试 2023-2026</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+5.87%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+0.68</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">−28.97%</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">全区间 2016-2026</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+2.10%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+0.11</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">−48.16%</td>
+</tr>
+</tbody>
+</table></section>
+<p style="margin:22px 0 6px;text-align:center;"><img data-src="http://mmbiz.qpic.cn/sz_mmbiz_png/8aETljw86fzFfJDovw0vm3Vf21IvJIT1UzqJUZ9CvMMSic5rbsOVWrpNZjmoic1NKsCvyqWQePtOjThxl3Jzh2P5owx6AtJpKwErIon8Bl4GI/0?from=appmsg" style="max-width:100%;display:block;margin:0 auto;border-radius:2px;"/></p><p style="margin:6px 0 24px;text-align:center;font-size:13px;color:#999;line-height:1.6;">同一套参数，三期体检</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">四条必须记住的：</p>
+<ol style="margin:15px 0;padding-left:24px;font-size:16px;line-height:1.85;color:#2c2c2c;">
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">+5.87% 不是预期收益</strong>。 超额高度集中在 2025：分年 2023 −8.3%、2024 +6.8%、
+   2025 <strong style="font-weight:700;color:#000;">+35.0%</strong>、2026 −5.9%。两年是亏的。</li>
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">回撤仍然很大</strong>：测试期 −29%，全区间 −48%。年化 2~6% 配 30~48% 的回撤，
+   这个风险收益比<strong style="font-weight:700;color:#000;">只够当组合里的一小块卫星仓</strong>，不适合当主仓。</li>
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">这是「一次性测试期」的结果</strong>，而且我已经看过测试期数字了，任何后续调整都带污染。
+   想再用，必须换一段全新的样本外。</li>
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">没做的事</strong>：波动率目标、行业中性权重、分歧度做减仓触发器、
+   接入实盘组合端到端验证。</li>
+</ol>
+<p style="margin:32px 0;text-align:center;color:#D8D8D8;letter-spacing:8px;font-size:14px;">• • •</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">如果只带走一句话</strong>：混合基本面和高频价量是对的，但真正决定成败的不是「加不加基本面」，
+而是<strong style="font-weight:700;color:#000;">方向对不对</strong>和<strong style="font-weight:700;color:#000;">换手多不多</strong>。前者错了信号是反的，后者错了信号被成本吃掉。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">顺手把两个东西留在这里，方便复现：</p>
+<section style="margin:20px 0;padding:14px 16px;background:#FAFAFA;border:1px solid #EEE;border-radius:4px;overflow-x:auto;"><pre style="margin:0;padding:0;background:transparent;font-family:Consolas,Monaco,'Courier New',monospace;font-size:13px;line-height:1.8;white-space:pre-wrap;word-break:break-all;color:#333;"><code style="font-family:Consolas,Monaco,'Courier New',monospace;background:transparent;padding:0;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;"># 抓数（PIT，390 秒）
+python tools/fetch_fundamental.py
+# PIT 对齐 → 标准化 → 打分 → 验证
+python tools/build_panel.py
+python tools/composite.py
+python tools/eval_ic.py
+# 策略：验证期选参 + 回测（换手/成本/基线）
+python tools/strategy.py
+</code></pre></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">全部代码与数据在 <code style="font-family:Consolas,Monaco,'Courier New',monospace;background:#F5F5F5;padding:1px 4px;border-radius:2px;font-size:14px;color:#333;">projects/trend_combo/</code>，一个项目一个文件都能单独跑。</p>
+<p style="margin:32px 0;text-align:center;color:#D8D8D8;letter-spacing:8px;font-size:14px;">• • •</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><em style="font-style:italic;color:#555;">本文所有数字来自一次完整可复现的运行：qlib 本地行情（637 只沪深300 时点成分，2014-01-02 ~ 2026-10-30）
++ 东方财富公开财务接口。测试期只跑一次，参数只在验证期选。</em></p></section></body></html>

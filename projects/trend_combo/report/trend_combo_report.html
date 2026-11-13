@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<title>基本面 × 高频价量 混合趋势打分：框架选型、指标体系与参数方案</title>
+<style>
+* { box-sizing: border-box; }
+body { margin:0; background:#fff; color:#1F2933;
+  font-family:"Microsoft YaHei","PingFang SC",-apple-system,sans-serif;
+  font-size:14px; line-height:1.78; }
+.wrap { max-width:1180px; margin:0 auto; padding:38px 34px 60px; }
+h1 { font-size:27px; margin:0 0 6px; letter-spacing:-.3px; }
+.sub { color:#8A9099; font-size:12.5px; margin-bottom:26px; }
+h2 { font-size:18.5px; margin:40px 0 10px; padding-left:11px;
+  border-left:4px solid #E8833A; line-height:1.35; }
+h3 { font-size:14.5px; margin:22px 0 8px; color:#2F7E8C; }
+p { margin:9px 0; }
+.lead { background:#F7F8FA; border:1px solid #E4E7EB; border-radius:10px; padding:20px 24px; }
+.lead ol { margin:8px 0 0; padding-left:22px; }
+.lead li { margin:11px 0; }
+.card { background:#F7F8FA; border:1px solid #E4E7EB; border-radius:10px;
+  padding:16px 20px; margin:14px 0; }
+.warn { background:#FDF6F1; border-left:4px solid #E8833A; padding:13px 18px;
+  border-radius:6px; margin:16px 0; }
+.bad { background:#FBF3F3; border-left:4px solid #C94C4C; padding:13px 18px;
+  border-radius:6px; margin:16px 0; }
+.good { background:#F1F7F6; border-left:4px solid #2F7E8C; padding:13px 18px;
+  border-radius:6px; margin:16px 0; }
+table { border-collapse:collapse; width:100%; margin:14px 0 6px; font-size:12.6px; }
+th { background:#F2F4F6; color:#5B6470; font-weight:600; text-align:right;
+  padding:9px 10px; border-bottom:1px solid #E4E7EB; white-space:nowrap; }
+td { padding:8px 10px; border-bottom:1px solid #F0F2F4; text-align:right;
+  vertical-align:top; }
+th.k, td.k { text-align:left; }
+td.k { color:#39424E; }
+tr.sel td { background:#FDF6F1; font-weight:600; }
+.pos { color:#C94C4C; } .neg { color:#2F7E8C; }
+.teal { color:#2F7E8C; } .grey { color:#9AA1A9; } .orange { color:#E8833A; }
+.rk { color:#E8833A; font-weight:700; text-align:center; width:34px; }
+.nm { text-align:left; font-weight:600; }
+.cd { color:#9AA1A9; font-weight:400; font-size:11px; margin-left:7px; }
+.flip { color:#C94C4C; font-size:11px; margin-left:6px; }
+img { max-width:100%; margin:12px 0 4px; display:block; }
+.cap { color:#9AA1A9; font-size:11.5px; margin:2px 0 18px; }
+.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+code { background:#F2F4F6; padding:1.5px 6px; border-radius:4px; font-size:12px;
+  font-family:Consolas,monospace; }
+ul { padding-left:22px; } li { margin:6px 0; }
+.tag { display:inline-block; background:#F2F4F6; color:#5B6470; border-radius:4px;
+  padding:1px 7px; font-size:11.5px; margin-right:6px; }
+.foot { color:#9AA1A9; font-size:11.5px; border-top:1px solid #E4E7EB;
+  margin-top:40px; padding-top:14px; }
+.big { font-size:21px; font-weight:700; }
+</style></head><body><div class="wrap">
+
+<h1>基本面 × 高频价量 混合趋势打分：框架选型、指标体系、参数方案</h1>
+<div class="sub">
+项目 <code>projects/trend_combo</code> · 股票池：沪深300 时点成分 637 只（2014-01-02 ~ 2026-10-30，3117 个交易日）
+· 基本面源：东方财富 F10（637 只，财务 35866 行 / 估值 1260947 行 / 预告 14128 行）
+· 切分：训练 2016-2019 / 验证 2020-2022 / 测试 2023-2026（测试期只跑一次）
+</div>
+
+<div class="lead">
+<ol>
+<b>方案结论：qlib 保留，但只让它干「价量高频 + 标签 + 回测」这一层；基本面不进 qlib 的 bin，
+改成外置 PIT 财务库；合成层用「标准化 + 训练期自动定向 + 分域线性加权」，不重训 LightGBM。</b>
+换框架的收益为负——要重写 30 个特征、回测引擎和 18 条踩坑，产出还是同样的信号。</li>
+
+<b>最大的坑不是数据源，是方向。</b>按教科书先验（动量+、反转−、低波+、低估值+）给价量因子定向，
+测试期 RankIC 是 <b class="neg">-0.0074</b>（负的，等于反向信号）；
+改成「训练期 RankIC 定方向 + |IC|≥0.008 且 |t|≥2.0 筛选」之后，
+同一批因子测试期 IC 变成 <b class="pos">+0.0332</b>（t=+9.1）。
+45 个因子里 <b>18 个先验方向被数据推翻</b>。</li>
+
+<b>基本面确实有正 alpha，但比价量弱、衰减更快。</b>纯基本面块测试期 IC +0.0093
+（IR +0.10），纯价量块 +0.0332
+（IR +0.30）；20 日 horizon 上差距更大：
+基本面 +0.0061 vs 价量 +0.0408。</li>
+
+<b>权重：验证期最优把基本面给到 0.4，测试期最优却在 0.2~0.4 —— 「选型不可外推」又一次复现。</b>
+两段都靠前的甜点区是基本面 0.2~0.4，<b>建议实盘用 价量 0.65 / 基本面 0.30 / 事件 0.05</b>，
+而不是验证期极值。</li>
+
+<b>但有个不好听的事实：IC 稳，分档不单调。</b>测试期按混合分五档的未来 20 日收益是 Q1 +0.63% · Q2 +0.81% · Q3 +0.86% · Q4 +0.79% · Q5 +0.61%
+——高低档收益差 0.02pct，
+说明这个分数<b>可以当「趋势判断/风控过滤」用，直接当选股器排序收益一般</b>。</li>
+</ol>
+</div>
+
+<h2>一、方案选型：三条路，逐一算账</h2>
+<table>
+<tr><th class="k">方案</th><th class="k">做法</th><th class="k">成本</th><th class="k">结论</th></tr>
+<tr><td class="k">A. qlib 留 + 基本面外置 PIT 库 <span class="tag">推荐</span></td>
+<td class="k">qlib 提供价量 30 特征、标签、回测/模拟器；基本面走东财 F10 三个接口落 parquet，
+按<b>披露日</b> as-of 对齐成日频面板；两层用线性加权合成</td>
+<td class="k">复用 csi300_lgbm 现成面板（637 只 × 3117 天，30 特征已跑通）；
+新写 3 个脚本（抓数 / PIT 对齐 / 打分）</td>
+<td class="k"><b>采用</b>：增量成本最小，且基本面可单独刷新</td></tr>
+<tr><td class="k">B. 换框架（backtrader / zipline / R quantstrats）</td>
+<td class="k">用别的框架重做取数、特征、回测</td>
+<td class="k">重写 30 特征 + 标签 + 组合模拟 + 交易成本/涨跌停/停牌规则</td>
+<td class="k"><b>否决</b>：本仓库 18 条 qlib 踩坑（bin 对齐、复权因子、col_set 元组、
+Windows 下 D.features 无限 fork…）全部要重踩一遍，换不到新信号</td></tr>
+<tr><td class="k">C. 把基本面 dump 成 qlib 的 bin</td>
+<td class="k">走 qlib 自带 <code>scripts/dump_pit.py</code> 落 PIT 财务 bin</td>
+<td class="k">字段受限于它的 schema，要重写 bin 对齐与复权处理</td>
+<td class="k"><b>不做</b>：同样的数据用 parquet 存更省事，qlib 的 bin 优势只在对齐日历，
+而我们本来就用 qlib 的交易日历做 as-of 对齐</td></tr>
+<tr><td class="k">D. 基本面直接进 LightGBM</td>
+<td class="k">30 个价量 + 18 个基本面对子一起喂模型</td>
+<td class="k">特征维度翻倍，样本外更难稳</td>
+<td class="k"><b>否决</b>：本仓库两次样本外失败（600418 训练 IC +0.12 → 测试 −0.01；
+002230 同类），Linear/IC 加权的可解释合成在这个量级上更靠谱</td></tr>
+</table>
+
+<div class="warn"><b>为什么基本面不进 LightGBM（证据在本仓库里）：</b>
+① <code>projects/jac_600418</code> 三次样本外失败，IC 从训练 +0.12 掉到测试 −0.01；
+② 财报/业绩公告 <b>T0 超额 −0.551%（n=187）</b>，短线是负 alpha；
+③ 本次实测纯基本面块的 IC 明显弱于价量块，喂进模型只会增加过拟合面。</div>
+
+<h2>二、数据层：三个免费接口 + PIT 纪律（已实测跑通）</h2>
+<table>
+<tr><th class="k">接口</th><th class="k">拿到什么</th><th class="k">关键字段</th><th class="k">PIT 怎么用</th></tr>
+<tr><td class="k">东财 F10 <code>RPT_F10_FINANCE_MAINFINADATA</code></td>
+<td class="k">每期财报 165 个财务指标</td>
+<td class="k"><code>REPORT_DATE</code>（报告期）<b>+ <code>NOTICE_DATE</code>（披露日）</b>、
+ROEJQ / ROIC / XSMLL / TOTALOPERATEREVETZ / PARENTNETPROFITTZ / KCFJCXSYJLRTZ / ROEJQTZ / BPSTZ</td>
+<td class="k">按 <code>NOTICE_DATE ≤ t</code> as-of 取最新一期，披露前不可见</td></tr>
+<tr><td class="k">东财 <code>RPT_VALUEANALYSIS_DET</code></td>
+<td class="k">日频估值 + 行业名</td>
+<td class="k">PE_TTM / PB_MRQ / PS_TTM / PEG / 总市值 / <b>BOARD_NAME</b></td>
+<td class="k">本身日频无前视；BOARD_NAME 用于<b>行业中性化</b></td></tr>
+<tr><td class="k">东财 <code>RPT_PUBLIC_OP_NEWPREDICT</code></td>
+<td class="k">业绩预告（事件）</td>
+<td class="k">NOTICE_DATE + ADD_AMP_LOWER/UPPER（预增幅度）</td>
+<td class="k">按公告日 as-of；同时用 <code>days_since_predict</code> 惩罚陈旧预告</td></tr>
+</table>
+<p>抓取：637 只股票、43 个请求失败（重试 3 次后放弃，失败只影响该股票的部分字段），
+耗时 390 秒；财务覆盖 637/637 只，
+估值覆盖 617/637 只。</p>
+
+<img src="img/fig6_coverage.png" alt="因子覆盖率">
+<div class="cap">基本面因子在 2014-2026 面板上的覆盖率。估值类因子从 2018 年才有数据
+（三年分位需要 250 日最小窗口，2019-01 才开始有值），这是面板里最实在的一处缺口。</div>
+
+<h2>三、指标体系：四域 + 事件，共 45 个因子</h2>
+<table>
+<tr><th class="k">域</th><th class="k">因子</th><th class="k">来源</th><th class="k">计算</th><th class="k">先验方向</th></tr>
+<tr><td class="k">价量·趋势</td><td class="k">mom_20 / mom_60 / mom_120、ma_slope_20/60、ma_dist_20/60、
+ma_cross_5_20、price_pos_250、rel_str_60</td><td class="k">qlib</td><td class="k">现成 30 特征</td>
+<td class="k">动量 +（<b>数据推翻了</b>）</td></tr>
+<tr><td class="k">价量·反转</td><td class="k">rev_3 / rev_10 / mom_5_ex / mom_20_ex / dd_60</td>
+<td class="k">qlib</td><td class="k">现成 30 特征</td><td class="k">反转 −（部分被推翻）</td></tr>
+<tr><td class="k">价量·风险</td><td class="k">vol_20 / vol_60 / hl_range_20 / beta_60 / alpha_20</td>
+<td class="k">qlib</td><td class="k">现成 30 特征</td><td class="k">低波好 / alpha 好</td></tr>
+<tr><td class="k">价量·量能</td><td class="k">vol_ratio / vol_ratio_5_20 / vol_z_20 / liq_change</td>
+<td class="k">qlib</td><td class="k">现成 30 特征</td><td class="k">放量 +</td></tr>
+<tr><td class="k">基本面·估值</td><td class="k">pe_pct_3y / pb_pct_3y / ps_pct_3y / pe_log / cap_log</td>
+<td class="k">东财估值</td><td class="k">PE/PB/PS 的 750 日滚动分位（min 250 日）</td><td class="k">低分位（便宜）看多</td></tr>
+<tr><td class="k">基本面·成长</td><td class="k">rev_yoy / rev_qoq / np_yoy / dnp_yoy / rev_gap</td>
+<td class="k">东财 F10</td><td class="k">营收/净利同比、环比；rev_gap = 营收同比 − 净利同比（剪刀差）</td>
+<td class="k">高增看多</td></tr>
+<tr><td class="k">基本面·质量</td><td class="k">roe / roic / gross_margin / net_margin / debt_ratio /
+cfo_to_np / inv_turn</td><td class="k">东财 F10</td>
+<td class="k">加权 ROE、ROIC、毛利率、净利率、资产负债率、经营现金流/净利、存货周转</td><td class="k">高质量看多</td></tr>
+<tr><td class="k">基本面·边际</td><td class="k">roe_yoy / bps_yoy</td><td class="k">东财 F10</td>
+<td class="k">ROE 同比变化、每股净资产同比</td><td class="k">改善看多</td></tr>
+<tr><td class="k">事件</td><td class="k">predict_growth / days_since_predict</td><td class="k">东财预告</td>
+<td class="k">预告净利增幅中值；距上次预告天数</td><td class="k">预增看多 / 预告越旧越扣分</td></tr>
+</table>
+<p class="cap">基本面里特意放了「边际变化」域（roe_yoy、bps_yoy、rev_gap）：只放水平值会让高分股永远是高分股，
+边际变化才是趋势信息。</p>
+
+<h2>四、计算流程与参数怎么定</h2>
+<div class="grid2">
+<div class="card">
+<h3>标准化（四步，顺序不能换）</h3>
+<ul>
+<li>截面 winsorize(1%, 99%)——去极值</li>
+<li>行业中性化——减同行业同日均值（成分 &lt; 5 只的行业跳过）</li>
+<li>截面 z-score</li>
+<li>clip(z/3, −1, 1)——限幅，避免单因子主导</li>
+</ul>
+<p class="cap">基本面和价量走同一套，量纲统一后才能线性加权。</p>
+</div>
+<div class="card">
+<h3>参数怎么调（协议）</h3>
+<ul>
+<li><b>方向</b>：训练期 RankIC 的符号（不是教科书先验）</li>
+<li><b>筛选</b>：|训练 IC| ≥ 0.008 且 |t| ≥ 2.0，留 36/45 个</li>
+<li><b>域内权重</b>：等权 / 训练期 IC 加权两种都跑，验证期挑</li>
+<li><b>跨域权重</b>：网格搜索，<b>只在验证期选</b>；测试期只跑一次</li>
+<li><b>阈值</b>：分数分位（不设绝对阈值，跨期不可比）</li>
+</ul>
+</div>
+</div>
+
+<img src="img/fig8_direction.png" alt="先验方向 vs 自动定向">
+<div class="cap">同一批价量因子，方向定错整块信号就是反的：先验版测试期 IC
+-0.0074，自动定向版 +0.0332。</div>
+
+<h2>五、验证结果</h2>
+<img src="img/fig1_ic_compare.png" alt="IC 对比">
+
+<table>
+<tr><th class="k">变体</th><th>训练 IC</th><th>验证 IC</th><th>验证 IR</th><th>测试 IC</th><th>测试 IR</th><th>测试 t</th></tr>
+<tr><td class="k">纯价量（自动定向）</td><td>+0.0372</td><td>+0.0338</td>
+<td>+0.326</td><td>+0.0332</td>
+<td>+0.299</td><td>+9.07</td></tr>
+<tr><td class="k">纯基本面</td><td>+0.0221</td><td>+0.0168</td>
+<td>+0.227</td><td>+0.0093</td>
+<td>+0.103</td><td>+3.12</td></tr>
+<tr><td class="k">纯事件（预告）</td><td>+0.0185</td><td>+0.0048</td>
+<td>+0.098</td><td>+0.0115</td>
+<td>+0.174</td><td>+5.27</td></tr>
+<tr class="sel"><td class="k">混合（验证期选中 0.5/0.4/0.10）</td>
+<td>+0.0453</td><td>+0.0340</td>
+<td>+0.420</td><td>+0.0313</td>
+<td>+0.308</td><td>+9.33</td></tr>
+<tr><td class="k">价量（教科书先验方向）</td><td>-0.0099</td>
+<td>-0.0138</td><td>-0.110</td>
+<td>-0.0074</td><td>-0.052</td>
+<td>-1.58</td></tr>
+</table>
+
+<img src="img/fig2_ic_yearly.png" alt="分年 IC">
+<table>
+<tr><th class="k">变体</th><th>2014</th><th>2015</th><th>2016</th><th>2017</th><th>2018</th><th>2019</th><th>2020</th><th>2021</th><th>2022</th><th>2023</th><th>2024</th><th>2025</th><th>2026</th></tr>
+<tr><td class='k'>纯价量</td><td class='teal'>+0.0448</td><td class='teal'>+0.1020</td><td class='teal'>+0.0754</td><td class='teal'>+0.0180</td><td class='teal'>+0.0209</td><td class='teal'>+0.0346</td><td class='teal'>+0.0243</td><td class='teal'>+0.0341</td><td class='teal'>+0.0429</td><td class='teal'>+0.0163</td><td class='teal'>+0.0219</td><td class='teal'>+0.0488</td><td class='teal'>+0.0490</td></tr><tr><td class='k'>纯基本面</td><td class='grey'>-0.0139</td><td class='grey'>+0.0069</td><td class='grey'>+0.0036</td><td class='grey'>+0.0294</td><td class='grey'>+0.0180</td><td class='grey'>+0.0373</td><td class='grey'>+0.0342</td><td class='grey'>+0.0029</td><td class='grey'>+0.0134</td><td class='grey'>-0.0078</td><td class='grey'>+0.0103</td><td class='grey'>+0.0187</td><td class='grey'>+0.0176</td></tr><tr><td class='k'>混合</td><td class='orange'>+0.0227</td><td class='orange'>+0.0822</td><td class='orange'>+0.0685</td><td class='orange'>+0.0318</td><td class='orange'>+0.0376</td><td class='orange'>+0.0435</td><td class='orange'>+0.0381</td><td class='orange'>+0.0282</td><td class='orange'>+0.0357</td><td class='orange'>+0.0128</td><td class='orange'>+0.0278</td><td class='orange'>+0.0401</td><td class='orange'>+0.0477</td></tr>
+</table>
+
+<img src="img/fig3_weight_sens.png" alt="权重敏感性">
+<table>
+<tr><th class="k">价量/基本面权重</th><th>训练 IC</th><th>验证 IC</th><th>验证 IR</th>
+<th>测试 IC</th><th>测试 IR</th><th>测试 IC(20日)</th><th>测试 IR(20日)</th></tr>
+<tr class=''><td class='k'>1.0 / 0.0</td><td>+0.0374</td><td>+0.0361</td><td>+0.355</td><td>+0.0344</td><td>+0.309</td><td>+0.0421</td><td>+0.363</td></tr><tr class=''><td class='k'>0.9 / 0.1</td><td>+0.0392</td><td>+0.0367</td><td>+0.366</td><td>+0.0344</td><td>+0.310</td><td>+0.0413</td><td>+0.355</td></tr><tr class=''><td class='k'>0.8 / 0.2</td><td>+0.0410</td><td>+0.0368</td><td>+0.378</td><td>+0.0341</td><td>+0.309</td><td>+0.0400</td><td>+0.343</td></tr><tr class=' sel'><td class='k'>0.7 / 0.3 <span class='tag'>建议实盘</span></td><td>+0.0426</td><td>+0.0364</td><td>+0.390</td><td>+0.0331</td><td>+0.304</td><td>+0.0377</td><td>+0.327</td></tr><tr class=''><td class='k'>0.6 / 0.4</td><td>+0.0438</td><td>+0.0355</td><td>+0.403</td><td>+0.0311</td><td>+0.294</td><td>+0.0343</td><td>+0.303</td></tr><tr class=''><td class='k'>0.5 / 0.5</td><td>+0.0441</td><td>+0.0336</td><td>+0.410</td><td>+0.0283</td><td>+0.275</td><td>+0.0302</td><td>+0.272</td></tr><tr class=''><td class='k'>0.4 / 0.6</td><td>+0.0436</td><td>+0.0308</td><td>+0.408</td><td>+0.0248</td><td>+0.250</td><td>+0.0255</td><td>+0.236</td></tr><tr class=''><td class='k'>0.3 / 0.7</td><td>+0.0410</td><td>+0.0274</td><td>+0.389</td><td>+0.0207</td><td>+0.216</td><td>+0.0205</td><td>+0.195</td></tr><tr class=''><td class='k'>0.2 / 0.8</td><td>+0.0361</td><td>+0.0235</td><td>+0.348</td><td>+0.0163</td><td>+0.175</td><td>+0.0151</td><td>+0.147</td></tr><tr class=''><td class='k'>0.1 / 0.9</td><td>+0.0299</td><td>+0.0192</td><td>+0.285</td><td>+0.0118</td><td>+0.129</td><td>+0.0094</td><td>+0.094</td></tr><tr class=''><td class='k'>0.0 / 1.0</td><td>+0.0236</td><td>+0.0145</td><td>+0.213</td><td>+0.0072</td><td>+0.080</td><td>+0.0037</td><td>+0.038</td></tr>
+</table>
+<div class="warn"><b>怎么读这张表：</b>上表是「事件权重 = 0」的切片（验证期选中的组合是
+0.5/0.4/0.10）。验证期（蓝）最优落在基本面 0.4，
+测试期（橙）最优落在基本面 0.2~0.3——<b>验证期的极值不能直接外推</b>。
+两段都靠前的区域是基本面 0.2~0.4，这也是建议实盘权重（价量 0.65 / 基本面 0.30 / 事件 0.05）的依据：
+它不赌任何一段的极值，落在两段曲线的共同高台区。
+<br><span style="font-size:11.8px;color:#8A9099">
+口径提示：本表 1.0/0.0 行（测试 IC +0.0344）比上面「纯价量」变体
+（+0.0332）略高，原因是网格里 <code>0 × NaN</code> 会把基本面缺失的样本整行剔掉，
+等于只在「基本面齐」的子样本上评估；上面的变体表是<b>不剔样本</b>的干净口径，本报告以变体表为准。</span></div>
+
+<img src="img/fig7_factor_ic.png" alt="因子级 IC">
+<table>
+<tr><th class="k">因子</th><th class="k">域</th><th>先验方向</th><th>训练 IC</th><th>训练 t</th>
+<th>验证 IC</th><th>测试 IC</th><th>保留</th></tr>
+<tr><td class='k'>mom_20 <span class='flip'>方向被推翻</span></td><td class='k'>price:trend</td><td>+1</td><td>-0.0341</td><td>-8.4</td><td>-0.0198</td><td>-0.0184</td><td>✓</td></tr><tr><td class='k'>alpha_20 <span class='flip'>方向被推翻</span></td><td class='k'>price:risk</td><td>+1</td><td>-0.0319</td><td>-8.1</td><td>-0.0178</td><td>-0.0193</td><td>✓</td></tr><tr><td class='k'>ma_dist_20 <span class='flip'>方向被推翻</span></td><td class='k'>price:trend</td><td>+1</td><td>-0.0317</td><td>-7.6</td><td>-0.0251</td><td>-0.0170</td><td>✓</td></tr><tr><td class='k'>mom_20_ex</td><td class='k'>price:reversal</td><td>-1</td><td>-0.0298</td><td>-7.4</td><td>-0.0186</td><td>-0.0170</td><td>✓</td></tr><tr><td class='k'>rev_3 <span class='flip'>方向被推翻</span></td><td class='k'>price:reversal</td><td>-1</td><td>+0.0281</td><td>+8.6</td><td>+0.0192</td><td>+0.0117</td><td>✓</td></tr><tr><td class='k'>vol_60</td><td class='k'>price:risk</td><td>-1</td><td>-0.0280</td><td>-6.2</td><td>-0.0222</td><td>-0.0432</td><td>✓</td></tr><tr><td class='k'>pe_pct_3y</td><td class='k'>fund:valuation</td><td>-1</td><td>-0.0270</td><td>-5.4</td><td>-0.0054</td><td>-0.0034</td><td>✓</td></tr><tr><td class='k'>vol_20</td><td class='k'>price:risk</td><td>-1</td><td>-0.0270</td><td>-6.5</td><td>-0.0215</td><td>-0.0415</td><td>✓</td></tr><tr><td class='k'>hl_range_20</td><td class='k'>price:risk</td><td>-1</td><td>-0.0263</td><td>-6.4</td><td>-0.0227</td><td>-0.0464</td><td>✓</td></tr><tr><td class='k'>rev_10 <span class='flip'>方向被推翻</span></td><td class='k'>price:reversal</td><td>-1</td><td>+0.0230</td><td>+5.8</td><td>+0.0219</td><td>+0.0140</td><td>✓</td></tr><tr><td class='k'>ma_cross_5_20 <span class='flip'>方向被推翻</span></td><td class='k'>price:trend</td><td>+1</td><td>-0.0226</td><td>-5.5</td><td>-0.0207</td><td>-0.0132</td><td>✓</td></tr><tr><td class='k'>ma_dist_60 <span class='flip'>方向被推翻</span></td><td class='k'>price:trend</td><td>+1</td><td>-0.0226</td><td>-4.9</td><td>-0.0299</td><td>-0.0196</td><td>✓</td></tr><tr><td class='k'>mom_5_ex</td><td class='k'>price:reversal</td><td>-1</td><td>-0.0224</td><td>-6.5</td><td>-0.0202</td><td>-0.0092</td><td>✓</td></tr><tr><td class='k'>net_margin</td><td class='k'>fund:quality</td><td>+1</td><td>+0.0195</td><td>+5.9</td><td>+0.0110</td><td>+0.0090</td><td>✓</td></tr><tr><td class='k'>days_since_predict <span class='flip'>方向被推翻</span></td><td class='k'>event</td><td>-1</td><td>+0.0187</td><td>+6.5</td><td>+0.0065</td><td>+0.0133</td><td>✓</td></tr><tr><td class='k'>ps_pct_3y</td><td class='k'>fund:valuation</td><td>-1</td><td>-0.0186</td><td>-3.0</td><td>-0.0102</td><td>-0.0139</td><td>✓</td></tr><tr><td class='k'>pb_pct_3y</td><td class='k'>fund:valuation</td><td>-1</td><td>-0.0178</td><td>-2.5</td><td>-0.0158</td><td>-0.0170</td><td>✓</td></tr><tr><td class='k'>roe</td><td class='k'>fund:quality</td><td>+1</td><td>+0.0173</td><td>+5.2</td><td>+0.0069</td><td>+0.0051</td><td>✓</td></tr>
+</table>
+
+<img src="img/fig4_buckets.png" alt="分档收益">
+<div class="bad"><b>分档不单调，这是本方案最需要警惕的地方。</b>
+测试期五档未来 20 日收益：Q1 +0.63% · Q2 +0.81% · Q3 +0.86% · Q4 +0.79% · Q5 +0.61%。IC 是 +0.0350（t=+9.7），
+但「最高分档」并不比中间档好多少。含义：<b>这个分数适合当「趋势确认 / 减仓触发」的过滤信号，
+直接拿来排序选股的收益会被 IC 的非线性吃掉</b>。要变成选股器，还需要加行业上限、风格约束、换手控制。</div>
+
+<h2>六、落到实盘：当前 20 只持仓的趋势分</h2>
+<img src="img/fig5_holdings.png" alt="持仓打分">
+<table>
+<tr><th>排名</th><th class="k">名称</th><th>总分</th><th>价量分</th><th>基本面分</th><th>事件分</th>
+<th>ROE%</th><th>营收同比%</th><th>PE(TTM)</th></tr>
+<tr><td class='rk'>1</td><td class='nm'>豪威集团<span class='cd'>SH603501</span></td><td class='pos'>+0.171</td><td>+0.422</td><td>-0.090</td><td>-0.041</td><td>+7.0</td><td>+1.7</td><td>+33.1</td></tr><tr><td class='rk'>2</td><td class='nm'>中国电信<span class='cd'>SH601728</span></td><td class='pos'>+0.084</td><td>+0.215</td><td>-0.051</td><td>-0.037</td><td>+5.6</td><td>-3.6</td><td>+22.4</td></tr><tr><td class='rk'>3</td><td class='nm'>三环集团<span class='cd'>SZ300408</span></td><td class='pos'>+0.072</td><td>+0.083</td><td>+0.089</td><td>-0.053</td><td>+15.9</td><td>+76.7</td><td>+35.0</td></tr><tr><td class='rk'>4</td><td class='nm'>紫光国微<span class='cd'>SZ002049</span></td><td class='pos'>+0.034</td><td>+0.169</td><td>-0.059</td><td>-0.269</td><td>+7.4</td><td>-1.0</td><td>+32.8</td></tr><tr><td class='rk'>5</td><td class='nm'>平安银行<span class='cd'>SZ000001</span></td><td class='pos'>+0.013</td><td>+0.027</td><td>+0.021</td><td>-0.087</td><td>+8.1</td><td>+2.4</td><td>+5.2</td></tr><tr><td class='rk'>6</td><td class='nm'>宁波银行<span class='cd'>SZ002142</span></td><td class='pos'>+0.007</td><td>+0.004</td><td>-0.019</td><td>+0.130</td><td>+10.5</td><td>+11.3</td><td>+7.2</td></tr><tr><td class='rk'>7</td><td class='nm'>工业富联<span class='cd'>SH601138</span></td><td class='neg'>-0.008</td><td>-0.159</td><td>+0.131</td><td>+0.193</td><td>+21.8</td><td>+55.9</td><td>+16.8</td></tr><tr><td class='rk'>8</td><td class='nm'>天孚通信<span class='cd'>SZ300394</span></td><td class='neg'>-0.019</td><td>-0.118</td><td>+0.096</td><td>+0.017</td><td>+32.5</td><td>+21.3</td><td>+61.3</td></tr><tr><td class='rk'>9</td><td class='nm'>中信银行<span class='cd'>SH601998</span></td><td class='neg'>-0.025</td><td>+0.079</td><td>-0.069</td><td>-0.375</td><td>+7.0</td><td>+3.3</td><td>+7.3</td></tr><tr><td class='rk'>10</td><td class='nm'>国电电力<span class='cd'>SH600795</span></td><td class='neg'>-0.028</td><td>+0.004</td><td>-0.074</td><td>+0.001</td><td>+6.5</td><td>-0.7</td><td>+22.0</td></tr><tr><td class='rk'>11</td><td class='nm'>川投能源<span class='cd'>SH600674</span></td><td class='neg'>-0.036</td><td>+0.061</td><td>+0.083</td><td>-1.000</td><td>+9.5</td><td>-1.4</td><td>+17.6</td></tr><tr><td class='rk'>12</td><td class='nm'>上海银行<span class='cd'>SH601229</span></td><td class='neg'>-0.042</td><td>-0.104</td><td>+0.034</td><td>-0.041</td><td>+5.2</td><td>+5.5</td><td>+5.5</td></tr><tr><td class='rk'>13</td><td class='nm'>英维克<span class='cd'>SZ002837</span></td><td class='neg'>-0.043</td><td>-0.074</td><td>+0.004</td><td>-0.074</td><td>+10.2</td><td>+22.9</td><td>+98.4</td></tr><tr><td class='rk'>14</td><td class='nm'>北京银行<span class='cd'>SH601169</span></td><td class='neg'>-0.050</td><td>-0.012</td><td>+0.003</td><td>-0.451</td><td>+5.3</td><td>+5.6</td><td>+5.7</td></tr><tr><td class='rk'>15</td><td class='nm'>中天科技<span class='cd'>SH600522</span></td><td class='neg'>-0.055</td><td>+0.004</td><td>-0.151</td><td>+0.035</td><td>+10.2</td><td>+27.6</td><td>+17.3</td></tr><tr><td class='rk'>16</td><td class='nm'>蓝思科技<span class='cd'>SZ300433</span></td><td class='neg'>-0.155</td><td>-0.162</td><td>-0.164</td><td>-0.084</td><td>+2.6</td><td>-10.7</td><td>+52.0</td></tr><tr><td class='rk'>17</td><td class='nm'>东山精密<span class='cd'>SZ002384</span></td><td class='neg'>-0.158</td><td>-0.227</td><td>-0.113</td><td>+0.004</td><td>+12.9</td><td>+63.9</td><td>+46.7</td></tr><tr><td class='rk'>18</td><td class='nm'>锐捷网络<span class='cd'>SZ301165</span></td><td class='neg'>-0.159</td><td>-0.208</td><td>-0.144</td><td>+0.032</td><td>+20.0</td><td>+36.7</td><td>+64.8</td></tr><tr><td class='rk'>19</td><td class='nm'>华工科技<span class='cd'>SZ000988</span></td><td class='neg'>-0.208</td><td>-0.495</td><td>+0.030</td><td>+0.278</td><td>+14.2</td><td>+14.6</td><td>+34.4</td></tr><tr><td class='rk'>20</td><td class='nm'>芯原股份<span class='cd'>SH688521</span></td><td class='neg'>-0.326</td><td>-0.469</td><td>-0.221</td><td>-0.025</td><td>-19.3</td><td>+91.4</td><td>-63.0</td></tr>
+</table>
+<div class="card kv">
+截面 2026-10-30，权重 价量 0.50 / 基本面 0.40 /
+事件 0.10。读法：<b>价量分是主旋律，基本面分是修正项</b>。
+比如天孚通信价量 −0.118（中期动量已转弱）但基本面 +0.096（ROE/毛利率仍在高位），
+这类「技术弱、基本面没坏」的票更适合减而不是清；反过来蓝思科技、锐捷网络两域同时为负，是先跑的对象。
+</div>
+
+<h2>八、局限与风险（必须一起看）</h2>
+
+<h2>七、把分数变成钱：完整策略回测（含换手与成本）</h2>
+
+<table>
+<tr><th class="k">设计项</th><th class="k">口径</th></tr>
+<tr><td class="k">股票池</td><td class="k">沪深300 <b>时点</b>成分（沿用 csi300_lgbm 的 membership.csv，不是今日 300 只倒推）</td></tr>
+<tr><td class="k">信号</td><td class="k">score = 0.65×价量 + 0.30×基本面 + 0.05×事件
+（基本面缺失按 0 中性填补，缺失格子 88400 个）</td></tr>
+<tr><td class="k">选股</td><td class="k">池内按分数取 top-K 等权；行业上限用东财 BOARD_NAME</td></tr>
+<tr><td class="k">调仓</td><td class="k">信号 T 日收盘 → <b>T+1 日收盘成交</b>（与本仓库其他项目同口径）</td></tr>
+<tr><td class="k">成本</td><td class="k">买入 0.05% / 卖出 0.15% / 单笔最低 5 元，账户 100 万</td></tr>
+<tr><td class="k">不可交易</td><td class="k">停牌（成交量=0）不可买卖；收盘涨停买不进</td></tr>
+<tr><td class="k">参数选择</td><td class="k"><b>只在验证期 2020-2022 搜</b>：K×频率×行业上限×权重方式 共 96 组，测试期只跑一次</td></tr>
+</table>
+
+<div class="good"><b>验证期选出的配置</b>：K=50、每 40 个交易日调仓、
+行业上限 3、等权
+（验证期 IR +0.39）。
+注意这个配置是<b>低换手 + 宽组合</b>：它比「top20 月调」更慢、更散 —— 下面的对比会看到这件事有多重要。</div>
+
+<img src="img/fig9_nav_test.png" alt="测试期净值曲线">
+
+<table>
+<tr><th class="k">策略</th><th>年化</th><th>总收益</th><th>波动</th><th>Sharpe</th><th>MDD</th>
+<th>IR vs 沪深300</th><th>超额年化</th><th>换手/年</th><th>成本/年</th></tr>
+<tr class=' sel'><td class='k'><b>策略(验证期选参) top50</b></td><td>+5.87%</td><td>+24.37%</td><td>+19.54%</td><td>+0.30</td><td>-28.97%</td><td>+0.68</td><td>+5.34%</td><td>4.12</td><td>1.05pct</td></tr><tr class=''><td class='k'>同上(零成本对照)</td><td>+6.89%</td><td>+29.02%</td><td>+19.53%</td><td>+0.35</td><td>-28.40%</td><td>+0.82</td><td>+6.36%</td><td>4.12</td><td>0.00pct</td></tr><tr class=''><td class='k'>默认 top20 月调(参照)</td><td>+7.05%</td><td>+29.74%</td><td>+24.30%</td><td>+0.29</td><td>-33.69%</td><td>+0.50</td><td>+6.90%</td><td>8.87</td><td>2.05pct</td></tr><tr class=''><td class='k'>纯价量分 top20 月调</td><td>-0.66%</td><td>-2.51%</td><td>+23.88%</td><td>-0.03</td><td>-35.33%</td><td>-0.07</td><td>-1.02%</td><td>9.49</td><td>2.03pct</td></tr><tr class=''><td class='k'>纯基本面分 top20 月调</td><td>-3.33%</td><td>-12.16%</td><td>+23.02%</td><td>-0.14</td><td>-42.54%</td><td>-0.30</td><td>-3.45%</td><td>3.02</td><td>0.51pct</td></tr><tr class=''><td class='k'>混合分 top20 月调(行业≤3)</td><td>+7.75%</td><td>+33.00%</td><td>+24.25%</td><td>+0.32</td><td>-33.63%</td><td>+0.55</td><td>+7.59%</td><td>8.89</td><td>2.07pct</td></tr><tr class=''><td class='k'>池内等权300只</td><td>+3.00%</td><td>+11.97%</td><td>+17.40%</td><td>+0.17</td><td>-25.09%</td><td>+0.45</td><td>+2.25%</td><td>0.00</td><td>0.00pct</td></tr><tr class=''><td class='k'>沪深300买入持有</td><td>+0.65%</td><td>+2.51%</td><td>+17.14%</td><td>+0.04</td><td>-24.80%</td><td>+0.00</td><td>+0.00%</td><td>0.00</td><td>0.00pct</td></tr>
+</table>
+
+<img src="img/fig11_yearly.png" alt="分年收益">
+<img src="img/fig12_freq_cost.png" alt="频率与成本">
+
+<div class="bad"><b>换手是这件事的胜负手，不是因子。</b>
+每 5 个交易日调仓的三个配置全部亏损（成本 4.3~4.7pct/年），每 10 日勉强打平（+0.7%~+1.2%），
+只有每 20 日以上才转正。<b>所以「基本面该不该加」的答案，一半是「别乱换手」的答案。</b></div>
+
+<table>
+<tr><th class="k">K</th><th class="k">调仓频率</th><th>年化</th><th>IR</th><th>MDD</th>
+<th>换手/年</th><th>成本/年</th></tr>
+<tr><td class='k'>10 只</td><td>每 5 日</td><td>-5.01%</td><td>-0.24</td><td>-49.44%</td><td>26.4</td><td>4.74pct</td></tr><tr><td class='k'>10 只</td><td>每 10 日</td><td>-2.73%</td><td>-0.13</td><td>-48.17%</td><td>16.7</td><td>2.90pct</td></tr><tr><td class='k'>10 只</td><td>每 20 日</td><td>+8.31%</td><td>+0.41</td><td>-41.87%</td><td>9.5</td><td>2.07pct</td></tr><tr><td class='k'>20 只</td><td>每 5 日</td><td>-4.34%</td><td>-0.30</td><td>-45.20%</td><td>23.4</td><td>4.41pct</td></tr><tr><td class='k'>20 只</td><td>每 10 日</td><td>+1.18%</td><td>+0.07</td><td>-40.66%</td><td>15.1</td><td>3.02pct</td></tr><tr><td class='k'>20 只</td><td>每 20 日</td><td>+7.05%</td><td>+0.50</td><td>-33.69%</td><td>8.9</td><td>2.05pct</td></tr><tr><td class='k'>30 只</td><td>每 5 日</td><td>-3.55%</td><td>-0.33</td><td>-39.56%</td><td>21.3</td><td>4.33pct</td></tr><tr><td class='k'>30 只</td><td>每 10 日</td><td>+0.73%</td><td>+0.04</td><td>-33.42%</td><td>13.8</td><td>3.01pct</td></tr><tr><td class='k'>30 只</td><td>每 20 日</td><td>+4.00%</td><td>+0.33</td><td>-30.84%</td><td>8.1</td><td>1.96pct</td></tr>
+</table>
+
+<h3>分期体检：同一套参数，三段都跑</h3>
+<table>
+<tr><th class="k">区间</th><th>年化</th><th>IR</th><th>MDD</th><th>换手/年</th><th>成本/年</th></tr>
+<tr><td class='k'>训练 2016-2019</td><td>+1.47%</td><td>-0.40</td><td>-33.95%</td><td>2.27</td><td>0.53pct</td></tr><tr><td class='k'>验证 2020-2022</td><td>+1.24%</td><td>+0.39</td><td>-44.76%</td><td>4.31</td><td>1.27pct</td></tr><tr><td class='k'>测试 2023-2026</td><td>+5.87%</td><td>+0.68</td><td>-28.97%</td><td>4.12</td><td>1.05pct</td></tr>
+</table>
+<img src="img/fig13_periods.png" alt="分期年化">
+<img src="img/fig10_nav_full.png" alt="全区间净值">
+
+<div class="warn"><b>这里有两个数字，别混用：</b><br>
+① <b>测试期最高年化 +7.05%</b>（默认 top20 月调）——但它在训练期是 +1.47%、
+验证期 +1.24%，全区间年化 +2.10%。
+<b>只在测试期好看的配置不能上线</b>，这是本仓库第三次同款教训。<br>
+② <b>能拿出去的数字：验证期选参版</b>（top50、每 40 日、行业≤3）——
+测试期年化 <b>+5.87%</b>、超额年化 <b>+5.34%</b>、
+IR +0.68、MDD -28.97%；
+训练期 +1.47%、验证期 +1.24%、
+全区间 +2.10%（超额 +0.90%）——<b>三段都是正的</b>，
+这才是「分数能变钱」的最低证据。</div>
+
+<table>
+<tr><th class="k">验证期网格 Top6</th><th class="k">K</th><th class="k">频率</th><th class="k">行业上限</th>
+<th class="k">权重方式</th><th>年化</th><th>IR</th><th>超额年化</th></tr>
+<tr><td class='k'>K=50</td><td>每 40 日</td><td>3</td><td>等权</td><td>+1.24%</td><td>+0.39</td><td>+3.73%</td></tr><tr><td class='k'>K=50</td><td>每 40 日</td><td>5</td><td>等权</td><td>-0.38%</td><td>+0.22</td><td>+2.10%</td></tr><tr><td class='k'>K=50</td><td>每 40 日</td><td>3</td><td>分数加权</td><td>-0.61%</td><td>+0.18</td><td>+1.85%</td></tr><tr><td class='k'>K=50</td><td>每 40 日</td><td>不限</td><td>等权</td><td>-1.14%</td><td>+0.14</td><td>+1.32%</td></tr><tr><td class='k'>K=50</td><td>每 40 日</td><td>5</td><td>分数加权</td><td>-1.79%</td><td>+0.06</td><td>+0.66%</td></tr><tr><td class='k'>K=50</td><td>每 20 日</td><td>3</td><td>等权</td><td>-1.97%</td><td>+0.03</td><td>+0.33%</td></tr>
+</table>
+
+<div class="card">
+<b>三个必须一起看的结论</b>
+<ol>
+<li><b>纯价量分和纯基本面分单独用都不行</b>：测试期年化 -0.66% 与
+-3.33%，都跑输沪深300；
+<b>混在一起才有 +5.87%</b>。基本面在组合里的作用不是"自己赚钱"，
+是<b>改变选股排序、砍掉价量信号里的坑</b>。</li>
+<li><b>超额主要来自 2025</b>：测试期分年收益 2023 -8.3% · 2024 +6.8% · 2025 +35.0% · 2026 -5.9%——2025 年 AI 行情贡献了绝大部分，
+2023 和 2026 两年策略都是亏的。<b>不要把 +5.87% 当成未来预期</b>。</li>
+<li><b>回撤仍然很大</b>：测试期 MDD -28.97%，全区间 MDD -48.16%。
+年化 2~6%、回撤 30~48%，<b>这个风险收益比只适合做组合里的一小块卫星仓</b>，不适合当主仓。</li>
+</ol>
+</div>
+
+<ul>
+<li><b>分档不单调</b>：IC 显著 ≠ 组合收益好；本方案只能算「打分/过滤」，还不是完整策略（缺换手与成本回测）。</li>
+<li><b>基本面衰减快</b>：纯基本面块训练 +0.0221 → 测试 +0.0093，
+掉了 58%；
+而价量块几乎没掉（+0.0372 → +0.0332）。基本面当压舱石可以，当主引擎不行。</li>
+<li><b>接口依赖</b>：东财 F10 无官方 SLA，字段可能改；缓存里存了原始快照，可离线复现，但需要定期重抓。</li>
+<li><b>行业中性化依赖 BOARD_NAME</b>：617/637 只有估值覆盖，
+未覆盖的股票没有行业标签（本次处理为不做行业中性化）。</li>
+<li><b>幸存者与成分口径</b>：股票池用 csi300_lgbm 的时点成分（含退市/被剔除的历史成分），非今日 300 只倒推。</li>
+<li><b>样本区间</b>：2014-2026，含 2015 与 2024-09 两次极端行情；未做危机期剔除。</li>
+<li><b>没有做的事</b>：没做交易成本与换手回测、没做组合优化、没做多空对冲、没接实时行情。</li>
+</ul>
+
+<h2>九、落地清单与复现命令</h2>
+<div class="card kv">
+<pre style="margin:0;white-space:pre-wrap;line-height:1.9">cd /d D:\Project\qlib\projects\trend_combo
+..\..\.venv\Scripts\python.exe tools\fetch_fundamental.py   :: 抓东财 F10 → data\fund_*.parquet（约 6.5 分钟）
+..\..\.venv\Scripts\python.exe tools\build_panel.py         :: PIT 对齐 → data\panel_merged.parquet
+..\..\.venv\Scripts\python.exe tools\composite.py          :: 标准化 + 分域 → data\scores.parquet
+..\..\.venv\Scripts\python.exe tools\eval_ic.py             :: 因子 IC → 自动定向 → 权重网格 → results\ic_results.json
+..\..\.venv\Scripts\python.exe tools\score_holdings.py      :: 实盘 20 只打分 → results\holdings_score.json
+..\..\.venv\Scripts\python.exe tools\strategy.py           :: 验证期选参 + 策略回测(换手/成本/基线) → results\backtest.json
+..\..\.venv\Scripts\python.exe tools\make_figures.py        :: 13 张配图
+..\..\.venv\Scripts\python.exe tools\build_report.py       :: 本报告
+..\..\.venv\Scripts\python.exe tools\render_png.py         :: HTML → PNG</pre>
+</div>
+<table>
+<tr><th class="k">文件</th><th class="k">内容</th></tr>
+<tr><td class="k">data/fund_financials.parquet</td><td class="k">35866 行季频财务（含 NOTICE_DATE，可做 PIT）</td></tr>
+<tr><td class="k">data/fund_valuation.parquet</td><td class="k">1260947 行日频估值 + 行业名</td></tr>
+<tr><td class="k">data/fund_predict.parquet</td><td class="k">14128 行业绩预告</td></tr>
+<tr><td class="k">data/panel_merged.parquet</td><td class="k">1985529 行日频面板（价量 30 + 基本面 19 + 标签）</td></tr>
+<tr><td class="k">data/scores.parquet</td><td class="k">标准化后的 45 个 z 因子 + 分域分数</td></tr>
+<tr><td class="k">results/factor_ic.csv</td><td class="k">因子级训练/验证/测试 IC + 方向 + 保留与否</td></tr>
+<tr><td class="k">results/weight_grid_equal.csv / _icw.csv</td><td class="k">跨域权重网格（等权 / IC 加权两套）</td></tr>
+<tr><td class="k">results/ic_results.json</td><td class="k">全部 IC 统计、分年、分档</td></tr>
+</table>
+
+<div class="foot">
+生成时间：2026-11-05 · 报告由 <code>tools/build_report.py</code> 自动生成，
+所有数字取自 <code>projects/trend_combo/results/*</code> · 行情与价量特征来自
+<code>qlib cn_data_2026</code>，基本面来自东方财富 F10 公开接口。
+</div>
+</div></body></html>

@@ -1,0 +1,15 @@
+# 多平台分发的 front matter（真根源头部参数）
+# 改这里 → 重新跑 make_source.py → 再 adapt → 再 publish
+title: "方向定错了，信号就是反的：基本面 + 高频价量的混合打分"
+summary: "基本面×价量混合打分：IC、换手与诚实的回测"
+tags: [量化, 股票, qlib, 因子合成, 投资分析, Python]
+category: "技术"
+cover: "img/cover.png"
+keywords: [基本面因子, qlib, 因子合成, 换手率, RankIC, 趋势打分]
+platform_notes:
+  zhihu: "知乎版：先讲那个把信号做成反的坑——教科书方向 vs 训练期自动定向，IC 从 -0.0074 到 +0.0332。"
+  csdn: "CSDN 版：完整可复现的工程链路，三个免费财务接口 + PIT 对齐 + 自动定向 + 换手成本回测，附复现命令。"
+  juejin: "掘金版：数据与图表为主，重点是换手怎么吃掉收益、为什么周度调仓必然亏。"
+  baijiahao: "百家号版：从「方向定错信号就是反的」这个反常识切口讲起，配真实数字与图表。"
+  bilibili: "B站专栏版：图多字少，按「数据→因子→IC→回测→结论」五步讲完这套框架。"
+footer_note: "完整版（含方法四步与数据口径）见原文链接。"

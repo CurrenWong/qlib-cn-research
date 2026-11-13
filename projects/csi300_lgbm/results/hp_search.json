@@ -1,0 +1,118 @@
+{
+  "hp_grid": [
+    {
+      "num_leaves": 63,
+      "learning_rate": 0.03,
+      "min_data_in_leaf": 100,
+      "feature_fraction": 0.8,
+      "valid_ic_mean": 0.034908397632642515,
+      "valid_ic_per_fold": [
+        0.04350412197589242,
+        0.006988028010157108,
+        0.05423304291187801
+      ],
+      "best_iter": [
+        800,
+        800,
+        800
+      ],
+      "sec": 80.6
+    },
+    {
+      "num_leaves": 31,
+      "learning_rate": 0.03,
+      "min_data_in_leaf": 500,
+      "feature_fraction": 0.7,
+      "valid_ic_mean": 0.03408340047125364,
+      "valid_ic_per_fold": [
+        0.045239795839590105,
+        0.005611665076886295,
+        0.05139874049728453
+      ],
+      "best_iter": [
+        800,
+        800,
+        800
+      ],
+      "sec": 56.6
+    },
+    {
+      "num_leaves": 31,
+      "learning_rate": 0.05,
+      "min_data_in_leaf": 200,
+      "feature_fraction": 0.8,
+      "valid_ic_mean": 0.03305225046187726,
+      "valid_ic_per_fold": [
+        0.044777606648309945,
+        0.0018997708740767668,
+        0.05247937386324506
+      ],
+      "best_iter": [
+        800,
+        800,
+        800
+      ],
+      "sec": 52.7
+    },
+    {
+      "num_leaves": 31,
+      "learning_rate": 0.05,
+      "min_data_in_leaf": 1000,
+      "feature_fraction": 0.6,
+      "valid_ic_mean": 0.03302370476078336,
+      "valid_ic_per_fold": [
+        0.039593087392011915,
+        0.008448704618756752,
+        0.051029322271581426
+      ],
+      "best_iter": [
+        800,
+        800,
+        800
+      ],
+      "sec": 57.2
+    },
+    {
+      "num_leaves": 15,
+      "learning_rate": 0.03,
+      "min_data_in_leaf": 500,
+      "feature_fraction": 0.9,
+      "valid_ic_mean": 0.030614070550846594,
+      "valid_ic_per_fold": [
+        0.04552586367845479,
+        -0.000491048937937642,
+        0.04680739691202264
+      ],
+      "best_iter": [
+        800,
+        800,
+        800
+      ],
+      "sec": 41.8
+    },
+    {
+      "num_leaves": 15,
+      "learning_rate": 0.05,
+      "min_data_in_leaf": 300,
+      "feature_fraction": 0.9,
+      "valid_ic_mean": 0.030388269883066598,
+      "valid_ic_per_fold": [
+        0.042306082900062596,
+        -4.027754755700737e-06,
+        0.04886275450389289
+      ],
+      "best_iter": [
+        800,
+        800,
+        800
+      ],
+      "sec": 39.7
+    }
+  ],
+  "selected_hp": {
+    "num_leaves": 63,
+    "learning_rate": 0.03,
+    "min_data_in_leaf": 100,
+    "feature_fraction": 0.8
+  }
+}

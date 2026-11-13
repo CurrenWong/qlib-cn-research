@@ -1,0 +1,12 @@
+{
+  "model": "Ridge_a100",
+  "rule": "ML&MA20",
+  "q": 0.2,
+  "smooth": 1,
+  "IR_mean_walkforward": 0.3943753309118191,
+  "IR_min_walkforward": -0.7290198354036718,
+  "folds": 10,
+  "folds_positive": 5,
+  "avg_exposure": 0.3606741112561219,
+  "selection": "walk-forward 2013-2022（每折训练窗口从 2007 年起、滚动9年），阈值=训练集分数分位点，目标=相对沪深300的信息比率均值"
+}

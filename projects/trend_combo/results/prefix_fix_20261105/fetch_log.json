@@ -1,0 +1,227 @@
+{
+  "n_symbols": 637,
+  "n_fin_rows": 35866,
+  "n_val_rows": 1260947,
+  "n_pre_rows": 14128,
+  "n_errors": 43,
+  "errors": [
+    {
+      "symbol": "SH600005",
+      "part": "val",
+      "err": "返回数据为空"
+    },
+    {
+      "symbol": "SH600005",
+      "part": "pre",
+      "err": "返回数据为空"
+    },
+    {
+      "symbol": "SH600068",
+      "part": "val",
+      "err": "返回数据为空"
+    },
+    {
+      "symbol": "SH600068",
+      "part": "pre",
+      "err": "返回数据为空"
+    },
+    {
+      "symbol": "SH600074",
+      "part": "val",
+      "err": "返回数据为空"
+    },
+    {
+      "symbol": "SH600074",
+      "part": "pre",
+      "err": "返回数据为空"
+    },
+    {
+      "symbol": "SH600350",
+      "part": "pre",
+      "err": "返回数据为空"
+    },
+    {
+      "symbol": "SH600297",
+      "part": "val",
+      "err": "返回数据为空"
+    },
+    {
+      "symbol": "SH600297",
+      "part": "pre",
+      "err": "返回数据为空"
+    },
+    {
+      "symbol": "SH600317",
+      "part": "val",
+      "err": "返回数据为空"
+    },
+    {
+      "symbol": "SH600317",
+      "part": "pre",
+      "err": "返回数据为空"
+    },
+    {
+      "symbol": "SH600485",
+      "part": "val",
+      "err": "返回数据为空"
+    },
+    {
+      "symbol": "SH600485",
+      "part": "pre",
+      "err": "返回数据为空"
+    },
+    {
+      "symbol": "SH600705",
+      "part": "val",
+      "err": "返回数据为空"
+    },
+    {
+      "symbol": "SH600705",
+      "part": "pre",
+      "err": "返回数据为空"
+    },
+    {
+      "symbol": "SH600804",
+      "part": "val",
+      "err": "返回数据为空"
+    },
+    {
+      "symbol": "SH600804",
+      "part": "pre",
+      "err": "返回数据为空"
+    },
+    {
+      "symbol": "SH600837",
+      "part": "val",
+      "err": "返回数据为空"
+    },
+    {
+      "symbol": "SH600837",
+      "part": "pre",
+      "err": "返回数据为空"
+    },
+    {
+      "symbol": "SH601258",
+      "part": "val",
+      "err": "返回数据为空"
+    },
+    {
+      "symbol": "SH601258",
+      "part": "pre",
+      "err": "返回数据为空"
+    },
+    {
+      "symbol": "SH601799",
+      "part": "pre",
+      "err": "返回数据为空"
+    },
+    {
+      "symbol": "SH601868",
+      "part": "pre",
+      "err": "返回数据为空"
+    },
+    {
+      "symbol": "SH601989",
+      "part": "val",
+      "err": "返回数据为空"
+    },
+    {
+      "symbol": "SH601989",
+      "part": "pre",
+      "err": "返回数据为空"
+    },
+    {
+      "symbol": "SZ000046",
+      "part": "val",
+      "err": "返回数据为空"
+    },
+    {
+      "symbol": "SZ000046",
+      "part": "pre",
+      "err": "返回数据为空"
+    },
+    {
+      "symbol": "SZ000413",
+      "part": "val",
+      "err": "返回数据为空"
+    },
+    {
+      "symbol": "SZ000413",
+      "part": "pre",
+      "err": "返回数据为空"
+    },
+    {
+      "symbol": "SZ000540",
+      "part": "val",
+      "err": "返回数据为空"
+    },
+    {
+      "symbol": "SZ000540",
+      "part": "pre",
+      "err": "返回数据为空"
+    },
+    {
+      "symbol": "SZ000627",
+      "part": "val",
+      "err": "返回数据为空"
+    },
+    {
+      "symbol": "SZ000627",
+      "part": "pre",
+      "err": "返回数据为空"
+    },
+    {
+      "symbol": "SZ000671",
+      "part": "val",
+      "err": "返回数据为空"
+    },
+    {
+      "symbol": "SZ000671",
+      "part": "pre",
+      "err": "返回数据为空"
+    },
+    {
+      "symbol": "SZ000961",
+      "part": "val",
+      "err": "返回数据为空"
+    },
+    {
+      "symbol": "SZ000961",
+      "part": "pre",
+      "err": "返回数据为空"
+    },
+    {
+      "symbol": "SZ002411",
+      "part": "val",
+      "err": "返回数据为空"
+    },
+    {
+      "symbol": "SZ002411",
+      "part": "pre",
+      "err": "返回数据为空"
+    },
+    {
+      "symbol": "SZ002450",
+      "part": "val",
+      "err": "返回数据为空"
+    },
+    {
+      "symbol": "SZ002450",
+      "part": "pre",
+      "err": "返回数据为空"
+    },
+    {
+      "symbol": "SZ300104",
+      "part": "val",
+      "err": "返回数据为空"
+    },
+    {
+      "symbol": "SZ300104",
+      "part": "pre",
+      "err": "返回数据为空"
+    }
+  ],
+  "seconds": 389.5,
+  "symbols_with_fin": 637,
+  "symbols_with_val": 617
+}

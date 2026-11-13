@@ -1,0 +1,20 @@
+# 统一换行：仓库内一律 LF，检出到 Windows 时也保持 LF（避免每次 diff 都提示 CRLF）
+* text=auto eol=lf
+
+# 二进制文件（即便误纳入也不要尝试 diff / 转换）
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.pdf  binary
+*.zip  binary
+*.bin  binary
+*.parquet binary
+*.npz  binary
+*.pkl  binary
+*.xlsx binary
+*.docx binary
+*.pptx binary
+*.wav  binary
+*.mp3  binary
+*.mp4  binary

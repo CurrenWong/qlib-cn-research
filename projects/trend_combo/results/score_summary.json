@@ -1,0 +1,78 @@
+{
+  "price_factors": [
+    "mom_20",
+    "mom_60",
+    "mom_120",
+    "ma_slope_20",
+    "ma_slope_60",
+    "ma_dist_20",
+    "ma_dist_60",
+    "ma_cross_5_20",
+    "price_pos_250",
+    "rel_str_60",
+    "rev_3",
+    "rev_10",
+    "mom_5_ex",
+    "mom_20_ex",
+    "dd_60",
+    "vol_20",
+    "vol_60",
+    "hl_range_20",
+    "beta_60",
+    "alpha_20",
+    "vol_ratio",
+    "vol_ratio_5_20",
+    "vol_z_20",
+    "liq_change"
+  ],
+  "fund_factors": [
+    "pe_pct_3y",
+    "pb_pct_3y",
+    "ps_pct_3y",
+    "pe_log",
+    "cap_log",
+    "rev_yoy",
+    "rev_qoq",
+    "np_yoy",
+    "dnp_yoy",
+    "rev_gap",
+    "roe",
+    "roic",
+    "gross_margin",
+    "net_margin",
+    "debt_ratio",
+    "cfo_to_np",
+    "inv_turn",
+    "roe_yoy",
+    "bps_yoy"
+  ],
+  "event_factors": [
+    "predict_growth",
+    "days_since_predict"
+  ],
+  "n_dates": 3117,
+  "n_symbols": 637,
+  "sample": [
+    {
+      "datetime": "2026-10-30 00:00:00",
+      "symbol": "SZ301269",
+      "price_score": 0.04744385555386543,
+      "fund_score": 0.07711853086948395,
+      "event_score": -0.2782970666885376
+    },
+    {
+      "datetime": "2026-10-30 00:00:00",
+      "symbol": "SZ301308",
+      "price_score": -0.22611498832702637,
+      "fund_score": 0.42652517557144165,
+      "event_score": 0.14551475644111633
+    },
+    {
+      "datetime": "2026-10-30 00:00:00",
+      "symbol": "SZ302132",
+      "price_score": 0.12107238918542862,
+      "fund_score": -0.13092464208602905,
+      "event_score": 0.5278193354606628
+    }
+  ]
+}

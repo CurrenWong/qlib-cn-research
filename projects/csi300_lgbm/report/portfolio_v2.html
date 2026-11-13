@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<title>组合调整：top10 → top20 + 缓冲带（2026-10-30）</title>
+<style>
+* { box-sizing: border-box; }
+body { margin:0; background:#fff; color:#1F2933;
+  font-family:"Microsoft YaHei","PingFang SC",-apple-system,sans-serif;
+  font-size:14px; line-height:1.75; }
+.wrap { max-width:1180px; margin:0 auto; padding:38px 34px 56px; }
+h1 { font-size:27px; margin:0 0 6px; letter-spacing:-.3px; }
+.sub { color:#8A9099; font-size:12.5px; margin-bottom:24px; }
+h2 { font-size:18.5px; margin:34px 0 10px; padding-left:11px;
+  border-left:4px solid #E8833A; line-height:1.35; }
+p { margin:9px 0; }
+.lead { background:#F7F8FA; border:1px solid #E4E7EB; border-radius:10px; padding:18px 24px; }
+.lead ol { margin:6px 0 0; padding-left:22px; }
+.lead li { margin:10px 0; }
+.warn { background:#FDF6F1; border-left:4px solid #E8833A; padding:13px 18px;
+  border-radius:6px; margin:16px 0; }
+.bad { background:#FBF3F3; border-left:4px solid #C94C4C; padding:13px 18px;
+  border-radius:6px; margin:16px 0; }
+table { border-collapse:collapse; width:100%; margin:12px 0 4px; font-size:12.4px; }
+th { background:#F2F4F6; color:#5B6470; font-weight:600; text-align:right;
+  padding:8px 9px; border-bottom:1px solid #E4E7EB; white-space:nowrap; }
+td { padding:7px 9px; border-bottom:1px solid #F0F2F4; text-align:right; }
+th.k, td.k { text-align:left; }
+tr.old td { color:#9AA1A9; }
+tr.sel td { background:#FDF6F1; font-weight:600; }
+.pos { color:#C94C4C; }
+.neg { color:#2F7E8C; }
+.rk { color:#E8833A; font-weight:700; text-align:center; width:30px; }
+.cd { color:#9AA1A9; font-weight:400; font-size:10.5px; margin-left:6px; }
+.cap { color:#9AA1A9; font-size:11.5px; margin:4px 0 6px; }
+.kpi { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin:16px 0 4px; }
+.kpi div { background:#F7F8FA; border:1px solid #E4E7EB; border-radius:9px; padding:13px 16px; }
+.kpi b { display:block; font-size:21px; letter-spacing:-.3px; margin-bottom:2px; }
+.kpi span { color:#8A9099; font-size:11.5px; }
+.foot { color:#9AA1A9; font-size:11.5px; border-top:1px solid #E4E7EB;
+  margin-top:34px; padding-top:13px; }
+</style></head><body><div class="wrap">
+
+<h1>组合调整：从 top10 扩到 top20，加一道缓冲带</h1>
+<div class="sub">数据截面 <b>2026-10-30</b> 收盘 · 股票池 300 只时点成分股 ·
+切分：训练 2016-2019 / 验证 2020-2022 / 测试 2023-2026 · 等权 · 含交易成本（买 0.05% / 卖 0.15%）</div>
+
+<div class="lead">
+<b>先说结论</b>
+<ol>
+<li><b>扩仓是对的。</b>原 top10 月度方案测试期年化 <span class="neg">-2.13%</span>、最大回撤 -50.74%；
+换成 top20 + 2 倍缓冲带后，测试期 <span class="pos">+6.11%</span>、回撤
+-45.1%，验证期几乎不受损（<span class="pos">+13.12%</span> / IR 1.19，
+原方案 20.86% / 1.22）。</li>
+<li><b>“拉长到季度”这条建议被数据否掉了。</b>K=20 从月度改季度，验证期年化从
+<span class="pos">+11.66%</span> 掉到 <span class="neg">-2.12%</span>——标签是未来 5 日收益，信号衰减太快，持有 60 天等于空转。</li>
+<li><b>没有能复制这个组合的 ETF。</b>ETF 只能买指数；自建 20 只的年成本约
+2.0%/年，几乎等于模型的全部超额。省不了，只能少赚或不做。</li>
+</ol>
+</div>
+
+<h2>一、原方案死在“太集中”，不是死在“手续费”</h2>
+<p>top10 月度方案：验证期年化 +20.86%（IR 1.22）看起来很能打，测试期 -2.13%（IR -0.07）。
+关键是<b>零成本对照也只有 -0.02%</b>——把手续费全额退回，组合层面依然不赚钱。
+所以主因是集中度：10 只票让年化波动冲到 32%，波动拖累把算术超额吃干净。</p>
+
+<h2>二、持仓只数 × 调仓频率：季度方案全线不合格</h2>
+<table>
+<tr><th class="k">持仓</th><th class="k">调仓</th><th>验证年化</th><th>验证IR</th>
+<th>测试年化</th><th>测试IR</th><th>测试MDD</th></tr>
+<tr class="old"><td class='k'>top10</td><td class='k'>月度</td><td><span class="pos">+20.86%</span></td><td>1.22</td><td><span class="neg">-2.13%</span></td><td>-0.07</td><td class='neg'>-50.7%</td></tr><tr><td class='k'>top10</td><td class='k'>季度</td><td><span class="pos">+0.26%</span></td><td>0.17</td><td><span class="neg">-4.10%</span></td><td>-0.18</td><td class='neg'>-52.4%</td></tr><tr><td class='k'>top10</td><td class='k'>半年</td><td><span class="neg">-2.93%</span></td><td>-0.01</td><td><span class="pos">+3.10%</span></td><td>0.19</td><td class='neg'>-55.7%</td></tr><tr><td class='k'>top20</td><td class='k'>月度</td><td><span class="pos">+11.66%</span></td><td>1.07</td><td><span class="pos">+2.96%</span></td><td>0.20</td><td class='neg'>-42.0%</td></tr><tr><td class='k'>top20</td><td class='k'>季度</td><td><span class="neg">-2.12%</span></td><td>0.05</td><td><span class="neg">-1.55%</span></td><td>-0.09</td><td class='neg'>-47.5%</td></tr><tr><td class='k'>top20</td><td class='k'>半年</td><td><span class="neg">-4.65%</span></td><td>-0.18</td><td><span class="pos">+0.78%</span></td><td>0.07</td><td class='neg'>-52.5%</td></tr><tr><td class='k'>top30</td><td class='k'>月度</td><td><span class="pos">+8.54%</span></td><td>1.02</td><td><span class="pos">+3.47%</span></td><td>0.28</td><td class='neg'>-38.8%</td></tr><tr><td class='k'>top30</td><td class='k'>季度</td><td><span class="neg">-2.03%</span></td><td>0.05</td><td><span class="pos">+2.56%</span></td><td>0.22</td><td class='neg'>-40.9%</td></tr><tr><td class='k'>top30</td><td class='k'>半年</td><td><span class="neg">-5.61%</span></td><td>-0.34</td><td><span class="neg">-0.44%</span></td><td>-0.03</td><td class='neg'>-45.9%</td></tr><tr><td class='k'>top50</td><td class='k'>月度</td><td><span class="pos">+2.89%</span></td><td>0.65</td><td><span class="pos">+3.34%</span></td><td>0.34</td><td class='neg'>-37.0%</td></tr><tr><td class='k'>top50</td><td class='k'>季度</td><td><span class="pos">+0.57%</span></td><td>0.36</td><td><span class="pos">+4.63%</span></td><td>0.52</td><td class='neg'>-41.4%</td></tr><tr><td class='k'>top50</td><td class='k'>半年</td><td><span class="neg">-4.05%</span></td><td>-0.23</td><td><span class="neg">-2.09%</span></td><td>-0.24</td><td class='neg'>-44.6%</td></tr><tr><td class='k'>top100</td><td class='k'>月度</td><td><span class="pos">+3.13%</span></td><td>0.97</td><td><span class="pos">+2.23%</span></td><td>0.27</td><td class='neg'>-32.2%</td></tr><tr><td class='k'>top100</td><td class='k'>季度</td><td><span class="pos">+2.40%</span></td><td>0.84</td><td><span class="pos">+4.92%</span></td><td>0.75</td><td class='neg'>-33.7%</td></tr><tr><td class='k'>top100</td><td class='k'>半年</td><td><span class="neg">-1.64%</span></td><td>0.07</td><td><span class="neg">-0.83%</span></td><td>-0.18</td><td class='neg'>-35.6%</td></tr>
+</table>
+<div class="cap">灰色行＝原方案。基线：验证期沪深300 <span class="neg">-2.31%</span>、
+池内等权 <span class="pos">+0.52%</span>；测试期沪深300 <span class="pos">+0.65%</span>、
+池内等权 <span class="pos">+2.74%</span>。</div>
+
+<div class="warn"><b>季度 / 半年调仓被否：</b>所有 K 在改成 60 日、120 日调仓后，验证期年化普遍掉到
+0 以下。这不是成本问题（成本确实降到 3 万），是<b>信号寿命问题</b>——模型预测的是 5 日收益，
+拿 60 天，前面 55 天都在赌一个已经失效的判断。</div>
+
+<h2>三、加一道缓冲带：老仓位只要还在 top40 就不动</h2>
+<table>
+<tr><th class="k">持仓</th><th class="k">缓冲带</th><th>验证年化</th><th>验证IR</th>
+<th>测试年化</th><th>测试IR</th><th>测试MDD</th><th>替换比例</th><th>测试成本</th></tr>
+<tr><td class='k'>top20</td><td class='k'>无（top20）</td><td><span class="pos">+11.66%</span></td><td>1.07</td><td><span class="pos">+2.96%</span></td><td>0.20</td><td class='neg'>-42.0%</td><td>78%</td><td>8.1万</td></tr><tr class="sel"><td class='k'>top20</td><td class='k'>×2.0（top40）</td><td><span class="pos">+13.12%</span></td><td>1.19</td><td><span class="pos">+6.11%</span></td><td>0.40</td><td class='neg'>-45.1%</td><td>70%</td><td>7.7万</td></tr><tr><td class='k'>top20</td><td class='k'>×3.0（top60）</td><td><span class="pos">+11.01%</span></td><td>1.04</td><td><span class="pos">+5.33%</span></td><td>0.35</td><td class='neg'>-45.5%</td><td>63%</td><td>7.2万</td></tr><tr><td class='k'>top30</td><td class='k'>无（top30）</td><td><span class="pos">+8.54%</span></td><td>1.02</td><td><span class="pos">+3.47%</span></td><td>0.28</td><td class='neg'>-38.8%</td><td>76%</td><td>8.6万</td></tr><tr><td class='k'>top30</td><td class='k'>×2.0（top60）</td><td><span class="pos">+7.63%</span></td><td>0.92</td><td><span class="pos">+3.42%</span></td><td>0.28</td><td class='neg'>-42.5%</td><td>64%</td><td>7.2万</td></tr><tr><td class='k'>top30</td><td class='k'>×3.0（top90）</td><td><span class="pos">+5.44%</span></td><td>0.74</td><td><span class="pos">+6.15%</span></td><td>0.50</td><td class='neg'>-40.4%</td><td>56%</td><td>6.7万</td></tr>
+</table>
+<div class="cap">橙色行＝选定方案。替换比例＝每次调仓被换掉的只数占比（无缓冲时 top20 每月换 78%）。</div>
+
+<h3>选定的这一档</h3>
+<div class="kpi">
+  <div><b class="pos">+6.11%</b><span>测试期年化（原方案 -2.13%）</span></div>
+  <div><b>-45.1%</b><span>测试期最大回撤（原 -50.7%）</span></div>
+  <div><b>7.7 万</b><span>测试期总成本 ≈ 2.0%/年</span></div>
+</div>
+<p>代价写清楚：每月约 <b>14 只被替换</b>（20 只的 70%），
+约 <b>28 笔委托</b>；缓冲带只把换手从 78% 压到 70%，压不下去——因为这个模型的排名本身就不稳。</p>
+
+<div class="bad"><b>纪律提示：</b>测试期被近 30 个配置看过，属于多重比较。
+可信的是<b>方向</b>（放宽 + 缓冲带降低单票依赖），不可信的是“top20/×2 恰好最优”。
+反面例子就在上表：top30 + 5 倍缓冲的验证期 IR 1.44 是全网格最高，测试期只有 +1.73%。</div>
+
+<h2>四、调整后的组合（等权 5%，2026-10-30 收盘）</h2>
+<table>
+<tr><th class="k">#</th><th class="k">名称</th><th class="k">板块</th>
+<th>现价（元）</th><th>一手金额</th><th class="k">权重</th></tr>
+<tr><td class='rk'>1</td><td class='k'>天孚通信<span class='cd'>300394</span></td><td class='k' style='color:#8A9099'>创业板</td><td>148.00</td><td>14,800</td><td class='k'>5.00%</td></tr><tr><td class='rk'>2</td><td class='k'>芯原股份<span class='cd'>688521</span></td><td class='k' style='color:#8A9099'>科创板</td><td>98.19</td><td>9,819</td><td class='k'>5.00%</td></tr><tr><td class='rk'>3</td><td class='k'>国电电力<span class='cd'>600795</span></td><td class='k' style='color:#8A9099'>主板</td><td>5.35</td><td>535</td><td class='k'>5.00%</td></tr><tr><td class='rk'>4</td><td class='k'>中信银行<span class='cd'>601998</span></td><td class='k' style='color:#8A9099'>主板</td><td>9.46</td><td>946</td><td class='k'>5.00%</td></tr><tr><td class='rk'>5</td><td class='k'>工业富联<span class='cd'>601138</span></td><td class='k' style='color:#8A9099'>主板</td><td>45.00</td><td>4,500</td><td class='k'>5.00%</td></tr><tr><td class='rk'>6</td><td class='k'>锐捷网络<span class='cd'>301165</span></td><td class='k' style='color:#8A9099'>创业板</td><td>63.80</td><td>6,380</td><td class='k'>5.00%</td></tr><tr><td class='rk'>7</td><td class='k'>英维克<span class='cd'>002837</span></td><td class='k' style='color:#8A9099'>主板</td><td>37.80</td><td>3,780</td><td class='k'>5.00%</td></tr><tr><td class='rk'>8</td><td class='k'>川投能源<span class='cd'>600674</span></td><td class='k' style='color:#8A9099'>主板</td><td>17.88</td><td>1,788</td><td class='k'>5.00%</td></tr><tr><td class='rk'>9</td><td class='k'>平安银行<span class='cd'>000001</span></td><td class='k' style='color:#8A9099'>主板</td><td>11.64</td><td>1,164</td><td class='k'>5.00%</td></tr><tr><td class='rk'>10</td><td class='k'>华工科技<span class='cd'>000988</span></td><td class='k' style='color:#8A9099'>主板</td><td>62.15</td><td>6,215</td><td class='k'>5.00%</td></tr><tr><td class='rk'>11</td><td class='k'>豪威集团<span class='cd'>603501</span></td><td class='k' style='color:#8A9099'>主板</td><td>82.45</td><td>8,245</td><td class='k'>5.00%</td></tr><tr><td class='rk'>12</td><td class='k'>中天科技<span class='cd'>600522</span></td><td class='k' style='color:#8A9099'>主板</td><td>23.17</td><td>2,317</td><td class='k'>5.00%</td></tr><tr><td class='rk'>13</td><td class='k'>上海银行<span class='cd'>601229</span></td><td class='k' style='color:#8A9099'>主板</td><td>9.31</td><td>931</td><td class='k'>5.00%</td></tr><tr><td class='rk'>14</td><td class='k'>宁波银行<span class='cd'>002142</span></td><td class='k' style='color:#8A9099'>主板</td><td>35.17</td><td>3,517</td><td class='k'>5.00%</td></tr><tr><td class='rk'>15</td><td class='k'>蓝思科技<span class='cd'>300433</span></td><td class='k' style='color:#8A9099'>创业板</td><td>25.58</td><td>2,558</td><td class='k'>5.00%</td></tr><tr><td class='rk'>16</td><td class='k'>紫光国微<span class='cd'>002049</span></td><td class='k' style='color:#8A9099'>主板</td><td>47.39</td><td>4,739</td><td class='k'>5.00%</td></tr><tr><td class='rk'>17</td><td class='k'>东山精密<span class='cd'>002384</span></td><td class='k' style='color:#8A9099'>主板</td><td>86.06</td><td>8,606</td><td class='k'>5.00%</td></tr><tr><td class='rk'>18</td><td class='k'>三环集团<span class='cd'>300408</span></td><td class='k' style='color:#8A9099'>创业板</td><td>79.23</td><td>7,923</td><td class='k'>5.00%</td></tr><tr><td class='rk'>19</td><td class='k'>中国电信<span class='cd'>601728</span></td><td class='k' style='color:#8A9099'>主板</td><td>7.01</td><td>701</td><td class='k'>5.00%</td></tr><tr><td class='rk'>20</td><td class='k'>北京银行<span class='cd'>601169</span></td><td class='k' style='color:#8A9099'>主板</td><td>5.66</td><td>566</td><td class='k'>5.00%</td></tr>
+</table>
+<div class="cap">20 只各买一手合计 <b>90,030 元</b>，这是这套组合的最小可执行资金。
+现价已按 <code>$close / $factor</code> 还原成真实市场价——qlib 的 $close 是复权连续序列，不能直接当成交价。</div>
+
+<h2>五、有没有现成 ETF 可以直接买？没有</h2>
+<p>这套组合是模型每天重排出来的 top20，ETF 只能复制指数，复制不了“某个模型的当期名单”。三条替代路径：</p>
+<table>
+<tr><th class="k">方案</th><th class="k">你能拿到什么</th><th>年成本</th><th class="k">操作量</th></tr>
+<tr><td class="k">沪深300ETF<br><span class="cd">510300 / 510310 / 510330</span></td>
+<td class="k">指数收益：测试期 <span class="pos">+0.65%</span>/年</td>
+<td>0.20%</td><td class="k">1 笔</td></tr>
+<tr><td class="k">沪深300指数增强 ETF<br><span class="cd">561990、159238 等</span></td>
+<td class="k">别人家的增强模型，与本事无关；159238 规模仅 5406 万</td>
+<td>见公告</td><td class="k">1 笔</td></tr>
+<tr class="sel"><td class="k">自建 20 只 + 缓冲带</td>
+<td class="k">回测那套：测试期 <span class="pos">+6.11%</span>/年</td>
+<td>2.0%</td><td class="k">每月约 28 笔</td></tr>
+</table>
+<p>关键在这笔账：自建的年化成本约 2.0 个点，几乎等于模型相对 300 只等权的全部超额
+（<span class="pos">+6.11%</span> vs <span class="pos">+2.74%</span>，约
++3.4 个点）。
+<b>这套策略的钱不是“省 ETF 管理费省出来的”，是“扣完交易成本还剩多少”决定的。</b></p>
+
+<h2>六、风险（不粉饰）</h2>
+<ul>
+<li>最大回撤仍有 <b>-45.1%</b>，扩仓只是把 -51% 收窄到 -45%，没有消除。</li>
+<li>20 只里 <b>11 只近 20 日跌超 20%</b>，本质是赌超跌反弹；反弹失败就是继续跌。</li>
+<li>数据源只有价量、没有财务字段，任何“公司变好了”的说法都不是数据说的。</li>
+<li>2026 年至今，这套策略仍是负的。</li>
+</ul>
+
+<div class="foot">数据与复现：<code>projects/csi300_lgbm/tools/</code> 下 wide_portfolio.py（K × 频率网格）、
+wide_buffer.py（缓冲带）、rank_latest.py（Top-N）、real_price.py（真实价还原）、
+gen_portfolio_note.py（本页）。所有数字取自 <code>results/*.json</code>。<br>
+风险提示：本页是回测复盘，不构成投资建议；模型输出与历史回测均不预示未来收益。</div>
+</div></body></html>

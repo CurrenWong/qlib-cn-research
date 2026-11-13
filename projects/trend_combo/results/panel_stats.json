@@ -1,0 +1,93 @@
+{
+  "rows": 1985529,
+  "symbols": 637,
+  "dates": 3117,
+  "start": "2014-01-02",
+  "end": "2026-10-30",
+  "coverage": {
+    "pe_pct_3y": {
+      "notna": 0.5568,
+      "first_date": "2019-01-10"
+    },
+    "pb_pct_3y": {
+      "notna": 0.5568,
+      "first_date": "2019-01-10"
+    },
+    "ps_pct_3y": {
+      "notna": 0.5568,
+      "first_date": "2019-01-10"
+    },
+    "pe_log": {
+      "notna": 0.6341,
+      "first_date": "2018-01-02"
+    },
+    "cap_log": {
+      "notna": 0.6341,
+      "first_date": "2018-01-02"
+    },
+    "rev_yoy": {
+      "notna": 0.924,
+      "first_date": "2014-01-02"
+    },
+    "rev_qoq": {
+      "notna": 0.8928,
+      "first_date": "2014-01-02"
+    },
+    "np_yoy": {
+      "notna": 0.9231,
+      "first_date": "2014-01-02"
+    },
+    "dnp_yoy": {
+      "notna": 0.9003,
+      "first_date": "2014-01-02"
+    },
+    "rev_gap": {
+      "notna": 0.9231,
+      "first_date": "2014-01-02"
+    },
+    "roe": {
+      "notna": 0.92,
+      "first_date": "2014-01-02"
+    },
+    "roic": {
+      "notna": 0.8312,
+      "first_date": "2014-01-02"
+    },
+    "gross_margin": {
+      "notna": 0.8338,
+      "first_date": "2014-01-02"
+    },
+    "net_margin": {
+      "notna": 0.9405,
+      "first_date": "2014-01-02"
+    },
+    "debt_ratio": {
+      "notna": 0.9403,
+      "first_date": "2014-01-02"
+    },
+    "cfo_to_np": {
+      "notna": 0.9528,
+      "first_date": "2014-01-02"
+    },
+    "inv_turn": {
+      "notna": 0.822,
+      "first_date": "2014-01-02"
+    },
+    "roe_yoy": {
+      "notna": 0.8889,
+      "first_date": "2014-01-02"
+    },
+    "bps_yoy": {
+      "notna": 0.918,
+      "first_date": "2014-01-02"
+    },
+    "predict_growth": {
+      "notna": 0.6065,
+      "first_date": "2014-01-02"
+    },
+    "days_since_predict": {
+      "notna": 0.7114,
+      "first_date": "2014-01-02"
+    }
+  }
+}

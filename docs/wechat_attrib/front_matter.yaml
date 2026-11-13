@@ -1,0 +1,15 @@
+# 多平台分发的 front matter（真根源头部参数）
+# 改这里 → 重新跑 make_source.py → 再 adapt → 再 publish
+title: "财报出来就跌？我把两家公司的 1347 次大波动都归因了一遍"
+summary: "江淮与讯飞1347次大波动的归因实验"
+tags: [量化, 股票, 数据分析, qlib, 投资分析]
+category: "技术"
+cover: "img/cover.png"
+keywords: [新闻归因, qlib, 涨停, 利好出尽, 科大讯飞, 江淮汽车]
+platform_notes:
+  zhihu: "知乎版：用两个真实标的做了一次'事后归因'实验，结论有点反直觉。"
+  csdn: "CSDN 版：方法论部分可复现，附 qlib 取数与校验要点。"
+  juejin: "掘金版：数据与图表为主，重点是涨跌停之后的超额。"
+  baijiahao: "百家号版：故事性强，从三个'利好当天反而跌'的现场切入。"
+  bilibili: "B站专栏版：图多字少，按时间线讲 AI 叙事的起落。"
+footer_note: "完整版（含方法四步与数据口径）见原文链接。"

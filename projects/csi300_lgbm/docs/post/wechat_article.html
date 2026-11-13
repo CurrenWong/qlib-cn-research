@@ -1,0 +1,988 @@
+<section style="margin:0 0 26px;"><h1 style="margin:0 0 14px;font-size:22px;line-height:1.5;font-weight:700;color:#1A1A1E;">沪深300×LightGBM选股复盘：验证期+20.86%，测试期-2.13%</h1>
+<blockquote style="margin:1.2em 0;padding:2px 0 2px 14px;border-left:3px solid #1F3BE0;color:#55575E;font-size:15px;line-height:1.85;">
+<p style="margin:.6em 0;font-size:15px;line-height:1.85;color:#55575E;"><strong style="font-weight:700;color:#1A1A1E;">排序信号是真的，但很弱。</strong>按模型预测分位分档，预测越靠前、未来 5 日平均收益越高，两期都单调（验证期前 3% 档 +0.441% vs 池内 +0.081%；测试期 +0.371% vs 池内 +0.099%）。分年度 RankIC 全部为正，但 2021 与 2026 已弱到 t&lt;1.5。</p>
+<p style="margin:.6em 0;font-size:15px;line-height:1.85;color:#55575E;"><strong style="font-weight:700;color:#1A1A1E;">但"只买 10 只集中持有"这套组合在测试期不成立。</strong>测试期年化 -2.13%，跑输沪深300（+0.65%），更跑输"300 只等权不动"（+2.74%）；交易成本每年再吃掉约 2 个百分点（零成本对照：-0.02%）。<strong style="font-weight:700;color:#1A1A1E;">把成本全额退回仍然不赚钱</strong>——所以主因是集中度，不是手续费。</p>
+<p style="margin:.6em 0;font-size:15px;line-height:1.85;color:#55575E;"><strong style="font-weight:700;color:#1A1A1E;">同一个模型，换个组合结构能救回来一点。</strong>top20 + 2 倍缓冲带：验证期 +13.12%（IR 1.19），测试期 +6.11%（IR 0.40），跑赢两条基线；代价是每月约 28 笔委托、2.03%/年的交易成本。</p>
+<p style="margin:.6em 0;font-size:15px;line-height:1.85;color:#55575E;"><strong style="font-weight:700;color:#1A1A1E;">没有能直接买的 ETF。</strong>宽基 ETF 只能给你指数（测试期 +0.65%/年），指数增强 ETF 是别人家的模型。这套东西要么自己每月下单，要么别做。</p>
+<p style="margin:.6em 0;font-size:15px;line-height:1.85;color:#55575E;"><strong style="font-weight:700;color:#1A1A1E;">本文还推翻了我自己上一版的建议。</strong>上一版写"更长的持有期（季度调仓）"，实测下来全线不合格：这批信号只活 5 天，持有 60 天是拿一个失效的判断扛 60 天。</p>
+</blockquote>
+<p style="margin:1.05em 0;font-size:16px;line-height:1.9;color:#2E2E33;letter-spacing:.3px;text-align:justify;">数据截至 <strong style="font-weight:700;color:#1A1A1E;">2026-10-30</strong>（最新完整交易日）· 股票池 300 只时点成分股 · 切分：训练 2016-2019 / 验证 2020-2022 / 测试 2023-2026 · 模型 LightGBM（30 个价量特征）· 全部数字可复现，文末有命令。</p>
+<h2 style="margin:2.2em 0 .9em;padding-left:11px;border-left:4px solid #1F3BE0;font-size:19px;line-height:1.5;font-weight:700;color:#1A1A1E;">一、这次到底做了什么</h2>
+<table style="width:100%;border-collapse:collapse;margin:1.1em 0;font-size:12.5px;line-height:1.6;">
+<thead>
+<tr>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">环节</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">做法</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">关键约束</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">数据源</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">本地 qlib <code style="background:#F3F1EA;padding:1px 5px;border-radius:3px;font-family:Menlo,Consolas,monospace;font-size:13px;color:#1F3BE0;">cn_data_2026</code>（chenditc 日更版 + 手工追加）， 最新到 2026-10-30</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">股票维度的"最新完整横截面"是 10-30（见下方数据陷阱）</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">股票池</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">沪深300 <strong style="font-weight:700;color:#1A1A1E;">时点</strong>成分股（用成分文件的 start/end 区间逐日还原， 不拿今天的 300 只倒推历史）</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">避免幸存者偏差；637 只曾在池内</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">特征</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">30 个价量特征：动量/反转/波动/均线/RSI/量比/Amihud/Beta/52周位置…</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">数据源<strong style="font-weight:700;color:#1A1A1E;">没有</strong>基本面字段，特征全部无量纲</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">标签</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">未来 5 日收益 <code style="background:#F3F1EA;padding:1px 5px;border-radius:3px;font-family:Menlo,Consolas,monospace;font-size:13px;color:#1F3BE0;">close(t+5)/close(t)-1</code></td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">对齐月度调仓；训练样本必须满足"标签期末早于预测日"</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">切分</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">训练 2016-2019 / 验证 2020-2022 / 测试 2023-2026</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">超参、topK、调仓频率<strong style="font-weight:700;color:#1A1A1E;">只在验证期</strong>选；测试期只跑一次</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">模型</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">LightGBM（leaves 63 / lr 0.03 / min_leaf 100 / ff 0.8），年度 walk-forward 重训</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">每折只用"折前标签已知"的样本训练</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">组合</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">等权 top10，每 20 个交易日调仓， 信号 T 日收盘 → T+1 日收盘成交</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">涨停买不进、停牌不可交易</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">成本</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">买入 0.05% / 卖出 0.15% / 单笔最低 5 元，账户 100 万</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">与本仓库历史项目同口径，可比</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">基线</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">沪深300买入持有、池内等权 300 只、MA20 趋势过滤、零成本对照</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">必须保留"干脆别择时"的退路</td>
+</tr>
+</tbody>
+</table>
+<blockquote style="margin:1.2em 0;padding:2px 0 2px 14px;border-left:3px solid #1F3BE0;color:#55575E;font-size:15px;line-height:1.85;">
+<p style="margin:.6em 0;font-size:15px;line-height:1.85;color:#55575E;">⚠️ <strong style="font-weight:700;color:#1A1A1E;">数据陷阱（本次实际踩到）：</strong> qlib 的日历到 2026-10-30，但 300 只成分股里 <strong style="font-weight:700;color:#1A1A1E;">298 只的行情只到 2026-10-27</strong>—— 之前的日更脚本默认只补 2 只标的。直接用会得到"最后 3 天全 NaN"、特征失效、模型输出乱码。 本次用 <code style="background:#F3F1EA;padding:1px 5px;border-radius:3px;font-family:Menlo,Consolas,monospace;font-size:13px;color:#1F3BE0;">tools/append_latest_bars.py --symbols-file … --until 2026-10-30</code> 把这 300 只补到 10-30（腾讯不复权价 × 既有 factor，与原始价逐只核对偏差 0.000%），并排除了当天未收盘的 bar。</p>
+</blockquote>
+<h2 style="margin:2.2em 0 .9em;padding-left:11px;border-left:4px solid #1F3BE0;font-size:19px;line-height:1.5;font-weight:700;color:#1A1A1E;">二、信号强度：RankIC 与分档</h2>
+<p style="margin:1.05em 0;font-size:16px;line-height:1.9;color:#2E2E33;letter-spacing:.3px;text-align:justify;"><img alt="分年 RankIC" data-src="__IMG:fig2_ic.png__" src="__IMG:fig2_ic.png__" style="display:block;max-width:100%;margin:12px auto;border-radius:4px;"/></p>
+<p style="margin:1.05em 0;font-size:16px;line-height:1.9;color:#2E2E33;letter-spacing:.3px;text-align:justify;">分年度样本外 RankIC：walk-forward 每折只用折前数据训练。2021（0.0070）与 2026（0.0089）已弱到 t&lt;1.5。</p>
+<p style="margin:1.05em 0;font-size:16px;line-height:1.9;color:#2E2E33;letter-spacing:.3px;text-align:justify;"><img alt="预测分档与前瞻收益" data-src="__IMG:fig3_buckets.png__" src="__IMG:fig3_buckets.png__" style="display:block;max-width:100%;margin:12px auto;border-radius:4px;"/></p>
+<p style="margin:1.05em 0;font-size:16px;line-height:1.9;color:#2E2E33;letter-spacing:.3px;text-align:justify;">预测分位越靠前，未来 5 日平均收益越高——两期都单调，说明<strong style="font-weight:700;color:#1A1A1E;">排序信号本身成立</strong>。</p>
+<h2 style="margin:2.2em 0 .9em;padding-left:11px;border-left:4px solid #1F3BE0;font-size:19px;line-height:1.5;font-weight:700;color:#1A1A1E;">三、回测结果</h2>
+<p style="margin:1.05em 0;font-size:16px;line-height:1.9;color:#2E2E33;letter-spacing:.3px;text-align:justify;"><img alt="净值曲线" data-src="__IMG:fig1_nav.png__" src="__IMG:fig1_nav.png__" style="display:block;max-width:100%;margin:12px auto;border-radius:4px;"/></p>
+<p style="margin:1.05em 0;font-size:16px;line-height:1.9;color:#2E2E33;letter-spacing:.3px;text-align:justify;">左：验证期（选型只用这段）；右：测试期（冻结后一次性评估）。</p>
+<table style="width:100%;border-collapse:collapse;margin:1.1em 0;font-size:12.5px;line-height:1.6;">
+<thead>
+<tr>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">组合</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">年化</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">年化波动</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">夏普</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">IR</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">超额年化</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">最大回撤</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">策略 top10 月调（含成本）</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+20.86%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+29.94%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">0.70</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+122.39%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+24.29%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-28.31%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">策略（零成本对照）</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+23.60%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+29.97%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">0.79</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+136.45%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+27.12%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-27.10%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">池内等权 300 只</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+0.52%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+19.51%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">0.03</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+49.02%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+2.58%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-28.36%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">MA20 趋势过滤</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-5.15%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+20.81%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-0.25</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-36.30%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-3.19%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-38.02%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">沪深300 买入持有</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-2.31%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+20.34%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-0.11</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+0.00%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+0.00%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-39.59%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">测试期 2023-01-01 ~ 2026-10-30（一次性评估）</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;"></td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;"></td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;"></td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;"></td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;"></td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;"></td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">策略 top10 月调（含成本）</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-2.13%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+32.01%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-0.07</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-7.17%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-1.59%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-50.74%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">策略（零成本对照）</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-0.02%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+32.00%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-0.00</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+2.42%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+0.54%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-50.01%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">池内等权 300 只</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+2.74%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+17.28%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">0.16</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+36.99%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+1.96%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-25.13%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">MA20 趋势过滤</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+0.52%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+18.27%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">0.03</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-3.22%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-0.26%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-26.89%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">沪深300 买入持有</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+0.65%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+17.14%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">0.04</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+0.00%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+0.00%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-24.80%</td>
+</tr>
+</tbody>
+</table>
+<blockquote style="margin:1.2em 0;padding:2px 0 2px 14px;border-left:3px solid #1F3BE0;color:#55575E;font-size:15px;line-height:1.85;">
+<p style="margin:.6em 0;font-size:15px;line-height:1.85;color:#55575E;">⛔ <strong style="font-weight:700;color:#1A1A1E;">测试期结论（不好听但是真的）：</strong> 策略年化 -2.13%、最大回撤 -50.74%， 三个基线里<strong style="font-weight:700;color:#1A1A1E;">没有一个被跑赢</strong>——连"300 只等权不动"都拿到 +2.74%。 拆解：①零成本也只有 -0.02%， 说明信号在组合层面就没有把择时优势变成收益；②成本每年再扣约 2.1 个点； ③集中到 10 只后年化波动 +32.01%，波动拖累把算术平均超额吃掉了。</p>
+</blockquote>
+<p style="margin:1.05em 0;font-size:16px;line-height:1.9;color:#2E2E33;letter-spacing:.3px;text-align:justify;"><img alt="配置对比" data-src="__IMG:fig4_configs.png__" src="__IMG:fig4_configs.png__" style="display:block;max-width:100%;margin:12px auto;border-radius:4px;"/></p>
+<p style="margin:1.05em 0;font-size:16px;line-height:1.9;color:#2E2E33;letter-spacing:.3px;text-align:justify;">同一套模型换配置：验证期挑中的（橙）在测试期反而最差——排序完全反转，说明差异都在噪声里。</p>
+<p style="margin:1.05em 0;font-size:16px;line-height:1.9;color:#2E2E33;letter-spacing:.3px;text-align:justify;"><img alt="成本" data-src="__IMG:fig7_cost.png__" src="__IMG:fig7_cost.png__" style="display:block;max-width:100%;margin:12px auto;border-radius:4px;"/></p>
+<p style="margin:1.05em 0;font-size:16px;line-height:1.9;color:#2E2E33;letter-spacing:.3px;text-align:justify;">测试期累计交易成本：周度调仓的换手是月度调仓的 3.5 倍。</p>
+<h2 style="margin:2.2em 0 .9em;padding-left:11px;border-left:4px solid #1F3BE0;font-size:19px;line-height:1.5;font-weight:700;color:#1A1A1E;">四、诚实结论</h2>
+<p style="margin:1.05em 0;font-size:16px;line-height:1.9;color:#2E2E33;letter-spacing:.3px;text-align:justify;"><strong style="font-weight:700;color:#1A1A1E;">1. 排序信号可用，组合信号不可用。</strong>分档结果说明模型确实能把"未来涨得好的"排在前面， 但把这个排序压缩成"10 只、月度调仓、等权"之后，算术超额被波动拖累与成本吃掉。 如果要继续做，方向是<strong style="font-weight:700;color:#1A1A1E;">更宽的持仓池</strong>——这一点在第六节被实测证实；但同一句话里的“更长的持有期（季度调仓）”在第六节被我自己推翻。 <strong style="font-weight:700;color:#1A1A1E;">2. 单一切分不足以定论。</strong>本次额外试了一个"指数跌破 MA60 空仓"的过滤变体： 验证期它更差（IR 0.21 vs 1.22）， 按协议（只在验证期选型）<strong style="font-weight:700;color:#1A1A1E;">不采用</strong>；但它在测试期反而更好（年化 +8.76%）。 这既说明"一刀切"会错过东西，也说明单次切分的结论不该被当成定论——本次两边都如实写出来。 <strong style="font-weight:700;color:#1A1A1E;">3. 不要把模型输出当目标价。</strong>表里的"预测 5 日收益"是回归输出，横截面可比、绝对值不可信， 也不是任何意义上的收益承诺。</p>
+<h2 style="margin:2.2em 0 .9em;padding-left:11px;border-left:4px solid #1F3BE0;font-size:19px;line-height:1.5;font-weight:700;color:#1A1A1E;">五、模型当前的 Top 10（2026-10-30，观察名单）</h2>
+<p style="margin:1.05em 0;font-size:16px;line-height:1.9;color:#2E2E33;letter-spacing:.3px;text-align:justify;"><img alt="Top10" data-src="__IMG:fig5_picks.png__" src="__IMG:fig5_picks.png__" style="display:block;max-width:100%;margin:12px auto;border-radius:4px;"/></p>
+<p style="margin:1.05em 0;font-size:16px;line-height:1.9;color:#2E2E33;letter-spacing:.3px;text-align:justify;">左：模型预测的未来 5 日收益；右：近 20 日实际涨跌。预测值全部为正但幅度普遍很小。</p>
+<table style="width:100%;border-collapse:collapse;margin:1.1em 0;font-size:12.5px;line-height:1.6;">
+<thead>
+<tr>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">排名</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">名称</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">预测5日</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">预测分位</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">近20日</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">距60日高点</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">日波动(20日)</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">模型主要依据（SHAP 贡献）</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">风险标签</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">1</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">天孚通信SZ300394</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+4.74%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">100%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-44.76%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-49.12%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">6.7%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">20日振幅（+0.1，正向贡献）；20日均线斜率（-0.2，正向贡献）；60日Beta（+3.5，正向贡献）</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">20日已跌 45% · 日波动 7% · 创业板±20% · 距60日高点 -49%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">2</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">芯原股份SH688521</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+3.61%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">100%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-52.67%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-57.40%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">4.5%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">20日均线斜率（-0.3，正向贡献）；60日波动率（+0.1，正向贡献）；120日动量（-0.6，正向贡献）</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">20日已跌 53% · 日波动 5% · 科创板±20% · 距60日高点 -57%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">3</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">国电电力SH600795</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+1.80%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">99%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+2.10%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-1.83%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">1.7%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">20日超额收益（-0.026，正向贡献）；距60日高点（-0.018，正向贡献）；量能比(5/20)（+0.3，正向贡献）</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">—</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">4</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">中信银行SH601998</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+1.33%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">99%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+4.99%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+0.00%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">1.4%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">距60日高点（0，正向贡献）；60日均线斜率（+0.2，正向贡献）；20日超额收益（-0.005，正向贡献）</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">—</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">5</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">工业富联SH601138</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+1.22%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">99%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-26.22%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-34.94%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">3.5%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">20日均线斜率（-0.2，正向贡献）；250日价格位置（0，负向贡献）；20日振幅（+0.049，正向贡献）</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">20日已跌 26% · 距60日高点 -35%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">6</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">锐捷网络SZ301165</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+1.18%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">98%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-42.88%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-56.89%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">3.4%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">60日均线斜率（+0.3，正向贡献）；波动率变化(20/60)（-0.3，负向贡献）；60日Beta（+3.0，负向贡献）</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">20日已跌 43% · 创业板±20% · 距60日高点 -57%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">7</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">英维克SZ002837</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+1.06%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">98%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-33.94%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-44.81%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">3.2%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">波动率变化(20/60)（-0.1，负向贡献）；20日振幅（+0.1，正向贡献）；120日动量（-0.5，正向贡献）</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">20日已跌 34% · 距60日高点 -45%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">8</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">川投能源SH600674</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+1.05%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">98%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+9.90%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-0.67%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">1.0%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">20日振幅（+0.021，正向贡献）；RSI(14)（+69.7，正向贡献）；距60日高点（-0.007，正向贡献）</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">—</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">9</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">平安银行SZ000001</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+1.00%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">97%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+3.01%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-1.19%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">1.3%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">距60日高点（-0.012，正向贡献）；20日超额收益（-0.002，正向贡献）；20日振幅（+0.021，正向贡献）</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">—</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">10</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">华工科技SZ000988</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+1.00%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">97%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-39.60%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-45.32%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">3.6%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">60日均线斜率（-0.4，负向贡献）；20日均线斜率（-0.2，正向贡献）；250日价格位置（0，负向贡献）</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">20日已跌 40% · 距60日高点 -45%</td>
+</tr>
+</tbody>
+</table>
+<blockquote style="margin:1.2em 0;padding:2px 0 2px 14px;border-left:3px solid #1F3BE0;color:#55575E;font-size:15px;line-height:1.85;">
+<p style="margin:.6em 0;font-size:15px;line-height:1.85;color:#55575E;">⚠️ <strong style="font-weight:700;color:#1A1A1E;">名单要这么读：</strong> ① 前 2 位（天孚通信、芯原股份）近 20 日分别跌了 45% 和 53%，模型给它们最高分是因为 "超跌 + 高振幅 + 高 Beta"的反转特征——<strong style="font-weight:700;color:#1A1A1E;">这是赌反弹，不是赌基本面</strong>，反弹失败就是继续跌； ② 10 只里有 3 只是创业板/科创板（±20% 涨跌幅、单日波动更大）， ③ 名单里没有基本面信息（数据源没有财务字段），任何"公司变好了"的说法都是我自己加的，不是数据说的。</p>
+</blockquote>
+<p style="margin:1.05em 0;font-size:16px;line-height:1.9;color:#2E2E33;letter-spacing:.3px;text-align:justify;"><img alt="Top10 走势" data-src="__IMG:fig8_price.png__" src="__IMG:fig8_price.png__" style="display:block;max-width:100%;margin:12px auto;border-radius:4px;"/></p>
+<p style="margin:1.05em 0;font-size:16px;line-height:1.9;color:#2E2E33;letter-spacing:.3px;text-align:justify;">Top 10 近 6 个月走势（qlib 前复权价，起点=100）。</p>
+<h2 style="margin:2.2em 0 .9em;padding-left:11px;border-left:4px solid #1F3BE0;font-size:19px;line-height:1.5;font-weight:700;color:#1A1A1E;">六、先认错：我上一版提的"拉长持有期"是错的</h2>
+<p style="margin:1.05em 0;font-size:16px;line-height:1.9;color:#2E2E33;letter-spacing:.3px;text-align:justify;">上一版的结论里我写过一句："如果要继续做，方向是<strong style="font-weight:700;color:#1A1A1E;">更宽的持仓池、更长的持有期</strong>（例如 top 10% ≈ 30 只、季度调仓）"。</p>
+<p style="margin:1.05em 0;font-size:16px;line-height:1.9;color:#2E2E33;letter-spacing:.3px;text-align:justify;">这半句是对的，另外半半是错的。下面是把它拆开实测的结果。</p>
+<p style="margin:1.05em 0;font-size:16px;line-height:1.9;color:#2E2E33;letter-spacing:.3px;text-align:justify;"><img alt="持仓只数 × 调仓频率" data-src="__IMG:fig9_wide_grid.png__" src="__IMG:fig9_wide_grid.png__" style="display:block;max-width:100%;margin:12px auto;border-radius:4px;"/></p>
+<p style="margin:1.05em 0;font-size:16px;line-height:1.9;color:#2E2E33;letter-spacing:.3px;text-align:justify;">左图验证期、右图测试期。三条线分别是月度、季度、半年调仓。</p>
+<table style="width:100%;border-collapse:collapse;margin:1.1em 0;font-size:12.5px;line-height:1.6;">
+<thead>
+<tr>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">持仓</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">调仓</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">验证期年化</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">验证IR</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">测试期年化</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">测试IR</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">测试期MDD</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">top10</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">月度（原方案）</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+20.86%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">1.22</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-2.13%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-0.07</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-50.74%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">top10</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">季度</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+0.26%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">0.17</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-4.10%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-0.18</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-52.40%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">top10</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">半年</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-2.93%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-0.01</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+3.10%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">0.19</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-55.66%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">top20</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">月度</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+11.66%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">1.07</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+2.96%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">0.20</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-41.98%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">top20</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">季度</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-2.12%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">0.05</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-1.55%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-0.09</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-47.48%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">top20</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">半年</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-4.65%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-0.18</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+0.78%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">0.07</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-52.46%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">top30</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">月度</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+8.54%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">1.02</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+3.47%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">0.28</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-38.79%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">top30</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">季度</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-2.03%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">0.05</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+2.56%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">0.22</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-40.89%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">top30</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">半年</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-5.61%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-0.34</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-0.44%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-0.03</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-45.94%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">top50</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">月度</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+2.89%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">0.65</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+3.34%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">0.34</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-37.05%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">top50</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">季度</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+0.57%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">0.36</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+4.63%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">0.52</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-41.36%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">top50</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">半年</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-4.05%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-0.23</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-2.09%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-0.24</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-44.57%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">top100</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">月度</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+3.13%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">0.97</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+2.23%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">0.27</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-32.19%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">top100</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">季度</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+2.40%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">0.84</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+4.92%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">0.75</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-33.65%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">top100</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">半年</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-1.64%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">0.07</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-0.83%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-0.18</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-35.57%</td>
+</tr>
+</tbody>
+</table>
+<p style="margin:1.05em 0;font-size:16px;line-height:1.9;color:#2E2E33;letter-spacing:.3px;text-align:justify;"><strong style="font-weight:700;color:#1A1A1E;">放宽有效</strong>：同样是月度调仓，把持仓从 10 只放到 20 只，测试期年化从 -2.13% 变成 +2.96%，MDD 从 -50.74% 收窄到 -41.98%；放到 30 只是 +3.47%。原因很直白——10 只票的年化波动冲到 32%，波动拖累把算术超额吃干净了。</p>
+<p style="margin:1.05em 0;font-size:16px;line-height:1.9;color:#2E2E33;letter-spacing:.3px;text-align:justify;"><strong style="font-weight:700;color:#1A1A1E;">拉长无效，而且相当糟糕</strong>：所有 K 在改成 60 日、120 日调仓后，验证期年化普遍掉到 0 以下（top20 从 +11.66% 掉到 -2.12%）。这不是成本问题（成本确实降到 3 万），是<strong style="font-weight:700;color:#1A1A1E;">信号寿命问题</strong>——模型预测的是未来 5 日收益，拿 60 天去持有，等于用 55 天去赌一个已经失效的判断。</p>
+<p style="margin:1.05em 0;font-size:16px;line-height:1.9;color:#2E2E33;letter-spacing:.3px;text-align:justify;">所以我上一版的建议要改成：<strong style="font-weight:700;color:#1A1A1E;">更宽的池子，更短的持有期</strong>。</p>
+<h2 style="margin:2.2em 0 .9em;padding-left:11px;border-left:4px solid #1F3BE0;font-size:19px;line-height:1.5;font-weight:700;color:#1A1A1E;">七、真正管用的修正：top20 + 缓冲带</h2>
+<p style="margin:1.05em 0;font-size:16px;line-height:1.9;color:#2E2E33;letter-spacing:.3px;text-align:justify;">既然换手是成本的主要来源，就该在换手上下手。规则很简单：<strong style="font-weight:700;color:#1A1A1E;">老仓位只要还在 top40 就不动</strong>，只有跌出前 40 名才换掉，空出的名额用新名字补。</p>
+<p style="margin:1.05em 0;font-size:16px;line-height:1.9;color:#2E2E33;letter-spacing:.3px;text-align:justify;"><img alt="缓冲带规则" data-src="__IMG:fig10_buffer.png__" src="__IMG:fig10_buffer.png__" style="display:block;max-width:100%;margin:12px auto;border-radius:4px;"/></p>
+<table style="width:100%;border-collapse:collapse;margin:1.1em 0;font-size:12.5px;line-height:1.6;">
+<thead>
+<tr>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">持仓</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">缓冲带</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">验证期年化</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">验证IR</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">测试期年化</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">测试IR</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">测试期MDD</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">每月替换</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">测试期成本</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">top20</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">无</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+11.66%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">1.07</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+2.96%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">0.20</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-41.98%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">78%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">8.1万</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">top20</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">×2（跌出 top40 才换）</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+13.12%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">1.19</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+6.11%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">0.40</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-45.10%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">70%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">7.7万</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">top20</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">×3（跌出 top60 才换）</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+11.01%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">1.04</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+5.33%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">0.35</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-45.52%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">63%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">7.2万</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">top30</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">无</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+8.54%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">1.02</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+3.47%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">0.28</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-38.79%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">76%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">8.6万</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">top30</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">×2（跌出 top60 才换）</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+7.63%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">0.92</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+3.42%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">0.28</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-42.51%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">64%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">7.2万</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">top30</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">×3（跌出 top90 才换）</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+5.44%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">0.74</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+6.15%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">0.50</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-40.35%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">56%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">6.7万</td>
+</tr>
+</tbody>
+</table>
+<p style="margin:1.05em 0;font-size:16px;line-height:1.9;color:#2E2E33;letter-spacing:.3px;text-align:justify;">选定 <strong style="font-weight:700;color:#1A1A1E;">top20 + 2 倍缓冲带</strong>：验证期 +13.12%（IR 1.19，原方案 +20.86% / 1.22，几乎打平），测试期 +6.11%（IR 0.40）、MDD -45.10%，跑赢沪深300（+0.65%）和"300 只等权不动"（+2.74%）两条基线。</p>
+<p style="margin:1.05em 0;font-size:16px;line-height:1.9;color:#2E2E33;letter-spacing:.3px;text-align:justify;">代价也写在表里：测试期总成本 7.7 万元，约 2.03%/年；每月约 14 只被替换，也就是约 28 笔委托。缓冲带只把换手从 78% 压到 70%——<strong style="font-weight:700;color:#1A1A1E;">这个模型的排名本身就不稳</strong>，再懒的规则也压不住。</p>
+<blockquote style="margin:1.2em 0;padding:2px 0 2px 14px;border-left:3px solid #1F3BE0;color:#55575E;font-size:15px;line-height:1.85;">
+<p style="margin:.6em 0;font-size:15px;line-height:1.85;color:#55575E;"><strong style="font-weight:700;color:#1A1A1E;">纪律提示</strong>：测试期被近 30 个配置看过，属于多重比较。可信的是<strong style="font-weight:700;color:#1A1A1E;">方向</strong>（放宽 + 缓冲带能降低单票依赖），不可信的是"top20/×2 恰好最优"。反面例子就在同一张表里：top30 + 5 倍缓冲的验证期 IR 1.44 是全网格最高，测试期却只有 +1.73%。选型越精细，样本外越难看——这是这个模型的老毛病。</p>
+</blockquote>
+<h2 style="margin:2.2em 0 .9em;padding-left:11px;border-left:4px solid #1F3BE0;font-size:19px;line-height:1.5;font-weight:700;color:#1A1A1E;">八、调整后的 20 只</h2>
+<p style="margin:1.05em 0;font-size:16px;line-height:1.9;color:#2E2E33;letter-spacing:.3px;text-align:justify;"><img alt="20 只持仓" data-src="__IMG:fig11_basket.png__" src="__IMG:fig11_basket.png__" style="display:block;max-width:100%;margin:12px auto;border-radius:4px;"/></p>
+<table style="width:100%;border-collapse:collapse;margin:1.1em 0;font-size:12.5px;line-height:1.6;">
+<thead>
+<tr>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">#</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">代码</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">名称</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">板块</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">现价（元）</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">一手金额</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">权重</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">1</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">SZ300394</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">天孚通信</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">创业板</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">148.00</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">14,800</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">5.00%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">2</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">SH688521</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">芯原股份</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">科创板</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">98.19</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">9,819</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">5.00%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">3</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">SH600795</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">国电电力</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">主板</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">5.35</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">535</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">5.00%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">4</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">SH601998</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">中信银行</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">主板</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">9.46</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">946</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">5.00%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">5</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">SH601138</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">工业富联</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">主板</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">45.00</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">4,500</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">5.00%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">6</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">SZ301165</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">锐捷网络</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">创业板</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">63.80</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">6,380</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">5.00%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">7</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">SZ002837</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">英维克</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">主板</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">37.80</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">3,780</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">5.00%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">8</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">SH600674</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">川投能源</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">主板</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">17.88</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">1,788</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">5.00%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">9</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">SZ000001</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">平安银行</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">主板</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">11.64</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">1,164</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">5.00%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">10</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">SZ000988</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">华工科技</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">主板</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">62.15</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">6,215</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">5.00%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">11</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">SH603501</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">豪威集团</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">主板</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">82.45</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">8,245</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">5.00%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">12</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">SH600522</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">中天科技</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">主板</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">23.17</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">2,317</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">5.00%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">13</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">SH601229</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">上海银行</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">主板</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">9.31</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">931</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">5.00%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">14</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">SZ002142</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">宁波银行</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">主板</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">35.17</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">3,517</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">5.00%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">15</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">SZ300433</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">蓝思科技</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">创业板</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">25.58</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">2,558</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">5.00%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">16</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">SZ002049</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">紫光国微</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">主板</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">47.39</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">4,739</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">5.00%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">17</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">SZ002384</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">东山精密</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">主板</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">86.06</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">8,606</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">5.00%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">18</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">SZ300408</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">三环集团</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">创业板</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">79.23</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">7,923</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">5.00%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">19</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">SH601728</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">中国电信</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">主板</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">7.01</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">701</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">5.00%</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">20</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">SH601169</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">北京银行</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">主板</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">5.66</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">566</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">5.00%</td>
+</tr>
+</tbody>
+</table>
+<p style="margin:1.05em 0;font-size:16px;line-height:1.9;color:#2E2E33;letter-spacing:.3px;text-align:justify;">等权 5%，每 20 个交易日调仓一次，老仓位跌出 top40 才换。</p>
+<p style="margin:1.05em 0;font-size:16px;line-height:1.9;color:#2E2E33;letter-spacing:.3px;text-align:justify;"><strong style="font-weight:700;color:#1A1A1E;">最小可执行资金</strong>：20 只各买一手合计 <strong style="font-weight:700;color:#1A1A1E;">90,030 元</strong>。</p>
+<p style="margin:1.05em 0;font-size:16px;line-height:1.9;color:#2E2E33;letter-spacing:.3px;text-align:justify;">这里有个坑值得记一笔：qlib 的 <code style="background:#F3F1EA;padding:1px 5px;border-radius:3px;font-family:Menlo,Consolas,monospace;font-size:13px;color:#1F3BE0;">$close</code> 是"原始价 × 复权因子"之后的连续序列，<strong style="font-weight:700;color:#1A1A1E;">不能直接当成交价用</strong>（芯原股份在那里显示 0.66 元，实际 98 元）。表里的现价是按 <code style="background:#F3F1EA;padding:1px 5px;border-radius:3px;font-family:Menlo,Consolas,monospace;font-size:13px;color:#1F3BE0;">$close / $factor</code> 还原的真实市场价。</p>
+<p style="margin:1.05em 0;font-size:16px;line-height:1.9;color:#2E2E33;letter-spacing:.3px;text-align:justify;">还要看清楚这 20 只是什么东西：其中 <strong style="font-weight:700;color:#1A1A1E;">11 只近 20 日跌幅超过 20%</strong>，模型给它们高分的理由是"超跌 + 高振幅 + 高 Beta"的反转特征——<strong style="font-weight:700;color:#1A1A1E;">这是赌反弹，不是赌基本面</strong>。反弹失败就继续跌。</p>
+<h2 style="margin:2.2em 0 .9em;padding-left:11px;border-left:4px solid #1F3BE0;font-size:19px;line-height:1.5;font-weight:700;color:#1A1A1E;">九、有没有现成 ETF 可以直接买？没有</h2>
+<p style="margin:1.05em 0;font-size:16px;line-height:1.9;color:#2E2E33;letter-spacing:.3px;text-align:justify;">这套组合是模型每天重排出来的 top20。ETF 只能复制指数，复制不了"某个模型的当期名单"。所以只有三条路：</p>
+<table style="width:100%;border-collapse:collapse;margin:1.1em 0;font-size:12.5px;line-height:1.6;">
+<thead>
+<tr>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">方案</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">你能拿到什么</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">年成本</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">操作量</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">沪深300ETF（510300 / 510310 / 510330）</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">指数收益：测试期 +0.65%/年</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">0.20%（管理费 0.15% + 托管费 0.05%）</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">1 笔</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">沪深300指数增强 ETF（561990、159238 等）</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">别人家的增强模型，和这个模型无关；159238 规模只有 5406 万</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">以公告为准</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">1 笔</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">自建 20 只 + 缓冲带</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">回测那套：测试期 +6.11%/年</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">约 2.03%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">每月约 28 笔</td>
+</tr>
+</tbody>
+</table>
+<p style="margin:1.05em 0;font-size:16px;line-height:1.9;color:#2E2E33;letter-spacing:.3px;text-align:justify;">关键在这笔账：自建的年化成本约 2.0 个点，几乎等于模型相对"300 只等权"的全部超额（+6.11% vs +2.74%，约 +3.4 个点）。</p>
+<p style="margin:1.05em 0;font-size:16px;line-height:1.9;color:#2E2E33;letter-spacing:.3px;text-align:justify;">也就是说，<strong style="font-weight:700;color:#1A1A1E;">这套策略的钱不是"省 ETF 管理费省出来的"，是"扣完交易成本还剩多少"决定的</strong>。如果你不能接受每月 28 笔委托，实质上就只剩买沪深300ETF 这一条路——那就等于承认放弃选股。</p>
+<h2 style="margin:2.2em 0 .9em;padding-left:11px;border-left:4px solid #1F3BE0;font-size:19px;line-height:1.5;font-weight:700;color:#1A1A1E;">十、怎么用这份名单（这一节是改过的）</h2>
+<p style="margin:1.05em 0;font-size:16px;line-height:1.9;color:#2E2E33;letter-spacing:.3px;text-align:justify;"><strong style="font-weight:700;color:#1A1A1E;">把它当研究起点，不是买入清单。</strong>先看这 20 只各自的公告、财报、订单和估值，本文的任何数据里都没有财务字段。</p>
+<p style="margin:1.05em 0;font-size:16px;line-height:1.9;color:#2E2E33;letter-spacing:.3px;text-align:justify;"><strong style="font-weight:700;color:#1A1A1E;">要上组合，先做减法。</strong>上一版写的是"扩到 20-30 只、把调仓拉长到一个季度"——前半句保留（实测有效），后半句删掉（实测无效，见第六节）。正确做法是：20 只 + 月度调仓 + 2 倍缓冲带，每月只换掉跌出 top40 的那几只。</p>
+<p style="margin:1.05em 0;font-size:16px;line-height:1.9;color:#2E2E33;letter-spacing:.3px;text-align:justify;"><strong style="font-weight:700;color:#1A1A1E;">把成本算进去。</strong>周度调仓的换手是月度的 3.5 倍；自建 20 只的方案测试期成本 2.0%/年，是策略超额的主要消耗项。</p>
+<p style="margin:1.05em 0;font-size:16px;line-height:1.9;color:#2E2E33;letter-spacing:.3px;text-align:justify;"><strong style="font-weight:700;color:#1A1A1E;">数据要跟到最新。</strong>本次就因为成分股行情停在 10-27 而返工了一轮（见第一节数据陷阱）。</p>
+<p style="margin:1.05em 0;font-size:16px;line-height:1.9;color:#2E2E33;letter-spacing:.3px;text-align:justify;">复盘这一轮，最值钱的不是哪个数字，是那句被自己推翻的话。</p>
+<h2 style="margin:2.2em 0 .9em;padding-left:11px;border-left:4px solid #1F3BE0;font-size:19px;line-height:1.5;font-weight:700;color:#1A1A1E;">附录</h2>
+<h3 style="margin:1.6em 0 .6em;font-size:16px;line-height:1.6;font-weight:700;color:#1F3BE0;">A. 6 组配置的验证期 / 测试期对照（选型只依据左半边）</h3>
+<table style="width:100%;border-collapse:collapse;margin:1.1em 0;font-size:12.5px;line-height:1.6;">
+<thead>
+<tr>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">配置</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">验证期 IR</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">验证期年化</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">测试期 IR</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">测试期年化</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">测试期 MDD</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">测试期成本</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">K=5 · 周度</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">0.75</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+17.24%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">0.20</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+4.94%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-46.58%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">31.7 万</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">K=5 · 月度</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">0.61</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+13.47%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">0.16</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+3.92%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-63.30%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">7.4 万</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">K=10 · 周度</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">0.33</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+3.31%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">0.18</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+3.15%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-46.76%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">33.8 万</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">K=10 · 月度</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">1.22</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+20.86%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-0.07</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-2.13%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-50.74%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">7.8 万</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">K=20 · 周度</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">0.39</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+2.58%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-0.13</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-2.36%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-39.32%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">29.6 万</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">K=20 · 月度</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">1.07</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+11.66%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">0.20</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">+2.96%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">-41.98%</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">8.1 万</td>
+</tr>
+</tbody>
+</table>
+<h3 style="margin:1.6em 0 .6em;font-size:16px;line-height:1.6;font-weight:700;color:#1F3BE0;">B. 最终模型特征重要性（分裂次数，top12 / 共 30）</h3>
+<table style="width:100%;border-collapse:collapse;margin:1.1em 0;font-size:12.5px;line-height:1.6;">
+<thead>
+<tr>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">特征</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">字段</th>
+<th style="background:#F3F1EA;border-bottom:2px solid #1F3BE0;padding:8px 7px;text-align:left;color:#1A1A1E;font-weight:700;">分裂次数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">60日Beta</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">beta_60</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">3240</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">流动性变化</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">liq_change</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">3128</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">60日均线斜率</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">ma_slope_60</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">2968</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">60日波动率</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">vol_60</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">2783</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">20日振幅</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">hl_range_20</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">2683</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">250日价格位置</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">price_pos_250</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">2559</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">20日均线斜率</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">ma_slope_20</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">2463</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">120日动量</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">mom_120</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">2449</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">波动率变化(20/60)</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">vol_ratio</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">2415</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">20日波动率</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">vol_20</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">2132</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">距60日高点</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">dd_60</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">2016</td>
+</tr>
+<tr>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">60日动量</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">mom_60</td>
+<td style="border-bottom:1px solid #E7E2D6;padding:7px;text-align:left;color:#2E2E33;">1937</td>
+</tr>
+</tbody>
+</table>
+<h3 style="margin:1.6em 0 .6em;font-size:16px;line-height:1.6;font-weight:700;color:#1F3BE0;">C. 复现命令</h3>
+<pre style="background:#F5F3EE;border-radius:6px;padding:12px 14px;overflow-x:auto;font-size:12px;line-height:1.6;color:#3A3A40;"><code class="language-bash" style="font-family:Menlo,Consolas,monospace;font-size:12px;">cd /d D:\Project\qlib\projects\csi300_lgbm\tools
+
+..\..\..\.venv\Scripts\python.exe build_dataset.py    # 取数 → 30 特征 + 标签
+..\..\..\.venv\Scripts\python.exe train_select.py      # 超参搜索 + walk-forward + 选型
+..\..\..\.venv\Scripts\python.exe backtest.py          # 组合回测 vs 4 基线 + 零成本对照
+..\..\..\.venv\Scripts\python.exe variants.py         # 全配置附录 + MA60 过滤变体
+..\..\..\.venv\Scripts\python.exe diag_signal.py       # 信号分档诊断
+..\..\..\.venv\Scripts\python.exe rank_latest.py 20    # 最终模型 → Top20 + 理由
+..\..\..\.venv\Scripts\python.exe make_figures.py      # 8 张配图
+..\..\..\.venv\Scripts\python.exe build_report.py      # 完整回测报告
+..\..\..\.venv\Scripts\python.exe check_report.py      # 自检（数字与切分一致性）
+
+# 组合调整（第六~九节）
+..\..\..\.venv\Scripts\python.exe wide_portfolio.py    # K × 调仓频率 网格
+..\..\..\.venv\Scripts\python.exe wide_buffer.py       # 缓冲带规则对比
+..\..\..\.venv\Scripts\python.exe real_price.py         # 真实成交价还原（$close/$factor）
+..\..\..\.venv\Scripts\python.exe build_post.py        # 合成这篇文章
+</code></pre>
+<p style="margin:1.05em 0;font-size:16px;line-height:1.9;color:#2E2E33;letter-spacing:.3px;text-align:justify;">生成时间：2026-10-30 数据截面 · 本文由 <code style="background:#F3F1EA;padding:1px 5px;border-radius:3px;font-family:Menlo,Consolas,monospace;font-size:13px;color:#1F3BE0;">build_report.py</code> + <code style="background:#F3F1EA;padding:1px 5px;border-radius:3px;font-family:Menlo,Consolas,monospace;font-size:13px;color:#1F3BE0;">build_post.py</code> 自动生成，所有数字取自 <code style="background:#F3F1EA;padding:1px 5px;border-radius:3px;font-family:Menlo,Consolas,monospace;font-size:13px;color:#1F3BE0;">projects/csi300_lgbm/results/*.json</code> · 风险提示：本文是回测复盘，不构成投资建议；模型输出与历史回测均不预示未来收益。</p></section>

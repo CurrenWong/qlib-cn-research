@@ -1,0 +1,355 @@
+<!DOCTYPE html><html lang='zh-CN'><head><meta charset='utf-8'><title>wechat body preview</title></head><body style='max-width:677px;margin:0 auto;padding:24px 18px;background:#fff;'><section style="font-size:16px;line-height:1.85;color:#2c2c2c;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;"><h1 style="margin:0 0 18px;font-size:22px;line-height:1.45;font-weight:700;color:#111;letter-spacing:.3px;">19 年数据、三套切分：我用 qlib 选了个择时策略，然后看着它死了三次</h1>
+<blockquote style="margin:20px 0;padding:12px 16px;background:#F7F7F7;border-left:3px solid #ddd;color:#555;font-size:15px;line-height:1.8;">
+<p style="margin:4px 0;font-size:15px;line-height:1.8;color:#555;">摘要：一个单票择时策略，在三种样本切分下全部失效。最后发现凶手不是模型，是手续费。</p>
+</blockquote>
+<p style="margin:32px 0;text-align:center;color:#D8D8D8;letter-spacing:8px;font-size:14px;">• • •</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">先说结论，省得你往下翻：</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">我用微软开源的量化框架 <strong style="font-weight:700;color:#000;">qlib</strong>，在江淮汽车（600418）上搭了一个 21 因子 + Ridge 回归的日频择时策略。训练集里 IC 有 +0.12（t 值 6 以上），看起来很能打。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">然后我把它放到样本外。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">第一次，2019-2020，策略 -18.96%，同期沪深300 +53.66%。</strong>
+<strong style="font-weight:700;color:#000;">第二次，把数据从 1.7 年延长到 7.8 年，策略 -36.33%，同期指数 +38.19%。</strong>
+<strong style="font-weight:700;color:#000;">第三次，重新切分样本、重新选型，跑了三套切分，三套全灭。</strong></p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">最扎心的一个数字：江淮这 6.5 年涨了 <strong style="font-weight:700;color:#000;">3 倍</strong>，策略亏了 <strong style="font-weight:700;color:#000;">2.7%</strong>。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">但真正让我停下来写这篇文章的，不是"失败"这件事——单票择时失败太正常了——而是<strong style="font-weight:700;color:#000;">尸检报告指出的死因</strong>：</p>
+<blockquote style="margin:20px 0;padding:12px 16px;background:#F7F7F7;border-left:3px solid #ddd;color:#555;font-size:15px;line-height:1.8;">
+<p style="margin:4px 0;font-size:15px;line-height:1.8;color:#555;">这个策略的方向其实不算错。把交易成本设为 0，它在 6.5 年里能跑赢沪深300 每年 4.4 个百分点。
+是每年 49 倍的换手率，把这 4.4 个点全部吃掉了。</p>
+</blockquote>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">下面是完整的过程。</p>
+<p style="margin:32px 0;text-align:center;color:#D8D8D8;letter-spacing:8px;font-size:14px;">• • •</p>
+<section style="border-left:4px solid #E67E22;padding-left:11px;margin:40px 0 18px;"><span style="font-size:19px;font-weight:700;color:#1a1a1a;line-height:1.45;">一、先介绍 qlib：一个把"数据—因子—模型—回测"串成一条线的框架</span></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">如果你没听过 qlib，一句话概括：<strong style="font-weight:700;color:#000;">它把量化研究里最烦的那部分（数据对齐、复权、停牌、涨跌停、撮合、成本）都写好了，你只需要往里塞因子和模型。</strong></p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">它的设计是<strong style="font-weight:700;color:#000;">五层</strong>，从上到下：</p>
+<p style="margin:22px 0 6px;text-align:center;"><img src="file:///D:/Project/qlib/docs/wechat/img/fig1_qlib_arch.png" style="max-width:100%;display:block;margin:0 auto;border-radius:2px;"/></p><p style="margin:6px 0 24px;text-align:center;font-size:13px;color:#999;line-height:1.6;">图 1｜qlib 的五层结构，以及本地数据目录的样子</p>
+<ul style="margin:15px 0;padding-left:24px;font-size:16px;line-height:1.85;color:#2c2c2c;">
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">数据层</strong>：不是 CSV，是二进制 <code style="font-family:Consolas,Monaco,'Courier New',monospace;background:#F5F5F5;padding:1px 4px;border-radius:2px;font-size:14px;color:#333;">.bin</code> + 交易日历 + 标的表。取数用 <code style="font-family:Consolas,Monaco,'Courier New',monospace;background:#F5F5F5;padding:1px 4px;border-radius:2px;font-size:14px;color:#333;">D.features()</code>，一条表达式拿全字段。</li>
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">特征层</strong>：有个表达式引擎，<code style="font-family:Consolas,Monaco,'Courier New',monospace;background:#F5F5F5;padding:1px 4px;border-radius:2px;font-size:14px;color:#333;">$close/Ref($close,5)-1</code> 这样的字符串直接算，不用自己写循环。</li>
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">模型层</strong>：Ridge、LightGBM、LSTM 都在里面，统一的 <code style="font-family:Consolas,Monaco,'Courier New',monospace;background:#F5F5F5;padding:1px 4px;border-radius:2px;font-size:14px;color:#333;">fit</code>/<code style="font-family:Consolas,Monaco,'Courier New',monospace;background:#F5F5F5;padding:1px 4px;border-radius:2px;font-size:14px;color:#333;">predict</code> 接口。</li>
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">策略层</strong>：把"预测分数"翻译成"目标权重"。</li>
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">回测执行层</strong>：撮合、手续费、印花税、涨跌停、停牌，全按 A 股规则来。</li>
+</ul>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">为什么值得用</strong>：你自己写回测，最容易错的地方不是策略逻辑，而是"这天停牌了怎么办""复权因子换过怎么办""跌停卖不出去怎么办"。qlib 把这些坑都填了，而且填得比较认真——我在项目里专门做过执行校验，策略层给出的目标仓位和实际成交仓位一致率 98.6%~99%，差异全部可归因于停牌、涨跌停和数据缺口。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">顺手记一个 qlib 最容易踩的坑</strong>：所有价格字段存的都是<strong style="font-weight:700;color:#000;">「原始价 × 复权因子」</strong>，而因子单独存在一个 <code style="font-family:Consolas,Monaco,'Courier New',monospace;background:#F5F5F5;padding:1px 4px;border-radius:2px;font-size:14px;color:#333;">factor.day.bin</code> 里。如果你自己读 <code style="font-family:Consolas,Monaco,'Courier New',monospace;background:#F5F5F5;padding:1px 4px;border-radius:2px;font-size:14px;color:#333;">.bin</code> 却不读 factor，得到的是一堆对不上的价格。我第一次做数据核对时就在这里卡了半天——两个数据源的价格比值恒等于 1.39，查了很久才发现只是复权基准差了常数。</p>
+<p style="margin:32px 0;text-align:center;color:#D8D8D8;letter-spacing:8px;font-size:14px;">• • •</p>
+<section style="border-left:4px solid #E67E22;padding-left:11px;margin:40px 0 18px;"><span style="font-size:19px;font-weight:700;color:#1a1a1a;line-height:1.45;">二、策略长什么样：21 个因子，一个线性模型，一条均线</span></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">策略简单到有点朴素：</p>
+<section style="margin:20px 0;overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:14px;table-layout:auto;margin:0;">
+<thead>
+<tr>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:left;line-height:1.6;color:#222;">项</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">设定</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">标的</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">江淮汽车 600418，单票</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">因子</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">21 个，全部用 qlib 表达式算（纯价格 17 个 + 纯成交量 3 个 + 价量交互 1 个）</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">模型</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">Ridge 回归（L2 正则），预测次日收盘到后日收盘的收益</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">入场条件</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">模型分数 &gt; 阈值 <strong style="font-weight:700;color:#000;">且</strong> 收盘价 &gt; 20 日均线</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">仓位</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">满足条件满仓，否则空仓（不做空、不加杠杆、不设止损）</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">成交</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">T 日收盘出信号，T+1 日收盘成交</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">成本</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">买入 0.05%，卖出 0.15%（含印花税）</td>
+</tr>
+</tbody>
+</table></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">因子分三类</strong>：</p>
+<ul style="margin:15px 0;padding-left:24px;font-size:16px;line-height:1.85;color:#2c2c2c;">
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">纯价格 17 个</strong>：动量（5/10/20/60 日）、短期反转、均线偏离（4 个）、均线交叠、波动率（2 个）、振幅、价格位置、日内涨跌、跳空、距 250 日高点的距离。</li>
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">纯成交量 3 个</strong>：5 日量比偏离、20 日量比偏离、5 日量与 20 日量之比。</li>
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">价量交互 1 个</strong>：20 日收盘价与成交量的相关系数。</li>
+</ul>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">顺便回答一个常见疑问：<strong style="font-weight:700;color:#000;">这个策略是只用价格吗？不是。</strong>实测拟合出来的标准化系数里，成交量相关因子占了总权重绝对值的 <strong style="font-weight:700;color:#000;">20.4%</strong>（其中 20 日量比偏离排第 4、5 日量比偏离排第 8）。但它们只参与了"打分"，没有进入"规则层"——规则层只有 MA20 一条硬条件。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">阈值怎么定</strong>：不是拍脑袋给个 0.02，而是取<strong style="font-weight:700;color:#000;">训练集分数的 q 分位点</strong>。这么做的原因很实际：绝对阈值会随着模型输出的尺度漂移，换个训练窗口就失效了；分位点是相对量，跨时间可比。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">模型怎么选</strong>：候选池里有 Ridge（三个正则强度）和 LightGBM，用 <strong style="font-weight:700;color:#000;">walk-forward</strong> 选——把历史切成若干个"每年一折"，每折只用折前数据训练、折内数据验证，算出相对沪深300 的信息比率，跨折取平均，选均值最高的那个组合。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">这套协议本身是干净的：<strong style="font-weight:700;color:#000;">测试期完全不参与选型</strong>。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">然后，就是三次死亡。</p>
+<p style="margin:32px 0;text-align:center;color:#D8D8D8;letter-spacing:8px;font-size:14px;">• • •</p>
+<section style="border-left:4px solid #E67E22;padding-left:11px;margin:40px 0 18px;"><span style="font-size:19px;font-weight:700;color:#1a1a1a;line-height:1.45;">三、第一次死亡（2019–2020）：它在一个大牛市里踏空了</span></section>
+<section style="margin:20px 0;overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:14px;table-layout:auto;margin:0;">
+<thead>
+<tr>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:left;line-height:1.6;color:#222;"></th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">验证集 2017–2018</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">测试集 2019–2020</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">沪深300</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-9.92%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">+53.66%</strong></td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">买入持有江淮</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">-57.75%</strong></td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+53.00%</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">策略</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">+13.76%</strong></td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">-18.96%</strong></td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">策略 vs 指数</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+23.7pct</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">-72.6pct</strong></td>
+</tr>
+</tbody>
+</table></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">验证集里它表现很好：江淮那两年跌了 58%，策略靠"空仓"躲过去了，还赚了 13.76%。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">测试集里它彻底反过来：2019 年一季度沪深300 涨 30%、2020 年二季度江淮涨 77%，<strong style="font-weight:700;color:#000;">策略平均仓位只有 34%，两次大反弹都在场外</strong>。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">当时的归因是"踏空"。听起来像是运气不好——如果它当时在场，是不是就成了？</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">于是有了第二次实验。</p>
+<p style="margin:32px 0;text-align:center;color:#D8D8D8;letter-spacing:8px;font-size:14px;">• • •</p>
+<section style="border-left:4px solid #E67E22;padding-left:11px;margin:40px 0 18px;"><span style="font-size:19px;font-weight:700;color:#1a1a1a;line-height:1.45;">四、第二次死亡（延长到 7.8 年）：不是运气，是结构</span></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">原来的数据源冻结在 2020-09，测试期只有 1.7 年。我换了一个日更的数据源（<code style="font-family:Consolas,Monaco,'Courier New',monospace;background:#F5F5F5;padding:1px 4px;border-radius:2px;font-size:14px;color:#333;">chenditc/investment_data</code>，2026-10-27 版，543 MB），日历延长到 2026 年，<strong style="font-weight:700;color:#000;">参数一个都不动</strong>，直接重跑。</p>
+<p style="margin:22px 0 6px;text-align:center;"><img src="file:///D:/Project/qlib/docs/wechat/img/fig0_stock_path.png" style="max-width:100%;display:block;margin:0 auto;border-radius:2px;"/></p><p style="margin:6px 0 24px;text-align:center;font-size:13px;color:#999;line-height:1.6;">图 2｜江淮汽车 2002–2026 年走势（对数轴），三套切分的测试期落在右侧这段</p>
+<section style="margin:20px 0;overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:14px;table-layout:auto;margin:0;">
+<thead>
+<tr>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:left;line-height:1.6;color:#222;">2019-01 ~ 2026-10（7.8 年）</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">区间收益</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">年化</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">策略</strong></td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">-36.33%</strong></td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-5.84%</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">沪深300</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+38.19%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+4.40%</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">买入持有江淮</strong></td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">+326.99%</strong></td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">+21.33%</strong></td>
+</tr>
+</tbody>
+</table></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">股票涨了 3.27 倍，指数涨了 38%，策略亏了 36%。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">而且模型预测力彻底消失了</strong>：原测试期（2019-2020）IC 还有 +0.1316（t=2.65），扩到 2019-2026 后掉到 <strong style="font-weight:700;color:#000;">+0.0130（t=0.57）</strong>。前 1.7 年那点"预测力"，是噪声。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">还有一个更让我警惕的发现：<strong style="font-weight:700;color:#000;">同样的 walk-forward 协议，只因为训练样本从 1758 条变成 1798 条（早期停牌处理略有差异），选出来的模型就从 <code style="font-family:Consolas,Monaco,'Courier New',monospace;background:#F5F5F5;padding:1px 4px;border-radius:2px;font-size:14px;color:#333;">Ridge_a100 + q=0.4</code> 翻成了 <code style="font-family:Consolas,Monaco,'Courier New',monospace;background:#F5F5F5;padding:1px 4px;border-radius:2px;font-size:14px;color:#333;">Ridge_a1 + q=0.6</code>，正折数从 5/6 掉到 3/6。</strong></p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">40 条样本的差异，能让选型翻个面。这说明<strong style="font-weight:700;color:#000;">在单票、弱信号的问题上，"多折验证"压不住估计噪声</strong>。</p>
+<p style="margin:32px 0;text-align:center;color:#D8D8D8;letter-spacing:8px;font-size:14px;">• • •</p>
+<section style="border-left:4px solid #E67E22;padding-left:11px;margin:40px 0 18px;"><span style="font-size:19px;font-weight:700;color:#1a1a1a;line-height:1.45;">五、第三次死亡（重新切分）：三套切分，三次全灭</span></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">到这里还有最后一个辩解：<strong style="font-weight:700;color:#000;">会不会是切分方式不对？</strong>原测试期只有 1.7 年，训练集也不含 2008 年金融危机和 2015 年股灾。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">现在有 19.8 年数据了，那就重新切。我做了三套，<strong style="font-weight:700;color:#000;">每套都重新跑完整的 walk-forward 选型</strong>（不冻结旧参数）：</p>
+<section style="margin:20px 0;overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:14px;table-layout:auto;margin:0;">
+<thead>
+<tr>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:left;line-height:1.6;color:#222;">方案</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">训练 / 验证</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">测试期</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">年数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">A</strong></td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">2007–2018 / 2019</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">2020-01 ~ 2026-10</strong></td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">6.5</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">B</strong></td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">2007–2021 / 2022</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">2023-01 ~ 2026-10</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">3.7</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">C</strong></td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">2007–2019 / 2020</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">2021-01 ~ 2026-10</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">5.6</td>
+</tr>
+</tbody>
+</table></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">选型结果：<strong style="font-weight:700;color:#000;">三套切分选出的规则完全一样</strong>——<code style="font-family:Consolas,Monaco,'Courier New',monospace;background:#F5F5F5;padding:1px 4px;border-radius:2px;font-size:14px;color:#333;">ML 分数 + MA20 趋势过滤 + 不平滑</code>，只有 Ridge 的正则强度和阈值分位点在变（A/C 是 <code style="font-family:Consolas,Monaco,'Courier New',monospace;background:#F5F5F5;padding:1px 4px;border-radius:2px;font-size:14px;color:#333;">alpha=10, q=0.3</code>，B 是 <code style="font-family:Consolas,Monaco,'Courier New',monospace;background:#F5F5F5;padding:1px 4px;border-radius:2px;font-size:14px;color:#333;">alpha=100, q=0.2</code>）。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">规则族是稳健的。可惜赚钱不是。</p>
+<p style="margin:22px 0 6px;text-align:center;"><img src="file:///D:/Project/qlib/docs/wechat/img/fig3_three_splits.png" style="max-width:100%;display:block;margin:0 auto;border-radius:2px;"/></p><p style="margin:6px 0 24px;text-align:center;font-size:13px;color:#999;line-height:1.6;">图 3｜三套切分的测试期年化收益对比</p>
+<section style="margin:20px 0;overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:14px;table-layout:auto;margin:0;">
+<thead>
+<tr>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:left;line-height:1.6;color:#222;">方案</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">策略年化</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">策略（零成本）</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">沪深300</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">买入持有江淮</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">A</strong></td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">-0.42%</strong></td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+4.22%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-0.18%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">+23.66%</strong></td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">B</strong></td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">-5.91%</strong></td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-2.46%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+1.49%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+12.39%</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">C</strong></td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">+0.63%</strong></td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+5.10%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-4.38%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+9.63%</td>
+</tr>
+</tbody>
+</table></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">方案 A 的净值曲线长这样：</p>
+<p style="margin:22px 0 6px;text-align:center;"><img src="file:///D:/Project/qlib/docs/wechat/img/fig2_nav_A.png" style="max-width:100%;display:block;margin:0 auto;border-radius:2px;"/></p><p style="margin:6px 0 24px;text-align:center;font-size:13px;color:#999;line-height:1.6;">图 4｜方案 A 测试期净值：股票涨 3 倍，策略原地踏步</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">六年半里，它有过一年很风光的时候——2024 年策略 +105.47%，几乎吃到了江淮 +132% 的涨幅。但 2025 年 -17.97%、2026 年 -29.63%，全部还回去了。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">赢的那一年看起来很像 alpha，实际上只是进出场时点的运气。</strong></p>
+<p style="margin:32px 0;text-align:center;color:#D8D8D8;letter-spacing:8px;font-size:14px;">• • •</p>
+<section style="border-left:4px solid #E67E22;padding-left:11px;margin:40px 0 18px;"><span style="font-size:19px;font-weight:700;color:#1a1a1a;line-height:1.45;">六、尸检：凶手是手续费，不是方向</span></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">真正有意思的部分在这里。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">同一个信号、同一套规则，我只做一件事：<strong style="font-weight:700;color:#000;">把交易成本设为 0</strong>。</p>
+<p style="margin:22px 0 6px;text-align:center;"><img src="file:///D:/Project/qlib/docs/wechat/img/fig4_cost_drag.png" style="max-width:100%;display:block;margin:0 auto;border-radius:2px;"/></p><p style="margin:6px 0 24px;text-align:center;font-size:13px;color:#999;line-height:1.6;">图 5｜左：含成本 vs 零成本；右：三套方案的换手率与累计成本</p>
+<section style="margin:20px 0;overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:14px;table-layout:auto;margin:0;">
+<thead>
+<tr>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:left;line-height:1.6;color:#222;">方案</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">含成本年化</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">零成本年化</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">成本拖累</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">年化换手</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">累计成本 / 本金</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">A</strong></td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-0.42%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">+4.22%</strong></td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">4.64pct/年</strong></td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">49.4 倍</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">32%</strong></td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">B</strong></td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-5.91%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-2.46%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">3.45pct/年</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">49.0 倍</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">18%</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">C</strong></td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+0.63%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">+5.10%</strong></td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">4.47pct/年</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">49.9 倍</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">28%</td>
+</tr>
+</tbody>
+</table></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">看懂这张表要抓两点：</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">第一，方向不算错。</strong>方案 A 零成本下每年跑赢指数 4.4 个百分点，方案 C 跑赢 9.5 个百分点。它确实是"防守型"的——熊市少亏，牛市少赚，长期看相对指数有正超额。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">第二，成本把这 4.4 个点全吃光了。</strong>年化换手 49 倍，意味着一年买卖的金额是本金的 49 倍。按买入 0.05% + 卖出 0.15% 算，光是摩擦成本就是每年 10% 左右（乘上 30% 的平均仓位，落在账面上是 3.5~4.6 个百分点）。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">六年半累计交出去 <strong style="font-weight:700;color:#000;">32% 的本金</strong>。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">还有一个对照特别说明问题：第二次实验（参数冻结版）用的是 <strong style="font-weight:700;color:#000;">5 日平滑</strong>，换手 25.7 倍，8 年成本拖累约 16 个百分点——折下来每年 2 个百分点。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">平滑窗口从 5 降到 1，换手翻倍，成本拖累直接翻倍。</strong>这条因果链干净得让人无话可说。</p>
+<p style="margin:32px 0;text-align:center;color:#D8D8D8;letter-spacing:8px;font-size:14px;">• • •</p>
+<section style="border-left:4px solid #E67E22;padding-left:11px;margin:40px 0 18px;"><span style="font-size:19px;font-weight:700;color:#1a1a1a;line-height:1.45;">七、信号本身也死了：IC 归零</span></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">成本之外还有第二具尸体。同一个模型，在训练集和测试集上的 IC：</p>
+<p style="margin:22px 0 6px;text-align:center;"><img src="file:///D:/Project/qlib/docs/wechat/img/fig5_ic_decay.png" style="max-width:100%;display:block;margin:0 auto;border-radius:2px;"/></p><p style="margin:6px 0 24px;text-align:center;font-size:13px;color:#999;line-height:1.6;">图 6｜三套切分的 IC：样本内 +0.10~+0.12，样本外全部为负</p>
+<section style="margin:20px 0;overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:14px;table-layout:auto;margin:0;">
+<thead>
+<tr>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:left;line-height:1.6;color:#222;">方案</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">训练集 IC</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">验证集 IC</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;"><strong style="font-weight:700;color:#000;">测试集 IC</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">A</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+0.1238</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+0.0595</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">-0.0086</strong>（t=-0.35）</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">B</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+0.1031</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-0.0589</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">-0.0076</strong>（t=-0.21）</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">C</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+0.1220</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+0.0562</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">-0.0256</strong>（t=-0.80）</td>
+</tr>
+</tbody>
+</table></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">训练集 t 值 6 以上，测试集 t 值全在 1 以内，方向还是负的。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">这 21 个因子（动量、均线、波动、量比、价量相关）描述的是"过去几天的形状"。而江淮 2020 年之后走的是题材 + 重组的行情，<strong style="font-weight:700;color:#000;">过去的形状对未来一天没有信息量</strong>。</p>
+<p style="margin:32px 0;text-align:center;color:#D8D8D8;letter-spacing:8px;font-size:14px;">• • •</p>
+<section style="border-left:4px solid #E67E22;padding-left:11px;margin:40px 0 18px;"><span style="font-size:19px;font-weight:700;color:#1a1a1a;line-height:1.45;">八、我学到了什么（五条，都很贵）</span></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">1. "多折验证"不等于"能外推"。</strong>
+方案 B 的 walk-forward IR 均值最高（+0.394，10 折里 5 折为正），测试期却是三套里最惨的（-5.91%/年）。方案 C 的选型 IR 最低（+0.201，8 折里 3 折为正），测试期反而最好。<strong style="font-weight:700;color:#000;">选型指标和外推能力，在这个问题上是脱钩的。</strong></p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">2. 单票择时最根本的问题是"你放弃了 beta"。</strong>
+江淮 6.5 年涨 3 倍。任何择时策略只要不是满仓，就是在和这 3 倍对赌。你要证明的不是"我能躲过下跌"，而是"我躲过下跌省下的钱，比我踏空上涨亏掉的多"——这是两个数量级不对等的赌注。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">3. 换手率是策略的隐形税。</strong>
+49 倍年化换手，在 0.2% 双边成本下就是每年 10% 的税。<strong style="font-weight:700;color:#000;">任何日频策略在设计阶段就该先算这笔账</strong>：你的信号每年能创造多少超额？超过 10% 吗？如果答案是不能，那你做的不是策略，是给券商打工。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">4. 平滑、最小持仓期、阈值 buffer，这些"难看的工程手段"往往比换模型更有用。</strong>
+从 5 日平滑降到 1 日，换手翻倍、成本拖累翻倍——模型一点没变。<strong style="font-weight:700;color:#000;">信号处理的边际收益，可能远大于模型选择。</strong></p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">5. 数据要够长，而且必须真的够长。</strong>
+1.7 年的测试期给我的是"踏空"这个错误归因。7.8 年才告诉我"这是结构性问题"。<strong style="font-weight:700;color:#000;">如果你只有一个短测试集，你得到的结论很可能是错的，而且错得很有说服力。</strong></p>
+<p style="margin:32px 0;text-align:center;color:#D8D8D8;letter-spacing:8px;font-size:14px;">• • •</p>
+<section style="border-left:4px solid #E67E22;padding-left:11px;margin:40px 0 18px;"><span style="font-size:19px;font-weight:700;color:#1a1a1a;line-height:1.45;">九、如果还想继续，唯一有意义的方向</span></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">不是换因子，不是换模型，是<strong style="font-weight:700;color:#000;">压换手</strong>：</p>
+<ul style="margin:15px 0;padding-left:24px;font-size:16px;line-height:1.85;color:#2c2c2c;">
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">平滑窗口拉到 5~10 日</li>
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">加最小持仓期（比如持有不满 5 天不许卖）</li>
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">阈值加 buffer：入场用 q=0.6，出场用 q=0.4，中间不动</li>
+</ul>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">但这三件事我<strong style="font-weight:700;color:#000;">不打算用这次的测试集去验证</strong>——那叫拿答案调参数。正确做法是先写死一组先验参数，再找一段谁都没看过的数据跑一次。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">顺便说一句：qlib 官方示例在沪深300 成分股上用 Alpha158 + LightGBM，IC 是 0.0468、年化 12.6%、IR 1.43。<strong style="font-weight:700;color:#000;">看起来比我这 21 个因子的 IC 0.12 差远了</strong>——但人家做的是 300 只股票的横截面排序，我做的是一只股票的时序预测。<strong style="font-weight:700;color:#000;">IC 数字不能跨问题类型比较，这是我这轮实验里最该早点想明白的事。</strong></p>
+<p style="margin:32px 0;text-align:center;color:#D8D8D8;letter-spacing:8px;font-size:14px;">• • •</p>
+<section style="border-left:4px solid #E67E22;padding-left:11px;margin:40px 0 18px;"><span style="font-size:19px;font-weight:700;color:#1a1a1a;line-height:1.45;">十、复现</span></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">所有代码和结果都在本地 ：</p>
+<section style="margin:20px 0;padding:14px 16px;background:#FAFAFA;border:1px solid #EEE;border-radius:4px;overflow-x:auto;"><pre style="margin:0;padding:0;background:transparent;font-family:Consolas,Monaco,'Courier New',monospace;font-size:13px;line-height:1.8;white-space:pre-wrap;word-break:break-all;color:#333;"><code class="language-bash" style="font-family:Consolas,Monaco,'Courier New',monospace;background:transparent;padding:0;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;"># 环境：pyqlib 0.9.8 + 日更数据（chenditc/investment_data 2026-10-27）
+set JAC_PROVIDER=D:\Project\qlib\qlib_data\cn_data_2026
+set JAC_RESULTS=results_A
+
+# 选型（walk-forward）+ 回测
+python tools/walkforward.py
+python run_backtest.py
+
+# 三方案汇总对照
+python tools/compare_splits.py
+</code></pre></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">数据覆盖 2000-01-04 ~ 2026-10-28（6497 个交易日），600418 有 6105 个交易日。策略源码、21 个因子的表达式、三套切分的完整结果（净值 CSV、指标表、因子权重、逐日预测）都在仓库里。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">如果你也在做单票择时，欢迎拿着我的换手率去对比一下你的。</strong>如果都比 49 倍低，那至少你没在给券商打工。</p>
+<p style="margin:32px 0;text-align:center;color:#D8D8D8;letter-spacing:8px;font-size:14px;">• • •</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><em style="font-style:italic;color:#555;">本文所有数字均来自实际回测输出，未做任何修饰。失败的部分就是失败的，包括我自己在归因上犯的错。</em></p></section></body></html>

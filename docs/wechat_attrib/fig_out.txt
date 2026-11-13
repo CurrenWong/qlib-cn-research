@@ -1,0 +1,16 @@
+已生成 fig0
+已生成 fig1
+已生成 fig2
+已生成 fig3
+已生成 fig4
+已生成 fig5
+Traceback (most recent call last):
+  File "D:\Project\qlib\docs\wechat_attrib\make_figures.py", line 344, in <module>
+    f()
+  File "D:\Project\qlib\docs\wechat_attrib\make_figures.py", line 314, in cover
+    fig.subplots_adjust(left=0, right=1, top=1, bottom=1)
+  File "D:\Project\qlib\.venv\Lib\site-packages\matplotlib\figure.py", line 1360, in subplots_adjust
+    self.subplotpars.update(left, bottom, right, top, wspace, hspace)
+  File "D:\Project\qlib\.venv\Lib\site-packages\matplotlib\gridspec.py", line 786, in update
+    raise ValueError('bottom cannot be >= top')
+ValueError: bottom cannot be >= top

@@ -1,0 +1,62 @@
+{
+  "platform": "juejin",
+  "platform_name": "掘金",
+  "title": "一份赚 2190 万，一份亏 11.41 亿——两份三季报翻到同一页",
+  "title_length": 34,
+  "title_limit": 50,
+  "title_truncated": false,
+  "title_head_keywords_ok": true,
+  "summary": "讯飞靠 7.85 亿非经常性收益把 -7.63 亿扣非抹平；江淮减亏 2.93 亿，代价是 48.8 亿现金流出",
+  "summary_length": 56,
+  "summary_limit": null,
+  "tags": [
+    "财报解读",
+    "数据分析",
+    "股票",
+    "量化",
+    "科大讯飞"
+  ],
+  "category": "技术",
+  "cover": "cover.png",
+  "cover_mode": "cli",
+  "formula_strategy": "latex",
+  "body_format": "markdown",
+  "auto_fields": [
+    "标题",
+    "正文",
+    "图片上传到平台图床"
+  ],
+  "manual_fields": [
+    {
+      "field": "标签",
+      "value": [
+        "财报解读",
+        "数据分析",
+        "股票",
+        "量化",
+        "科大讯飞"
+      ],
+      "where": "掘金 编辑器标签栏",
+      "limit": "最多 5 个，逗号分隔"
+    },
+    {
+      "field": "摘要",
+      "value": "讯飞靠 7.85 亿非经常性收益把 -7.63 亿扣非抹平；江淮减亏 2.93 亿，代价是 48.8 亿现金流出",
+      "where": "掘金 编辑器摘要栏（留空则自动生成）",
+      "limit": "无硬上限"
+    },
+    {
+      "field": "分类/专栏",
+      "value": "技术",
+      "where": "掘金 编辑器分类栏",
+      "limit": "无"
+    }
+  ],
+  "after_publish": "草稿箱人工确认发布",
+  "editor_url": "https://juejin.cn/editor/drafts",
+  "notes": [
+    "第二批平台（Q2 决策：知乎 + CSDN 先行）",
+    "公式走 Markdown 原生 LaTeX，掘金编辑器直接渲染"
+  ],
+  "warnings": []
+}

@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>公众号预览</title>
+<style>
+  body {
+    max-width: 677px; margin: 0 auto; padding: 32px 22px 80px;
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC",
+                 "Microsoft YaHei", sans-serif;
+    font-size: 16px; line-height: 1.85; color: #2c2c2c;
+    background: #fff;
+  }
+  h1 { font-size: 24px; line-height: 1.45; margin: 0 0 18px; letter-spacing: .3px; }
+  h2 {
+    font-size: 19px; margin: 40px 0 16px; padding-left: 11px;
+    border-left: 4px solid #E67E22; line-height: 1.4;
+  }
+  h3 { font-size: 17px; margin: 28px 0 12px; color: #1a1a1a; }
+  p { margin: 15px 0; }
+  strong { color: #000; }
+  blockquote {
+    margin: 20px 0; padding: 12px 16px; background: #F7F7F7;
+    border-left: 3px solid #ddd; color: #555; font-size: 15px;
+  }
+  blockquote p { margin: 4px 0; }
+  img {
+    max-width: 100%; display: block; margin: 22px auto 6px;
+    border-radius: 2px;
+  }
+  img + p em, p em {
+    display: block; text-align: center; font-size: 13px; color: #999;
+    margin: -2px 0 22px; font-style: normal;
+  }
+  table {
+    width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 14px;
+  }
+  th { background: #F5F5F5; font-weight: 600; }
+  th, td { border: 1px solid #E3E3E3; padding: 8px 10px; text-align: center; }
+  td:first-child, th:first-child { text-align: left; }
+  pre {
+    background: #FAFAFA; border: 1px solid #EEE; border-radius: 4px;
+    padding: 14px; overflow-x: auto; font-size: 13px; line-height: 1.6;
+  }
+  code { font-family: Consolas, Monaco, monospace; background: #F5F5F5;
+          padding: 1px 4px; border-radius: 2px; font-size: 14px; }
+  pre code { background: none; padding: 0; }
+  hr { border: none; border-top: 1px solid #EAEAEA; margin: 36px 0; }
+</style>
+</head>
+<body>
+<h1 id="19-qlib">19 年数据、三套切分：我用 qlib 选了个择时策略，然后看着它死了三次</h1>
+<blockquote>
+<p>摘要：一个单票择时策略，在三种样本切分下全部失效。最后发现凶手不是模型，是手续费。</p>
+</blockquote>
+<hr />
+<p>先说结论，省得你往下翻：</p>
+<p>我用微软开源的量化框架 <strong>qlib</strong>，在江淮汽车（600418）上搭了一个 21 因子 + Ridge 回归的日频择时策略。训练集里 IC 有 +0.12（t 值 6 以上），看起来很能打。</p>
+<p>然后我把它放到样本外。</p>
+<p><strong>第一次，2019-2020，策略 -18.96%，同期沪深300 +53.66%。</strong>
+<strong>第二次，把数据从 1.7 年延长到 7.8 年，策略 -36.33%，同期指数 +38.19%。</strong>
+<strong>第三次，重新切分样本、重新选型，跑了三套切分，三套全灭。</strong></p>
+<p>最扎心的一个数字：江淮这 6.5 年涨了 <strong>3 倍</strong>，策略亏了 <strong>2.7%</strong>。</p>
+<p>但真正让我停下来写这篇文章的，不是"失败"这件事——单票择时失败太正常了——而是<strong>尸检报告指出的死因</strong>：</p>
+<blockquote>
+<p>这个策略的方向其实不算错。把交易成本设为 0，它在 6.5 年里能跑赢沪深300 每年 4.4 个百分点。
+是每年 49 倍的换手率，把这 4.4 个点全部吃掉了。</p>
+</blockquote>
+<p>下面是完整的过程。</p>
+<hr />
+<h2 id="qlib">一、先介绍 qlib：一个把"数据—因子—模型—回测"串成一条线的框架</h2>
+<p>如果你没听过 qlib，一句话概括：<strong>它把量化研究里最烦的那部分（数据对齐、复权、停牌、涨跌停、撮合、成本）都写好了，你只需要往里塞因子和模型。</strong></p>
+<p>它的设计是<strong>五层</strong>，从上到下：</p>
+<p><img alt="图 1｜qlib 的五层结构，以及本地数据目录的样子" src="img/fig1_qlib_arch.png" /></p>
+<ul>
+<li><strong>数据层</strong>：不是 CSV，是二进制 <code>.bin</code> + 交易日历 + 标的表。取数用 <code>D.features()</code>，一条表达式拿全字段。</li>
+<li><strong>特征层</strong>：有个表达式引擎，<code>$close/Ref($close,5)-1</code> 这样的字符串直接算，不用自己写循环。</li>
+<li><strong>模型层</strong>：Ridge、LightGBM、LSTM 都在里面，统一的 <code>fit</code>/<code>predict</code> 接口。</li>
+<li><strong>策略层</strong>：把"预测分数"翻译成"目标权重"。</li>
+<li><strong>回测执行层</strong>：撮合、手续费、印花税、涨跌停、停牌，全按 A 股规则来。</li>
+</ul>
+<p><strong>为什么值得用</strong>：你自己写回测，最容易错的地方不是策略逻辑，而是"这天停牌了怎么办""复权因子换过怎么办""跌停卖不出去怎么办"。qlib 把这些坑都填了，而且填得比较认真——我在项目里专门做过执行校验，策略层给出的目标仓位和实际成交仓位一致率 98.6%~99%，差异全部可归因于停牌、涨跌停和数据缺口。</p>
+<p><strong>顺手记一个 qlib 最容易踩的坑</strong>：所有价格字段存的都是<strong>「原始价 × 复权因子」</strong>，而因子单独存在一个 <code>factor.day.bin</code> 里。如果你自己读 <code>.bin</code> 却不读 factor，得到的是一堆对不上的价格。我第一次做数据核对时就在这里卡了半天——两个数据源的价格比值恒等于 1.39，查了很久才发现只是复权基准差了常数。</p>
+<hr />
+<h2 id="21">二、策略长什么样：21 个因子，一个线性模型，一条均线</h2>
+<p>策略简单到有点朴素：</p>
+<table>
+<thead>
+<tr>
+<th>项</th>
+<th>设定</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>标的</td>
+<td>江淮汽车 600418，单票</td>
+</tr>
+<tr>
+<td>因子</td>
+<td>21 个，全部用 qlib 表达式算（纯价格 17 个 + 纯成交量 3 个 + 价量交互 1 个）</td>
+</tr>
+<tr>
+<td>模型</td>
+<td>Ridge 回归（L2 正则），预测次日收盘到后日收盘的收益</td>
+</tr>
+<tr>
+<td>入场条件</td>
+<td>模型分数 &gt; 阈值 <strong>且</strong> 收盘价 &gt; 20 日均线</td>
+</tr>
+<tr>
+<td>仓位</td>
+<td>满足条件满仓，否则空仓（不做空、不加杠杆、不设止损）</td>
+</tr>
+<tr>
+<td>成交</td>
+<td>T 日收盘出信号，T+1 日收盘成交</td>
+</tr>
+<tr>
+<td>成本</td>
+<td>买入 0.05%，卖出 0.15%（含印花税）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>因子分三类</strong>：</p>
+<ul>
+<li><strong>纯价格 17 个</strong>：动量（5/10/20/60 日）、短期反转、均线偏离（4 个）、均线交叠、波动率（2 个）、振幅、价格位置、日内涨跌、跳空、距 250 日高点的距离。</li>
+<li><strong>纯成交量 3 个</strong>：5 日量比偏离、20 日量比偏离、5 日量与 20 日量之比。</li>
+<li><strong>价量交互 1 个</strong>：20 日收盘价与成交量的相关系数。</li>
+</ul>
+<p>顺便回答一个常见疑问：<strong>这个策略是只用价格吗？不是。</strong>实测拟合出来的标准化系数里，成交量相关因子占了总权重绝对值的 <strong>20.4%</strong>（其中 20 日量比偏离排第 4、5 日量比偏离排第 8）。但它们只参与了"打分"，没有进入"规则层"——规则层只有 MA20 一条硬条件。</p>
+<p><strong>阈值怎么定</strong>：不是拍脑袋给个 0.02，而是取<strong>训练集分数的 q 分位点</strong>。这么做的原因很实际：绝对阈值会随着模型输出的尺度漂移，换个训练窗口就失效了；分位点是相对量，跨时间可比。</p>
+<p><strong>模型怎么选</strong>：候选池里有 Ridge（三个正则强度）和 LightGBM，用 <strong>walk-forward</strong> 选——把历史切成若干个"每年一折"，每折只用折前数据训练、折内数据验证，算出相对沪深300 的信息比率，跨折取平均，选均值最高的那个组合。</p>
+<p>这套协议本身是干净的：<strong>测试期完全不参与选型</strong>。</p>
+<p>然后，就是三次死亡。</p>
+<hr />
+<h2 id="20192020">三、第一次死亡（2019–2020）：它在一个大牛市里踏空了</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>验证集 2017–2018</th>
+<th>测试集 2019–2020</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>沪深300</td>
+<td>-9.92%</td>
+<td><strong>+53.66%</strong></td>
+</tr>
+<tr>
+<td>买入持有江淮</td>
+<td><strong>-57.75%</strong></td>
+<td>+53.00%</td>
+</tr>
+<tr>
+<td>策略</td>
+<td><strong>+13.76%</strong></td>
+<td><strong>-18.96%</strong></td>
+</tr>
+<tr>
+<td>策略 vs 指数</td>
+<td>+23.7pct</td>
+<td><strong>-72.6pct</strong></td>
+</tr>
+</tbody>
+</table>
+<p>验证集里它表现很好：江淮那两年跌了 58%，策略靠"空仓"躲过去了，还赚了 13.76%。</p>
+<p>测试集里它彻底反过来：2019 年一季度沪深300 涨 30%、2020 年二季度江淮涨 77%，<strong>策略平均仓位只有 34%，两次大反弹都在场外</strong>。</p>
+<p>当时的归因是"踏空"。听起来像是运气不好——如果它当时在场，是不是就成了？</p>
+<p>于是有了第二次实验。</p>
+<hr />
+<h2 id="78">四、第二次死亡（延长到 7.8 年）：不是运气，是结构</h2>
+<p>原来的数据源冻结在 2020-09，测试期只有 1.7 年。我换了一个日更的数据源（<code>chenditc/investment_data</code>，2026-10-27 版，543 MB），日历延长到 2026 年，<strong>参数一个都不动</strong>，直接重跑。</p>
+<p><img alt="图 2｜江淮汽车 2002–2026 年走势（对数轴），三套切分的测试期落在右侧这段" src="img/fig0_stock_path.png" /></p>
+<table>
+<thead>
+<tr>
+<th>2019-01 ~ 2026-10（7.8 年）</th>
+<th>区间收益</th>
+<th>年化</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>策略</strong></td>
+<td><strong>-36.33%</strong></td>
+<td>-5.84%</td>
+</tr>
+<tr>
+<td>沪深300</td>
+<td>+38.19%</td>
+<td>+4.40%</td>
+</tr>
+<tr>
+<td><strong>买入持有江淮</strong></td>
+<td><strong>+326.99%</strong></td>
+<td><strong>+21.33%</strong></td>
+</tr>
+</tbody>
+</table>
+<p>股票涨了 3.27 倍，指数涨了 38%，策略亏了 36%。</p>
+<p><strong>而且模型预测力彻底消失了</strong>：原测试期（2019-2020）IC 还有 +0.1316（t=2.65），扩到 2019-2026 后掉到 <strong>+0.0130（t=0.57）</strong>。前 1.7 年那点"预测力"，是噪声。</p>
+<p>还有一个更让我警惕的发现：<strong>同样的 walk-forward 协议，只因为训练样本从 1758 条变成 1798 条（早期停牌处理略有差异），选出来的模型就从 <code>Ridge_a100 + q=0.4</code> 翻成了 <code>Ridge_a1 + q=0.6</code>，正折数从 5/6 掉到 3/6。</strong></p>
+<p>40 条样本的差异，能让选型翻个面。这说明<strong>在单票、弱信号的问题上，"多折验证"压不住估计噪声</strong>。</p>
+<hr />
+<h2 id="_1">五、第三次死亡（重新切分）：三套切分，三次全灭</h2>
+<p>到这里还有最后一个辩解：<strong>会不会是切分方式不对？</strong>原测试期只有 1.7 年，训练集也不含 2008 年金融危机和 2015 年股灾。</p>
+<p>现在有 19.8 年数据了，那就重新切。我做了三套，<strong>每套都重新跑完整的 walk-forward 选型</strong>（不冻结旧参数）：</p>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>训练 / 验证</th>
+<th>测试期</th>
+<th>年数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>A</strong></td>
+<td>2007–2018 / 2019</td>
+<td><strong>2020-01 ~ 2026-10</strong></td>
+<td>6.5</td>
+</tr>
+<tr>
+<td><strong>B</strong></td>
+<td>2007–2021 / 2022</td>
+<td>2023-01 ~ 2026-10</td>
+<td>3.7</td>
+</tr>
+<tr>
+<td><strong>C</strong></td>
+<td>2007–2019 / 2020</td>
+<td>2021-01 ~ 2026-10</td>
+<td>5.6</td>
+</tr>
+</tbody>
+</table>
+<p>选型结果：<strong>三套切分选出的规则完全一样</strong>——<code>ML 分数 + MA20 趋势过滤 + 不平滑</code>，只有 Ridge 的正则强度和阈值分位点在变（A/C 是 <code>alpha=10, q=0.3</code>，B 是 <code>alpha=100, q=0.2</code>）。</p>
+<p>规则族是稳健的。可惜赚钱不是。</p>
+<p><img alt="图 3｜三套切分的测试期年化收益对比" src="img/fig3_three_splits.png" /></p>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>策略年化</th>
+<th>策略（零成本）</th>
+<th>沪深300</th>
+<th>买入持有江淮</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>A</strong></td>
+<td><strong>-0.42%</strong></td>
+<td>+4.22%</td>
+<td>-0.18%</td>
+<td><strong>+23.66%</strong></td>
+</tr>
+<tr>
+<td><strong>B</strong></td>
+<td><strong>-5.91%</strong></td>
+<td>-2.46%</td>
+<td>+1.49%</td>
+<td>+12.39%</td>
+</tr>
+<tr>
+<td><strong>C</strong></td>
+<td><strong>+0.63%</strong></td>
+<td>+5.10%</td>
+<td>-4.38%</td>
+<td>+9.63%</td>
+</tr>
+</tbody>
+</table>
+<p>方案 A 的净值曲线长这样：</p>
+<p><img alt="图 4｜方案 A 测试期净值：股票涨 3 倍，策略原地踏步" src="img/fig2_nav_A.png" /></p>
+<p>六年半里，它有过一年很风光的时候——2024 年策略 +105.47%，几乎吃到了江淮 +132% 的涨幅。但 2025 年 -17.97%、2026 年 -29.63%，全部还回去了。</p>
+<p><strong>赢的那一年看起来很像 alpha，实际上只是进出场时点的运气。</strong></p>
+<hr />
+<h2 id="_2">六、尸检：凶手是手续费，不是方向</h2>
+<p>真正有意思的部分在这里。</p>
+<p>同一个信号、同一套规则，我只做一件事：<strong>把交易成本设为 0</strong>。</p>
+<p><img alt="图 5｜左：含成本 vs 零成本；右：三套方案的换手率与累计成本" src="img/fig4_cost_drag.png" /></p>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>含成本年化</th>
+<th>零成本年化</th>
+<th>成本拖累</th>
+<th>年化换手</th>
+<th>累计成本 / 本金</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>A</strong></td>
+<td>-0.42%</td>
+<td><strong>+4.22%</strong></td>
+<td><strong>4.64pct/年</strong></td>
+<td>49.4 倍</td>
+<td><strong>32%</strong></td>
+</tr>
+<tr>
+<td><strong>B</strong></td>
+<td>-5.91%</td>
+<td>-2.46%</td>
+<td>3.45pct/年</td>
+<td>49.0 倍</td>
+<td>18%</td>
+</tr>
+<tr>
+<td><strong>C</strong></td>
+<td>+0.63%</td>
+<td><strong>+5.10%</strong></td>
+<td>4.47pct/年</td>
+<td>49.9 倍</td>
+<td>28%</td>
+</tr>
+</tbody>
+</table>
+<p>看懂这张表要抓两点：</p>
+<p><strong>第一，方向不算错。</strong>方案 A 零成本下每年跑赢指数 4.4 个百分点，方案 C 跑赢 9.5 个百分点。它确实是"防守型"的——熊市少亏，牛市少赚，长期看相对指数有正超额。</p>
+<p><strong>第二，成本把这 4.4 个点全吃光了。</strong>年化换手 49 倍，意味着一年买卖的金额是本金的 49 倍。按买入 0.05% + 卖出 0.15% 算，光是摩擦成本就是每年 10% 左右（乘上 30% 的平均仓位，落在账面上是 3.5~4.6 个百分点）。</p>
+<p>六年半累计交出去 <strong>32% 的本金</strong>。</p>
+<p>还有一个对照特别说明问题：第二次实验（参数冻结版）用的是 <strong>5 日平滑</strong>，换手 25.7 倍，8 年成本拖累约 16 个百分点——折下来每年 2 个百分点。</p>
+<p><strong>平滑窗口从 5 降到 1，换手翻倍，成本拖累直接翻倍。</strong>这条因果链干净得让人无话可说。</p>
+<hr />
+<h2 id="ic">七、信号本身也死了：IC 归零</h2>
+<p>成本之外还有第二具尸体。同一个模型，在训练集和测试集上的 IC：</p>
+<p><img alt="图 6｜三套切分的 IC：样本内 +0.10~+0.12，样本外全部为负" src="img/fig5_ic_decay.png" /></p>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>训练集 IC</th>
+<th>验证集 IC</th>
+<th><strong>测试集 IC</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>+0.1238</td>
+<td>+0.0595</td>
+<td><strong>-0.0086</strong>（t=-0.35）</td>
+</tr>
+<tr>
+<td>B</td>
+<td>+0.1031</td>
+<td>-0.0589</td>
+<td><strong>-0.0076</strong>（t=-0.21）</td>
+</tr>
+<tr>
+<td>C</td>
+<td>+0.1220</td>
+<td>+0.0562</td>
+<td><strong>-0.0256</strong>（t=-0.80）</td>
+</tr>
+</tbody>
+</table>
+<p>训练集 t 值 6 以上，测试集 t 值全在 1 以内，方向还是负的。</p>
+<p>这 21 个因子（动量、均线、波动、量比、价量相关）描述的是"过去几天的形状"。而江淮 2020 年之后走的是题材 + 重组的行情，<strong>过去的形状对未来一天没有信息量</strong>。</p>
+<hr />
+<h2 id="_3">八、我学到了什么（五条，都很贵）</h2>
+<p><strong>1. "多折验证"不等于"能外推"。</strong>
+方案 B 的 walk-forward IR 均值最高（+0.394，10 折里 5 折为正），测试期却是三套里最惨的（-5.91%/年）。方案 C 的选型 IR 最低（+0.201，8 折里 3 折为正），测试期反而最好。<strong>选型指标和外推能力，在这个问题上是脱钩的。</strong></p>
+<p><strong>2. 单票择时最根本的问题是"你放弃了 beta"。</strong>
+江淮 6.5 年涨 3 倍。任何择时策略只要不是满仓，就是在和这 3 倍对赌。你要证明的不是"我能躲过下跌"，而是"我躲过下跌省下的钱，比我踏空上涨亏掉的多"——这是两个数量级不对等的赌注。</p>
+<p><strong>3. 换手率是策略的隐形税。</strong>
+49 倍年化换手，在 0.2% 双边成本下就是每年 10% 的税。<strong>任何日频策略在设计阶段就该先算这笔账</strong>：你的信号每年能创造多少超额？超过 10% 吗？如果答案是不能，那你做的不是策略，是给券商打工。</p>
+<p><strong>4. 平滑、最小持仓期、阈值 buffer，这些"难看的工程手段"往往比换模型更有用。</strong>
+从 5 日平滑降到 1 日，换手翻倍、成本拖累翻倍——模型一点没变。<strong>信号处理的边际收益，可能远大于模型选择。</strong></p>
+<p><strong>5. 数据要够长，而且必须真的够长。</strong>
+1.7 年的测试期给我的是"踏空"这个错误归因。7.8 年才告诉我"这是结构性问题"。<strong>如果你只有一个短测试集，你得到的结论很可能是错的，而且错得很有说服力。</strong></p>
+<hr />
+<h2 id="_4">九、如果还想继续，唯一有意义的方向</h2>
+<p>不是换因子，不是换模型，是<strong>压换手</strong>：</p>
+<ul>
+<li>平滑窗口拉到 5~10 日</li>
+<li>加最小持仓期（比如持有不满 5 天不许卖）</li>
+<li>阈值加 buffer：入场用 q=0.6，出场用 q=0.4，中间不动</li>
+</ul>
+<p>但这三件事我<strong>不打算用这次的测试集去验证</strong>——那叫拿答案调参数。正确做法是先写死一组先验参数，再找一段谁都没看过的数据跑一次。</p>
+<p>顺便说一句：qlib 官方示例在沪深300 成分股上用 Alpha158 + LightGBM，IC 是 0.0468、年化 12.6%、IR 1.43。<strong>看起来比我这 21 个因子的 IC 0.12 差远了</strong>——但人家做的是 300 只股票的横截面排序，我做的是一只股票的时序预测。<strong>IC 数字不能跨问题类型比较，这是我这轮实验里最该早点想明白的事。</strong></p>
+<hr />
+<h2 id="_5">十、复现</h2>
+<p>所有代码和结果都在本地 ：</p>
+<pre><code class="language-bash"># 环境：pyqlib 0.9.8 + 日更数据（chenditc/investment_data 2026-10-27）
+set JAC_PROVIDER=D:\Project\qlib\qlib_data\cn_data_2026
+set JAC_RESULTS=results_A
+
+# 选型（walk-forward）+ 回测
+python tools/walkforward.py
+python run_backtest.py
+
+# 三方案汇总对照
+python tools/compare_splits.py
+</code></pre>
+<p>数据覆盖 2000-01-04 ~ 2026-10-28（6497 个交易日），600418 有 6105 个交易日。策略源码、21 个因子的表达式、三套切分的完整结果（净值 CSV、指标表、因子权重、逐日预测）都在仓库里。</p>
+<p><strong>如果你也在做单票择时，欢迎拿着我的换手率去对比一下你的。</strong>如果都比 49 倍低，那至少你没在给券商打工。</p>
+<hr />
+<p><em>本文所有数字均来自实际回测输出，未做任何修饰。失败的部分就是失败的，包括我自己在归因上犯的错。</em></p>
+</body>
+</html>

@@ -1,0 +1,11 @@
+插图 7 张：
+  img/fig0_pipeline.png  |  新闻归因流水线：事件识别 → 数据校验 → 候选池 → 因果判定
+  img/fig2_evidence.png  |  分时期的有事前证据率：2001-2019 只有 23.4%/21.5%，2026
+  img/fig5_goodnews.png  |  科大讯飞「利好出尽」实录：好公告在预期打满之后，就变成了利空
+  img/fig6_jac_events.png  |  江淮汽车 2018-2026 实际成交价与八个带消息的日子：增持、回购、业绩预增
+  img/fig3_categories.png  |  11 类公告的次日（T+1）超额收益：两个标的符号频繁相反，胜率都在 50% 附
+  img/fig4_limit.png  |  涨停次日有 1%~2% 超额，但 20 天后归零；跌停次日继续跌
+  img/fig1_panorama.png  |  两个标的 18 年归一化走势与全部事件点（对数轴）
+
+已写入 D:\Project\qlib\docs\wechat_attrib\article.html
+已写入 D:\Project\qlib\docs\wechat_attrib\wechat_body.html

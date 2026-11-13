@@ -1,0 +1,69 @@
+# ============ 二进制 / 大文件：不进仓库 ============
+# 数据文件（qlib bin、parquet、npz、压缩包）
+*.bin
+*.parquet
+*.npz
+*.npy
+*.pkl
+*.joblib
+*.h5
+*.onnx
+*.pt
+*.ckpt
+*.zip
+*.tar
+*.gz
+*.7z
+# 图片 / 文档（AGENTS.md 要求：图片等二进制不进 git）
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.svg
+*.ico
+*.pdf
+*.docx
+*.pptx
+*.xlsx
+*.xls
+# 音视频
+*.wav
+*.mp3
+*.mp4
+*.m4a
+*.flac
+# 表格产出（可重新生成）
+*.csv
+*.tsv
+
+# ============ 目录：整块剔除 ============
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+# qlib 的数据目录（1.0 GB / 9.5 万个 .bin）
+qlib_data/
+# qlib 上游源码（是独立 git clone，不进本仓库）
+qlib-src/
+# 抓下来的行情 / 行业数据
+data/
+# MLflow 运行记录
+mlruns/
+**/mlruns/
+# 抓取响应缓存、临时探测脚本（留在磁盘上，但不版本化）
+tools/_cache/
+tools/scratch/
+tools/_scratch/
+
+# ============ 杂项 ============
+*.log
+*.pem
+*.key
+.env
+.DS_Store
+Thumbs.db
+.ipynb_checkpoints/
+.idea/
+.vscode/
