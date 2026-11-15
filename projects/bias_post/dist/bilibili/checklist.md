@@ -26,3 +26,20 @@
 ```bash
 wechatsync sync bilibili/article.md -p bilibili
 ```
+
+---
+
+## 本次实发（2026-11-15）——澄
+
+- 草稿：https://member.bilibili.com/platform/upload/text/edit?aid=374964
+- 图片：**4/4 上传成功**（`../publish-bilibili.log`），0 失败
+  - 2026-11-01 给 `bilibili.ts` 补的 `uploadImage` 覆写（Origin/Referer + csrf 时序）生效了，
+    **正文图不用再手动插**（上次那篇是 0/7 全挂）
+- 缺段：85/85 段，0 缺
+- 你要做的：
+  1. **封面必须手动上传** `cover.png`（1080×864）：适配器的保存 body 里根本没有封面字段，
+     `upcover` 没有可用入口，CLI 也不会替你传
+  2. 分区：`tid` 写死 `4`，按「科技 → 计算机技术」核对
+  3. 标签（≤5）、摘要
+- 注意：专栏编辑器对 LaTeX 的渲染没验证过；本文正文**没有公式**（只有一段 Python 代码块），
+  唯一带 `%` 的是标题里的「亏了 2%」，不影响

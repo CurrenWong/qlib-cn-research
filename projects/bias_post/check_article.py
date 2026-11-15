@@ -9,13 +9,16 @@
 import glob
 import json
 import re
+import sys
 from pathlib import Path
 
 import pandas as pd
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent.parent
-ART = (HERE / "article.md").read_text(encoding="utf-8")
+# 默认查公众号真源；传参可以查任意分发包，例如 dist/zhihu/article.md
+TARGET = Path(sys.argv[1]) if len(sys.argv) > 1 else HERE / "article.md"
+ART = TARGET.read_text(encoding="utf-8")
 
 checks: list[tuple[str, str, bool]] = []  # (标签, 正文里应出现的串, 是否必须)
 
@@ -137,4 +140,5 @@ for label, needle, ok in struct:
         bad += 1
     print(f"[{flag}] {label}")
 print("=" * 70)
-print(f"共 {len(checks) + len(struct)} 项，失败 {bad} 项")
+print(f"文件: {TARGET.parent.name}/{TARGET.name}   共 {len(checks) + len(struct)} 项，失败 {bad} 项")
+sys.exit(1 if bad else 0)

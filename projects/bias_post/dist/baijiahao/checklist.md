@@ -26,3 +26,17 @@
 ```bash
 wechatsync sync baijiahao/article.md -p baijiahao
 ```
+
+---
+
+## 本次实发（2026-11-15）——澄
+
+- 草稿：https://baijiahao.baidu.com/builder/rc/edit?type=news&article_id=1881912333098448508
+- 图片：**4/4 上传成功**（`../publish-baijiahao.log`），0 失败
+- 缺段：85/85 段，0 缺
+- 你要做的：
+  1. 标签（≤5）：量化 / 数据分析 / qlib / A股 / 投资
+  2. 摘要：`31 个行业乖离率热力图 + 三策略结局`
+  3. 封面：`cover.png`（保存 body 里没有封面字段，只能手填）
+  4. 分类：技术
+- 注意：标题 37/40 字，已在百家号上限内，别再补字

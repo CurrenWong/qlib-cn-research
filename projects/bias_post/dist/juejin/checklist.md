@@ -26,3 +26,16 @@
 ```bash
 wechatsync sync juejin/article.md -p juejin
 ```
+
+---
+
+## 本次实发（2026-11-15）——澄
+
+- 草稿：https://juejin.cn/editor/drafts/7708141298792267803
+- 图片：**4/4 上传成功**（`../publish-juejin.log`），0 失败
+- 缺段：85/85 段，0 缺
+- 你要做的：
+  1. **封面必须手填**：命令传了 `--cover ...\juejin\cover.png`，日志也显示「封面: (本地图片)」，
+     但 `juejin.ts` 里 `cover_image:""` 是写死的，草稿上不会有封面
+  2. 标签（≤5）、分类专栏
+  3. 摘要：`31 个行业乖离率热力图 + 三策略结局`
