@@ -20,7 +20,7 @@
 <section style="border-left:4px solid #E67E22;padding-left:11px;margin:40px 0 18px;"><span style="font-size:19px;font-weight:700;color:#1a1a1a;line-height:1.45;">一、先介绍 qlib：一个把"数据—因子—模型—回测"串成一条线的框架</span></section>
 <p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">如果你没听过 qlib，一句话概括：<strong style="font-weight:700;color:#000;">它把量化研究里最烦的那部分（数据对齐、复权、停牌、涨跌停、撮合、成本）都写好了，你只需要往里塞因子和模型。</strong></p>
 <p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">它的设计是<strong style="font-weight:700;color:#000;">五层</strong>，从上到下：</p>
-<p style="margin:22px 0 6px;text-align:center;"><img src="file:///D:/Project/qlib/docs/wechat/img/fig1_qlib_arch.png" style="max-width:100%;display:block;margin:0 auto;border-radius:2px;"/></p><p style="margin:6px 0 24px;text-align:center;font-size:13px;color:#999;line-height:1.6;">图 1｜qlib 的五层结构，以及本地数据目录的样子</p>
+<p style="margin:22px 0 6px;text-align:center;"><img src="file:///docs/wechat/img/fig1_qlib_arch.png" style="max-width:100%;display:block;margin:0 auto;border-radius:2px;"/></p><p style="margin:6px 0 24px;text-align:center;font-size:13px;color:#999;line-height:1.6;">图 1｜qlib 的五层结构，以及本地数据目录的样子</p>
 <ul style="margin:15px 0;padding-left:24px;font-size:16px;line-height:1.85;color:#2c2c2c;">
 <li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">数据层</strong>：不是 CSV，是二进制 <code style="font-family:Consolas,Monaco,'Courier New',monospace;background:#F5F5F5;padding:1px 4px;border-radius:2px;font-size:14px;color:#333;">.bin</code> + 交易日历 + 标的表。取数用 <code style="font-family:Consolas,Monaco,'Courier New',monospace;background:#F5F5F5;padding:1px 4px;border-radius:2px;font-size:14px;color:#333;">D.features()</code>，一条表达式拿全字段。</li>
 <li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">特征层</strong>：有个表达式引擎，<code style="font-family:Consolas,Monaco,'Courier New',monospace;background:#F5F5F5;padding:1px 4px;border-radius:2px;font-size:14px;color:#333;">$close/Ref($close,5)-1</code> 这样的字符串直接算，不用自己写循环。</li>
@@ -122,7 +122,7 @@
 <p style="margin:32px 0;text-align:center;color:#D8D8D8;letter-spacing:8px;font-size:14px;">• • •</p>
 <section style="border-left:4px solid #E67E22;padding-left:11px;margin:40px 0 18px;"><span style="font-size:19px;font-weight:700;color:#1a1a1a;line-height:1.45;">四、第二次死亡（延长到 7.8 年）：不是运气，是结构</span></section>
 <p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">原来的数据源冻结在 2020-09，测试期只有 1.7 年。我换了一个日更的数据源（<code style="font-family:Consolas,Monaco,'Courier New',monospace;background:#F5F5F5;padding:1px 4px;border-radius:2px;font-size:14px;color:#333;">chenditc/investment_data</code>，2026-10-27 版，543 MB），日历延长到 2026 年，<strong style="font-weight:700;color:#000;">参数一个都不动</strong>，直接重跑。</p>
-<p style="margin:22px 0 6px;text-align:center;"><img src="file:///D:/Project/qlib/docs/wechat/img/fig0_stock_path.png" style="max-width:100%;display:block;margin:0 auto;border-radius:2px;"/></p><p style="margin:6px 0 24px;text-align:center;font-size:13px;color:#999;line-height:1.6;">图 2｜江淮汽车 2002–2026 年走势（对数轴），三套切分的测试期落在右侧这段</p>
+<p style="margin:22px 0 6px;text-align:center;"><img src="file:///docs/wechat/img/fig0_stock_path.png" style="max-width:100%;display:block;margin:0 auto;border-radius:2px;"/></p><p style="margin:6px 0 24px;text-align:center;font-size:13px;color:#999;line-height:1.6;">图 2｜江淮汽车 2002–2026 年走势（对数轴），三套切分的测试期落在右侧这段</p>
 <section style="margin:20px 0;overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:14px;table-layout:auto;margin:0;">
 <thead>
 <tr>
@@ -189,7 +189,7 @@
 </table></section>
 <p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">选型结果：<strong style="font-weight:700;color:#000;">三套切分选出的规则完全一样</strong>——<code style="font-family:Consolas,Monaco,'Courier New',monospace;background:#F5F5F5;padding:1px 4px;border-radius:2px;font-size:14px;color:#333;">ML 分数 + MA20 趋势过滤 + 不平滑</code>，只有 Ridge 的正则强度和阈值分位点在变（A/C 是 <code style="font-family:Consolas,Monaco,'Courier New',monospace;background:#F5F5F5;padding:1px 4px;border-radius:2px;font-size:14px;color:#333;">alpha=10, q=0.3</code>，B 是 <code style="font-family:Consolas,Monaco,'Courier New',monospace;background:#F5F5F5;padding:1px 4px;border-radius:2px;font-size:14px;color:#333;">alpha=100, q=0.2</code>）。</p>
 <p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">规则族是稳健的。可惜赚钱不是。</p>
-<p style="margin:22px 0 6px;text-align:center;"><img src="file:///D:/Project/qlib/docs/wechat/img/fig3_three_splits.png" style="max-width:100%;display:block;margin:0 auto;border-radius:2px;"/></p><p style="margin:6px 0 24px;text-align:center;font-size:13px;color:#999;line-height:1.6;">图 3｜三套切分的测试期年化收益对比</p>
+<p style="margin:22px 0 6px;text-align:center;"><img src="file:///docs/wechat/img/fig3_three_splits.png" style="max-width:100%;display:block;margin:0 auto;border-radius:2px;"/></p><p style="margin:6px 0 24px;text-align:center;font-size:13px;color:#999;line-height:1.6;">图 3｜三套切分的测试期年化收益对比</p>
 <section style="margin:20px 0;overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:14px;table-layout:auto;margin:0;">
 <thead>
 <tr>
@@ -225,14 +225,14 @@
 </tbody>
 </table></section>
 <p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">方案 A 的净值曲线长这样：</p>
-<p style="margin:22px 0 6px;text-align:center;"><img src="file:///D:/Project/qlib/docs/wechat/img/fig2_nav_A.png" style="max-width:100%;display:block;margin:0 auto;border-radius:2px;"/></p><p style="margin:6px 0 24px;text-align:center;font-size:13px;color:#999;line-height:1.6;">图 4｜方案 A 测试期净值：股票涨 3 倍，策略原地踏步</p>
+<p style="margin:22px 0 6px;text-align:center;"><img src="file:///docs/wechat/img/fig2_nav_A.png" style="max-width:100%;display:block;margin:0 auto;border-radius:2px;"/></p><p style="margin:6px 0 24px;text-align:center;font-size:13px;color:#999;line-height:1.6;">图 4｜方案 A 测试期净值：股票涨 3 倍，策略原地踏步</p>
 <p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">六年半里，它有过一年很风光的时候——2024 年策略 +105.47%，几乎吃到了江淮 +132% 的涨幅。但 2025 年 -17.97%、2026 年 -29.63%，全部还回去了。</p>
 <p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">赢的那一年看起来很像 alpha，实际上只是进出场时点的运气。</strong></p>
 <p style="margin:32px 0;text-align:center;color:#D8D8D8;letter-spacing:8px;font-size:14px;">• • •</p>
 <section style="border-left:4px solid #E67E22;padding-left:11px;margin:40px 0 18px;"><span style="font-size:19px;font-weight:700;color:#1a1a1a;line-height:1.45;">六、尸检：凶手是手续费，不是方向</span></section>
 <p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">真正有意思的部分在这里。</p>
 <p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">同一个信号、同一套规则，我只做一件事：<strong style="font-weight:700;color:#000;">把交易成本设为 0</strong>。</p>
-<p style="margin:22px 0 6px;text-align:center;"><img src="file:///D:/Project/qlib/docs/wechat/img/fig4_cost_drag.png" style="max-width:100%;display:block;margin:0 auto;border-radius:2px;"/></p><p style="margin:6px 0 24px;text-align:center;font-size:13px;color:#999;line-height:1.6;">图 5｜左：含成本 vs 零成本；右：三套方案的换手率与累计成本</p>
+<p style="margin:22px 0 6px;text-align:center;"><img src="file:///docs/wechat/img/fig4_cost_drag.png" style="max-width:100%;display:block;margin:0 auto;border-radius:2px;"/></p><p style="margin:6px 0 24px;text-align:center;font-size:13px;color:#999;line-height:1.6;">图 5｜左：含成本 vs 零成本；右：三套方案的换手率与累计成本</p>
 <section style="margin:20px 0;overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:14px;table-layout:auto;margin:0;">
 <thead>
 <tr>
@@ -280,7 +280,7 @@
 <p style="margin:32px 0;text-align:center;color:#D8D8D8;letter-spacing:8px;font-size:14px;">• • •</p>
 <section style="border-left:4px solid #E67E22;padding-left:11px;margin:40px 0 18px;"><span style="font-size:19px;font-weight:700;color:#1a1a1a;line-height:1.45;">七、信号本身也死了：IC 归零</span></section>
 <p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">成本之外还有第二具尸体。同一个模型，在训练集和测试集上的 IC：</p>
-<p style="margin:22px 0 6px;text-align:center;"><img src="file:///D:/Project/qlib/docs/wechat/img/fig5_ic_decay.png" style="max-width:100%;display:block;margin:0 auto;border-radius:2px;"/></p><p style="margin:6px 0 24px;text-align:center;font-size:13px;color:#999;line-height:1.6;">图 6｜三套切分的 IC：样本内 +0.10~+0.12，样本外全部为负</p>
+<p style="margin:22px 0 6px;text-align:center;"><img src="file:///docs/wechat/img/fig5_ic_decay.png" style="max-width:100%;display:block;margin:0 auto;border-radius:2px;"/></p><p style="margin:6px 0 24px;text-align:center;font-size:13px;color:#999;line-height:1.6;">图 6｜三套切分的 IC：样本内 +0.10~+0.12，样本外全部为负</p>
 <section style="margin:20px 0;overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:14px;table-layout:auto;margin:0;">
 <thead>
 <tr>
@@ -339,7 +339,7 @@
 <section style="border-left:4px solid #E67E22;padding-left:11px;margin:40px 0 18px;"><span style="font-size:19px;font-weight:700;color:#1a1a1a;line-height:1.45;">十、复现</span></section>
 <p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">所有代码和结果都在本地 ：</p>
 <section style="margin:20px 0;padding:14px 16px;background:#FAFAFA;border:1px solid #EEE;border-radius:4px;overflow-x:auto;"><pre style="margin:0;padding:0;background:transparent;font-family:Consolas,Monaco,'Courier New',monospace;font-size:13px;line-height:1.8;white-space:pre-wrap;word-break:break-all;color:#333;"><code class="language-bash" style="font-family:Consolas,Monaco,'Courier New',monospace;background:transparent;padding:0;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;"># 环境：pyqlib 0.9.8 + 日更数据（chenditc/investment_data 2026-10-27）
-set JAC_PROVIDER=D:\Project\qlib\qlib_data\cn_data_2026
+set JAC_PROVIDER=qlib_data\cn_data_2026
 set JAC_RESULTS=results_A
 
 # 选型（walk-forward）+ 回测

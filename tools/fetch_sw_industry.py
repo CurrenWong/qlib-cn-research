@@ -17,7 +17,7 @@
 
 ## 用法
 ```cmd
-cd /d D:\\Project\\qlib
+cd /d <repo>
 .venv\\Scripts\\python.exe tools\\fetch_sw_industry.py --source sws
 .venv\\Scripts\\python.exe tools\\fetch_sw_industry.py --source tushare
 ```

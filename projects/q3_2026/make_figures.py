@@ -4,12 +4,18 @@ import json
 from pathlib import Path
 
 import matplotlib
+
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[2])
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 from matplotlib.patches import FancyBboxPatch  # noqa: E402
 
-HERE = Path(r"D:\Project\qlib\projects\q3_2026")
+HERE = Path(_ROOT + r"/projects/q3_2026")
 IMG = HERE / "img"
 IMG.mkdir(exist_ok=True)
 D = json.loads((HERE / "data.json").read_text(encoding="utf-8"))

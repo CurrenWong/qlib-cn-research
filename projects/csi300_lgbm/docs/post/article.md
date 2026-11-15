@@ -304,7 +304,7 @@ Top 10 近 6 个月走势（qlib 前复权价，起点=100）。
 
 
 ```bash
-cd /d D:\Project\qlib\projects\csi300_lgbm\tools
+cd /d projects\csi300_lgbm\tools
 
 ..\..\..\.venv\Scripts\python.exe build_dataset.py    # 取数 → 30 特征 + 标签
 ..\..\..\.venv\Scripts\python.exe train_select.py      # 超参搜索 + walk-forward + 选型

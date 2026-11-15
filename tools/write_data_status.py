@@ -15,8 +15,14 @@ from pathlib import Path
 
 import numpy as np
 
-DEFAULT_DIR = r"D:\Project\qlib\qlib_data\cn_data_2026"
-DEFAULT_OUT = r"D:\Project\qlib\DATA_STATUS.md"
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[1])
+
+DEFAULT_DIR = _ROOT + r"/qlib_data/cn_data_2026"
+DEFAULT_OUT = _ROOT + r"/DATA_STATUS.md"
 WATCH = ["SH600418", "SH000300"]
 
 
@@ -151,11 +157,11 @@ def main():
 
 ```cmd
 :: 普通交易日（只追加当天，历史零改动；用不复权接口，前复权接口被 WAF 封时也能用）
-cd /d D:\\Project\\qlib
-.venv\\Scripts\\python.exe tools\\append_latest_bars.py --dir D:\\Project\\qlib\\qlib_data\\cn_data_2026
+cd /d <repo>
+.venv\\Scripts\\python.exe tools\\append_latest_bars.py --dir qlib_data\\cn_data_2026
 
 :: 分红送股之后（factor 变了，必须全历史重写）
-.venv\\Scripts\\python.exe tools\\update_symbol_bins.py --dir D:\\Project\\qlib\\qlib_data\\cn_data_2026
+.venv\\Scripts\\python.exe tools\\update_symbol_bins.py --dir qlib_data\\cn_data_2026
 
 :: 只想刷新本文件
 .venv\\Scripts\\python.exe tools\\write_data_status.py

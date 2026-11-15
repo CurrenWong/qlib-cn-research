@@ -8,7 +8,13 @@ import sys
 import pandas as pd
 import requests
 
-SRC = r"C:\Users\curre\Downloads\qlib_bin.tar.gz"
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[1])
+
+SRC = str(_Path.home() / "Downloads" / "qlib_bin.tar.gz")
 MANIFEST_URL = "https://github.com/chenditc/investment_data/releases/download/2026-10-27/qlib_bin.manifest.json"
 
 
@@ -46,14 +52,14 @@ def main():
     print("\n" + "=" * 70)
     print("2) 数据字段与 600418 覆盖（cn_data_2026）")
     print("=" * 70)
-    sys.path.insert(0, r"D:\Project\qlib")
+    sys.path.insert(0, _ROOT)
     import qlib
     from qlib.constant import REG_CN
     from qlib.data import D
 
-    qlib.init(provider_uri=r"D:\Project\qlib\qlib_data\cn_data_2026", region=REG_CN)
+    qlib.init(provider_uri=_ROOT + r"/qlib_data/cn_data_2026", region=REG_CN)
 
-    root = r"D:\Project\qlib\qlib_data\cn_data_2026"
+    root = _ROOT + r"/qlib_data/cn_data_2026"
     feat = os.path.join(root, "features", "sh600418")
     print("600418 目录字段:", sorted(os.listdir(feat)) if os.path.isdir(feat) else "目录不存在")
 

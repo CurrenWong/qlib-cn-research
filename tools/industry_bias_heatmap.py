@@ -23,7 +23,7 @@
 
 ## 用法
 ```cmd
-cd /d D:\\Project\\qlib
+cd /d <repo>
 .venv\\Scripts\\python.exe tools\\industry_bias_heatmap.py
 .venv\\Scripts\\python.exe tools\\industry_bias_heatmap.py --periods 6,20,60,120 --days 60
 .venv\\Scripts\\python.exe tools\\industry_bias_heatmap.py --refresh          :: 忽略缓存重抓

@@ -10,6 +10,12 @@ from pathlib import Path
 
 from bs4 import BeautifulSoup
 
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[3])
+
 
 def inline(node):
     """行内节点 → markdown 文本。"""
@@ -131,7 +137,7 @@ def convert(html_path: Path) -> str:
 
 def main():
     src = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(
-        r"D:\Project\qlib\projects\csi300_lgbm\report\report.html")
+        _ROOT + r"/projects/csi300_lgbm/report/report.html")
     dst = Path(sys.argv[2]) if len(sys.argv) > 2 else src.with_suffix(".md")
     md = convert(src)
     dst.write_text(md, encoding="utf-8")

@@ -234,7 +234,7 @@
 ## 10. 复现
 
 ```cmd
-cd /d D:\Project\qlib\projects\iflytek_002230\news_attribution
+cd /d projects\iflytek_002230\news_attribution
 set "PYTHONWARNINGS=ignore"
 
 :: 1) 抓公告/新闻（已缓存 news_cache\，重跑会覆盖）

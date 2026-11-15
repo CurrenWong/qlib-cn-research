@@ -1,7 +1,7 @@
 """A 口径持仓的每日净值追踪（2026-11-02 开盘买入起，连续追踪一个月）。
 
 用法（手动跑，按用户偏好不注册定时任务）：
-    D:\\Project\\qlib\\.venv\\Scripts\\python.exe tools\\track_pnl.py
+    .venv\\Scripts\\python.exe tools\\track_pnl.py
 
 行为：
   1. 读冻结的持仓台账 results/positions_A.json（不存在则从 results/pnl_monday.json 自动生成）

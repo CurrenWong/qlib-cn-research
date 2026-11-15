@@ -2,7 +2,13 @@
 
 import pandas as pd
 
-P = r"D:\Project\qlib\projects\csi300_lgbm\data"
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[3])
+
+P = _ROOT + r"/projects/csi300_lgbm/data"
 
 for name in ["panel.parquet", "features.parquet"]:
     d = pd.read_parquet(f"{P}\\{name}")

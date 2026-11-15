@@ -4,6 +4,12 @@ from pathlib import Path
 
 import numpy as np
 
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[2])
+
 
 def read_bin(path):
     arr = np.fromfile(path, dtype=np.float32)
@@ -11,7 +17,7 @@ def read_bin(path):
 
 
 def main():
-    d = Path(r"D:\Project\qlib\qlib_data\_test_update")
+    d = Path(_ROOT + r"/qlib_data/_test_update")
     cal = [x.strip() for x in (d / "calendars" / "day.txt").read_text().splitlines() if x.strip()]
     print("日历长度:", len(cal), "末日:", cal[-1], "| 2001-08-24 下标:", cal.index("2001-08-24") if "2001-08-24" in cal else "不在日历")
 

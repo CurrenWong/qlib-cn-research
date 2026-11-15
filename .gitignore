@@ -27,6 +27,8 @@
 *.pptx
 *.xlsx
 *.xls
+# 例外：README / 文档正文要用的示意图，允许进仓库（体积小、需要长期可见）
+!docs/img/*.png
 # 音视频
 *.wav
 *.mp3

@@ -10,7 +10,7 @@
 |---|---|
 | **数据最新到** | **2026-10-30** |
 | 状态文件生成时间 | 2026-11-05 21:25:35 |
-| 数据目录 | `D:\Project\qlib\qlib_data\cn_data_2026` |
+| 数据目录 | `qlib_data\cn_data_2026` |
 | 交易日历 | 2000-01-04 ~ 2026-10-30（6499 个交易日） |
 | 股票数 | instruments/all.txt 共 6172 条（含已退市；按日期区间过滤后 2026 年在市约 5600 只） |
 | 数据来源 | `chenditc/investment_data` release **2026-10-27**（qlib_bin.tar.gz，569,575,728 bytes）+ 后续按日追加 |
@@ -33,17 +33,17 @@
 
 ```cmd
 :: 普通交易日（只追加当天，历史零改动；用不复权接口，前复权接口被 WAF 封时也能用）
-cd /d D:\Project\qlib
-.venv\Scripts\python.exe tools\append_latest_bars.py --dir D:\Project\qlib\qlib_data\cn_data_2026
+cd /d <repo>
+.venv\Scripts\python.exe tools\append_latest_bars.py --dir qlib_data\cn_data_2026
 
 :: 分红送股之后（factor 变了，必须全历史重写）
-.venv\Scripts\python.exe tools\update_symbol_bins.py --dir D:\Project\qlib\qlib_data\cn_data_2026
+.venv\Scripts\python.exe tools\update_symbol_bins.py --dir qlib_data\cn_data_2026
 
 :: 只想刷新本文件
 .venv\Scripts\python.exe tools\write_data_status.py
 ```
 
-每次更新会自动备份到 `D:\Project\qlib\qlib_data\cn_data_2026\_backup\<时间戳>\`。
+每次更新会自动备份到 `qlib_data\cn_data_2026\_backup\<时间戳>\`。
 
 ## 相关文档
 

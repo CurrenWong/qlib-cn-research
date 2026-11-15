@@ -8,6 +8,12 @@ from pathlib import Path
 
 import matplotlib
 
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[2])
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
@@ -19,7 +25,7 @@ plt.rcParams["font.sans-serif"] = ["Microsoft YaHei", "SimHei", "DejaVu Sans"]
 plt.rcParams["axes.unicode_minus"] = False
 
 HERE = Path(__file__).resolve().parent
-SNAP = Path(r"D:\Project\qlib\data\sw_industry\bias\bias_snapshot.csv")
+SNAP = Path(_ROOT + r"/data/sw_industry/bias/bias_snapshot.csv")
 OUT = HERE / "img" / "cover.png"
 
 df = pd.read_csv(SNAP, index_col=0, encoding="utf-8-sig")

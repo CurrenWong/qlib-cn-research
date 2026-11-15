@@ -15,7 +15,7 @@
 
 ## 用法
 ```cmd
-cd /d D:\\Project\\qlib
+cd /d <repo>
 .venv\\Scripts\\python.exe tools\\selftest_fetch.py            :: 默认：离线项全跑 + 网络项走缓存
 .venv\\Scripts\\python.exe tools\\selftest_fetch.py --online   :: 强制重新联网抓（会慢）
 .venv\\Scripts\\python.exe tools\\selftest_fetch.py --offline  :: 只跑离线项

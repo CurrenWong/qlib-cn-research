@@ -1,6 +1,12 @@
 import pandas as pd
 
-p = r"D:\Project\qlib\projects\trend_combo\data\scores.parquet"
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[3])
+
+p = _ROOT + r"/projects/trend_combo/data/scores.parquet"
 d = pd.read_parquet(p, columns=["datetime", "symbol", "close", "mom_20", "ma_dist_20",
                                  "vol_20", "rsi_14", "price_score", "fund_score"])
 s = d[d["symbol"] == "SZ000988"]

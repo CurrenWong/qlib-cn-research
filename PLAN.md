@@ -1,12 +1,12 @@
 # Qlib 安装与示例跑通计划
 
-目标：在 D:\Project\qlib 下用 uv 建虚拟环境，安装 GitHub 版 microsoft/qlib，跑通官方示例代码。
+目标：在 <repo> 下用 uv 建虚拟环境，安装 GitHub 版 microsoft/qlib，跑通官方示例代码。
 
 ## ✅ 状态：全部完成（2026-10-28）
 
 | 步骤 | 结果 |
 |---|---|
-| 1. 建目录 | ✅ D:\Project\qlib |
+| 1. 建目录 | ✅ <repo> |
 | 2. `uv venv` | ✅ Python 3.12.12 |
 | 3. `uv pip install git+...qlib.git` | ✅ pyqlib 0.9.8 @ 5435523，一次编译成功，无需回退 PyPI |
 | 3b. 额外：`pip-system-certs` | ✅ 解决 Watt Toolkit MITM 证书问题（原计划未预见） |

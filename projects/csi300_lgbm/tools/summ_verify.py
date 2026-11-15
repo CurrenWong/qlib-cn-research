@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-root = Path(r"C:\Users\curre\.copaw\workspaces\J6c4mu\dist\csi300_lgbm\logs")
+root = Path(r"<multi-platform-dist>\dist\csi300_lgbm\logs")
 for f in ["verify.json", "verify_frames.json", "verify_frames2.json", "verify_precise.json"]:
     p = root / f
     if not p.exists():

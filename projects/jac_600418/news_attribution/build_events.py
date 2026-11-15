@@ -1,6 +1,6 @@
 """从本地 qlib 数据生成 600418 的"明显涨跌"事件表。
 
-数据源：D:\\Project\\qlib\\qlib_data\\cn_data_2026（已校验到 2026-10-28）
+数据源：qlib_data\\cn_data_2026（已校验到 2026-10-28）
 输出：events.csv
 
 事件定义（三档，取并集）：
@@ -17,7 +17,13 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-QLIB_DIR = Path(r"D:\Project\qlib\qlib_data\cn_data_2026")
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[3])
+
+QLIB_DIR = Path(_ROOT + r"/qlib_data/cn_data_2026")
 OUT = Path(__file__).resolve().parent / "events.csv"
 
 SYM = "sh600418"

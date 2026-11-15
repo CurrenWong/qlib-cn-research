@@ -1,13 +1,19 @@
 """Qlib 官方 Quick Start 示例（对应 README「Initialization」+「Get stock data」）。
 
-数据源：D:\\Project\\qlib\\qlib_data\\cn_data（脚本 get_data.py qlib_data 下载后解压）
+数据源：qlib_data\\cn_data（脚本 get_data.py qlib_data 下载后解压）
 """
 
 import qlib
 from qlib.constant import REG_CN
 from qlib.data import D
 
-PROVIDER_URI = r"D:\Project\qlib\qlib_data\cn_data"
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[1])
+
+PROVIDER_URI = _ROOT + r"/qlib_data/cn_data"
 
 # 1. 初始化
 qlib.init(provider_uri=PROVIDER_URI, region=REG_CN)

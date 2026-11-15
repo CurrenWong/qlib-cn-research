@@ -17,13 +17,19 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[3])
+
 HERE = Path(__file__).resolve().parent
 PROJ = HERE.parent
 DATA = PROJ / "data"
 RESULTS = PROJ / "results"
 RESULTS.mkdir(exist_ok=True)
 
-PRICE_FEATS = Path(r"D:\Project\qlib\projects\csi300_lgbm\data\features.parquet")
+PRICE_FEATS = Path(_ROOT + r"/projects/csi300_lgbm/data/features.parquet")
 
 # ---------------------------------------------------------------- 因子分组
 # 方向：+1 表示"数值越大越看多"。方向在 eval 里会用训练期 IC 符号复核。

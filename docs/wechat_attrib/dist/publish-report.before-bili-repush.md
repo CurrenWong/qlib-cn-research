@@ -59,7 +59,7 @@ https://baijiahao.baidu.com/builder/rc/edit?type=news&article_id=188043610946660
 
 https://juejin.cn/editor/drafts/7701991107366928393
 
-封面走 `--cover D:\Project\qlib\docs\wechat_attrib\dist\juejin\cover.png`（绝对路径），CLI 显示 `封面: (本地图片)`。
+封面走 `--cover docs\wechat_attrib\dist\juejin\cover.png`（绝对路径），CLI 显示 `封面: (本地图片)`。
 
 ### ⚠ B站专栏 — 0/7（已知故障，未修复）
 

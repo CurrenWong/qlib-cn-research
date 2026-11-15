@@ -15,7 +15,7 @@ Tushare SDK 把错误细节吞得很干净——`pro.daily()` 抛的异常只有
 
 ## 用法
 ```cmd
-cd /d D:\\Project\\qlib
+cd /d <repo>
 .venv\\Scripts\\python.exe tools\\check_tushare.py
 .venv\\Scripts\\python.exe tools\\check_tushare.py --token <另一个token>
 ```

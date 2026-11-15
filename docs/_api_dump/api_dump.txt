@@ -1,5 +1,5 @@
 qlib version: 0.9.8
-qlib path: D:\Project\qlib\.venv\Lib\site-packages\qlib
+qlib path: .venv\Lib\site-packages\qlib
 
 ==============================================================================
 qlib 顶层 API
@@ -11,8 +11,8 @@ YAML(*, typ: 'Optional[Union[List[Text], Text]]' = None, pure: 'Any' = False, ou
     
 auto_init(**kwargs)
     This function will init qlib automatically with following priority
-config = <module 'qlib.config' from 'D:\\Project\\qlib\\.venv\\Lib\\site-packages\\qlib\\config.py'>
-constant = <module 'qlib.constant' from 'D:\\Project\\qlib\\.venv\\Lib\\site-packages\\qlib\\constant.py'>
+config = <module 'qlib.config' from '.venv\\Lib\\site-packages\\qlib\\config.py'>
+constant = <module 'qlib.constant' from '.venv\\Lib\\site-packages\\qlib\\constant.py'>
 get_module_logger = <qlib.log._QLibLoggerManager object at 0x000001E5AAAE1A30>
 get_project_path(config_name='config.yaml', cur_path: Union[pathlib.Path, str, NoneType] = None) -> pathlib.Path
     If users are building a project follow the following pattern.
@@ -22,12 +22,12 @@ init(default_conf='client', **kwargs)
     Parameters
 init_from_yaml_conf(conf_path, **kwargs)
     init_from_yaml_conf
-log = <module 'qlib.log' from 'D:\\Project\\qlib\\.venv\\Lib\\site-packages\\qlib\\log.py'>
-logging = <module 'logging' from 'C:\\Users\\curre\\.conda\\envs\\copaw\\Lib\\logging\\__init__.py'>
+log = <module 'qlib.log' from '.venv\\Lib\\site-packages\\qlib\\log.py'>
+logging = <module 'logging' from '<venv-python>\\Lib\\logging\\__init__.py'>
 os = <module 'os' (frozen)>
-platform = <module 'platform' from 'C:\\Users\\curre\\.conda\\envs\\copaw\\Lib\\platform.py'>
-re = <module 're' from 'C:\\Users\\curre\\.conda\\envs\\copaw\\Lib\\re\\__init__.py'>
-subprocess = <module 'subprocess' from 'C:\\Users\\curre\\.conda\\envs\\copaw\\Lib\\subprocess.py'>
+platform = <module 'platform' from '<venv-python>\\Lib\\platform.py'>
+re = <module 're' from '<venv-python>\\Lib\\re\\__init__.py'>
+subprocess = <module 'subprocess' from '<venv-python>\\Lib\\subprocess.py'>
 
 ==============================================================================
 qlib.data.D (数据入口) 的方法
@@ -427,7 +427,7 @@ Path(*args, **kwargs)
 TYPE_CHECKING = False
 Tuple = typing.Tuple
 Union = typing.Union
-account = <module 'qlib.backtest.account' from 'D:\\Project\\qlib\\.venv\\Lib\\site-packages\\qlib\\backtest\\account.py'>
+account = <module 'qlib.backtest.account' from '.venv\\Lib\\site-packages\\qlib\\backtest\\account.py'>
 annotations = _Feature((3, 7, 0, 'beta', 1), None, 16777216)
 backtest(start_time: 'Union[pd.Timestamp, str]', end_time: 'Union[pd.Timestamp, str]', strategy: 'Union[str, dict, object, Path]', executor: 'Union[str, dict, object, Path]', benchmark: 'str' = 'SH000300', account: 'Union[float, int, dict]' = 1000000000.0, exchange_kwargs: 'dict' = {}, pos_type: 'str' = 'Position') -> 'Tuple[PORT_METRIC, INDICATOR_METRIC]'
     initialize the strategy and executor, then backtest function for the interaction of the outermost strategy and
@@ -437,11 +437,11 @@ collect_data(start_time: 'Union[pd.Timestamp, str]', end_time: 'Union[pd.Timesta
     initialize the strategy and executor, then collect the trade decision data for rl training
 collect_data_loop(start_time: 'Union[pd.Timestamp, str]', end_time: 'Union[pd.Timestamp, str]', trade_strategy: 'BaseStrategy', trade_executor: 'BaseExecutor', return_value: 'dict | None' = None) -> 'Generator[BaseTradeDecision, Optional[BaseTradeDecision], None]'
     Generator for collecting the trade decision data for rl training
-copy = <module 'copy' from 'C:\\Users\\curre\\.conda\\envs\\copaw\\Lib\\copy.py'>
+copy = <module 'copy' from '<venv-python>\\Lib\\copy.py'>
 create_account_instance(start_time: 'Union[pd.Timestamp, str]', end_time: 'Union[pd.Timestamp, str]', benchmark: 'Optional[str]', account: 'Union[float, int, dict]', pos_type: 'str' = 'Position') -> 'Account'
     # TODO: is very strange pass benchmark_config in the account (maybe for report)
-decision = <module 'qlib.backtest.decision' from 'D:\\Project\\qlib\\.venv\\Lib\\site-packages\\qlib\\backtest\\decision.py'>
-exchange = <module 'qlib.backtest.exchange' from 'D:\\Project\\qlib\\.venv\\Lib\\site-packages\\qlib\\backtest\\exchange.py'>
+decision = <module 'qlib.backtest.decision' from '.venv\\Lib\\site-packages\\qlib\\backtest\\decision.py'>
+exchange = <module 'qlib.backtest.exchange' from '.venv\\Lib\\site-packages\\qlib\\backtest\\exchange.py'>
 format_decisions(decisions: 'List[BaseTradeDecision]') -> 'Optional[Tuple[str, List[Tuple[BaseTradeDecision, Union[Tuple, None]]]]]'
     format the decisions collected by `qlib.backtest.collect_data`
 get_exchange(exchange: 'Union[str, dict, object, Path]' = None, freq: 'str' = 'day', start_time: 'Union[pd.Timestamp, str]' = None, end_time: 'Union[pd.Timestamp, str]' = None, codes: 'Union[list, str]' = 'all', subscribe_fields: 'list' = [], open_cost: 'float' = 0.0015, close_cost: 'float' = 0.0025, min_cost: 'float' = 5.0, limit_threshold: 'Union[Tuple[str, str], float, None] | None' = None, deal_price: 'Union[str, Tuple[str, str], List[str]] | None' = None, **kwargs: 'Any') -> 'Exchange'
@@ -449,15 +449,15 @@ get_exchange(exchange: 'Union[str, dict, object, Path]' = None, freq: 'str' = 'd
 get_module_logger = <qlib.log._QLibLoggerManager object at 0x000001E5AAAE1A30>
 get_strategy_executor(start_time: 'Union[pd.Timestamp, str]', end_time: 'Union[pd.Timestamp, str]', strategy: 'Union[str, dict, object, Path]', executor: 'Union[str, dict, object, Path]', benchmark: 'Optional[str]' = 'SH000300', account: 'Union[float, int, dict]' = 1000000000.0, exchange_kwargs: 'dict' = {}, pos_type: 'str' = 'Position') -> 'Tuple[BaseStrategy, BaseExecutor]'
     
-high_performance_ds = <module 'qlib.backtest.high_performance_ds' from 'D:\\Project\\qlib\\.venv\\Lib\\site-packages\\qlib\\backtest\\high_performance_ds.py'>
+high_performance_ds = <module 'qlib.backtest.high_performance_ds' from '.venv\\Lib\\site-packages\\qlib\\backtest\\high_performance_ds.py'>
 init_instance_by_config(config: Union[qlib.typehint.InstDictConf, str, object, pathlib.Path], default_module=None, accept_types: Union[type, Tuple[type]] = (), try_kwargs: Dict = {}, **kwargs) -> Any
     get initialized instance with config
 logger = <QlibLogger qlib.backtest caller (INFO)>
-pd = <module 'pandas' from 'D:\\Project\\qlib\\.venv\\Lib\\site-packages\\pandas\\__init__.py'>
-position = <module 'qlib.backtest.position' from 'D:\\Project\\qlib\\.venv\\Lib\\site-packages\\qlib\\backtest\\position.py'>
-report = <module 'qlib.backtest.report' from 'D:\\Project\\qlib\\.venv\\Lib\\site-packages\\qlib\\backtest\\report.py'>
-signal = <module 'qlib.backtest.signal' from 'D:\\Project\\qlib\\.venv\\Lib\\site-packages\\qlib\\backtest\\signal.py'>
-utils = <module 'qlib.backtest.utils' from 'D:\\Project\\qlib\\.venv\\Lib\\site-packages\\qlib\\backtest\\utils.py'>
+pd = <module 'pandas' from '.venv\\Lib\\site-packages\\pandas\\__init__.py'>
+position = <module 'qlib.backtest.position' from '.venv\\Lib\\site-packages\\qlib\\backtest\\position.py'>
+report = <module 'qlib.backtest.report' from '.venv\\Lib\\site-packages\\qlib\\backtest\\report.py'>
+signal = <module 'qlib.backtest.signal' from '.venv\\Lib\\site-packages\\qlib\\backtest\\signal.py'>
+utils = <module 'qlib.backtest.utils' from '.venv\\Lib\\site-packages\\qlib\\backtest\\utils.py'>
 
 ==============================================================================
 qlib.backtest.executor.SimulatorExecutor
@@ -524,7 +524,7 @@ load(self, name: str, parents: bool = True, *, trusted: bool = False)
 recorder = <property object at 0x000001E5F0546B10>
 save(self, **kwargs)
     It behaves the same as self.recorder.save_objects.
-ens ERR cannot import name 'Rolling' from 'qlib.model.ens' (D:\Project\qlib\.venv\Lib\site-packages\qlib\model\ens\__init__.py)
+ens ERR cannot import name 'Rolling' from 'qlib.model.ens' (.venv\Lib\site-packages\qlib\model\ens\__init__.py)
 
 ==============================================================================
 qlib 全部子模块

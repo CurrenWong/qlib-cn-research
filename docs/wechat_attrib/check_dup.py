@@ -3,7 +3,13 @@
 import pandas as pd
 from pathlib import Path
 
-ROOT = Path(r"D:\Project\qlib")
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[2])
+
+ROOT = Path(_ROOT)
 for code, p in [("600418", ROOT / "projects/jac_600418/news_attribution"),
                 ("002230", ROOT / "projects/iflytek_002230/news_attribution")]:
     ev = pd.read_csv(p / "events.csv")

@@ -546,7 +546,7 @@ cfo_to_np / inv_turn</td><td class="k">东财 F10</td>
 
 <h2>九、落地清单与复现命令</h2>
 <div class="card kv">
-<pre style="margin:0;white-space:pre-wrap;line-height:1.9">cd /d D:\\Project\\qlib\\projects\\trend_combo
+<pre style="margin:0;white-space:pre-wrap;line-height:1.9">cd /d projects\\trend_combo
 ..\\..\\.venv\\Scripts\\python.exe tools\\fetch_fundamental.py   :: 抓东财 F10 → data\\fund_*.parquet（约 6.5 分钟）
 ..\\..\\.venv\\Scripts\\python.exe tools\\build_panel.py         :: PIT 对齐 → data\\panel_merged.parquet
 ..\\..\\.venv\\Scripts\\python.exe tools\\composite.py          :: 标准化 + 分域 → data\\scores.parquet

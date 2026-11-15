@@ -5,7 +5,13 @@ import sys
 
 import requests
 
-sys.path.insert(0, r"D:\Project\qlib")
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[2])
+
+sys.path.insert(0, _ROOT)
 
 HEADERS = {"Accept": "application/vnd.github+json", "User-Agent": "qlib-probe"}
 
@@ -41,7 +47,7 @@ from pathlib import Path
 
 import pandas as pd
 
-root = Path(r"D:\Project\qlib\qlib_data\cn_data")
+root = Path(_ROOT + r"/qlib_data/cn_data")
 cal = [x.strip() for x in (root / "calendars" / "day.txt").read_text().splitlines() if x.strip()]
 print(f"日历: {cal[0]} ~ {cal[-1]}  共 {len(cal)} 天")
 

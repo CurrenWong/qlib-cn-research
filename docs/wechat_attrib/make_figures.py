@@ -15,6 +15,12 @@ from pathlib import Path
 
 import matplotlib
 
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[2])
+
 matplotlib.use("Agg")
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
@@ -29,7 +35,7 @@ plt.rcParams["axes.grid"] = True
 plt.rcParams["grid.color"] = "#E8E8E8"
 plt.rcParams["grid.linewidth"] = 0.8
 
-ROOT = Path(r"D:\Project\qlib")
+ROOT = Path(_ROOT)
 DATA = ROOT / "qlib_data" / "cn_data_2026"
 JAC = ROOT / "projects" / "jac_600418" / "news_attribution"
 IFLY = ROOT / "projects" / "iflytek_002230" / "news_attribution"

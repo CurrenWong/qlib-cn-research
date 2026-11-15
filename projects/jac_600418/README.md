@@ -69,7 +69,7 @@
 ## 2. 目录结构
 
 ```
-D:\Project\qlib\projects\jac_600418\
+projects\jac_600418\
 ├── README.md                     ← 本文档（策略说明 + 回测结论）
 ├── config.py                     ← 全部参数：路径/切分/因子/超参/成本
 ├── data_model.py                 ← 取数、因子、候选模型、IC 统计
@@ -113,7 +113,7 @@ D:\Project\qlib\projects\jac_600418\
 ### 复现命令
 
 ```cmd
-cd /d D:\Project\qlib\projects\jac_600418
+cd /d projects\jac_600418
 ..\..\.venv\Scripts\python.exe tools\walkforward.py     :: 1) 滚动向前选型（约 2 分钟）
 ..\..\.venv\Scripts\python.exe run_backtest.py          :: 2) 冻结策略 → qlib 回测（约 1 分钟）
 ..\..\.venv\Scripts\python.exe tools\diagnostics.py      :: 3) 诊断数据
@@ -345,14 +345,14 @@ cd /d D:\Project\qlib\projects\jac_600418
 
 | 项 | 值 |
 |---|---|
-| 正式数据目录 | `D:\Project\qlib\qlib_data\cn_data_2026`（`chenditc/investment_data` 日更版）|
-| 旧数据目录 | `D:\Project\qlib\qlib_data\cn_data`（Microsoft 示例快照，日历到 2020-09-25）|
+| 正式数据目录 | `qlib_data\cn_data_2026`（`chenditc/investment_data` 日更版）|
+| 旧数据目录 | `qlib_data\cn_data`（Microsoft 示例快照，日历到 2020-09-25）|
 | 切换方式 | 环境变量 `JAC_PROVIDER`，**不要改代码默认值** |
 | 交易日历 | 2000-01-04 ~ **2026-10-28**（6497 个交易日）|
 | 600418 | 2001-08-24 ~ 2026-10-28，6105 天，末日收盘 9.7542 |
 | 沪深300 | 2005-01-04 ~ 2026-10-28，末日 4.1554 |
 
-**更新脚本**（在 `D:\Project\qlib\tools\`）：
+**更新脚本**（在 `tools\`）：
 
 | 脚本 | 什么时候用 | 干什么 |
 |---|---|---|
@@ -364,7 +364,7 @@ cd /d D:\Project\qlib\projects\jac_600418
 
 两套数据的兼容性已对账：2019-01~2020-09 旧源 +53.00% vs 新源 +53.02%，价格比值恒定 1.39（只是复权基准不同）→ **换源不需要重做历史结论**。
 
-详见 `D:\Project\qlib\docs\DATA_UPDATE.md`（方案对比）与 `D:\Project\qlib\DATA_STATUS.md`（当前状态，自动生成）。
+详见 `docs\DATA_UPDATE.md`（方案对比）与 `DATA_STATUS.md`（当前状态，自动生成）。
 
 ---
 
@@ -446,9 +446,9 @@ cd /d D:\Project\qlib\projects\jac_600418
 ### 12.6 复现命令
 
 ```cmd
-cd /d D:\Project\qlib\projects\jac_600418
-set "JAC_PROVIDER=D:\Project\qlib\qlib_data\cn_data_2026"
-set "JAC_RESULTS=D:\Project\qlib\projects\jac_600418\results_2026_frozen"
+cd /d projects\jac_600418
+set "JAC_PROVIDER=qlib_data\cn_data_2026"
+set "JAC_RESULTS=projects\jac_600418\results_2026_frozen"
 set "JAC_DATA_END=2026-12-31"
 set "JAC_TEST_END=2026-10-26"
 ..\..\.venv\Scripts\python.exe run_backtest.py
@@ -552,8 +552,8 @@ B 的 walk-forward IR 均值最高（+0.394，5/10 折为正），测试期却�
 ### 13.7 复现命令
 
 ```cmd
-cd /d D:\Project\qlib\projects\jac_600418
-set "JAC_PROVIDER=D:\Project\qlib\qlib_data\cn_data_2026"
+cd /d projects\jac_600418
+set "JAC_PROVIDER=qlib_data\cn_data_2026"
 set "JAC_DATA_END=2026-12-31"
 set "PYTHONWARNINGS=ignore"
 

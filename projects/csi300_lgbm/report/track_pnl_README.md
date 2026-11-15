@@ -6,7 +6,7 @@
 ## 一、每日一条命令
 
 ```bat
-D:\Project\qlib\.venv\Scripts\python.exe D:\Project\qlib\projects\csi300_lgbm\tools\track_pnl.py
+.venv\Scripts\python.exe projects\csi300_lgbm\tools\track_pnl.py
 ```
 
 - **手动跑，不注册定时任务**（沿用本项目既有约定：数据更新也是手动一条命令 + 自动刷新状态文档）
@@ -63,17 +63,17 @@ D:\Project\qlib\.venv\Scripts\python.exe D:\Project\qlib\projects\csi300_lgbm\to
 
 ```bat
 :: 1) 把 qlib 本地行情补到 11-30（注意 --until 排除当天未收盘的 bar）
-D:\Project\qlib\.venv\Scripts\python.exe D:\Project\qlib\tools\append_latest_bars.py ^
-  --dir D:\Project\qlib\qlib_data\cn_data_2026 ^
-  --symbols-file D:\Project\qlib\projects\csi300_lgbm\universe_latest.txt --until 2026-11-30
+.venv\Scripts\python.exe tools\append_latest_bars.py ^
+  --dir qlib_data\cn_data_2026 ^
+  --symbols-file projects\csi300_lgbm\universe_latest.txt --until 2026-11-30
 
 :: 2) 用冻结的超参跑最新排名 → results/picks_K20.json
-cd /d D:\Project\qlib\projects\csi300_lgbm
-D:\Project\qlib\.venv\Scripts\python.exe tools\rank_latest.py 20
+cd /d projects\csi300_lgbm
+.venv\Scripts\python.exe tools\rank_latest.py 20
 
 :: 3) 还原真实价 → results/picks_K20_price.json
 ::    ⚠ real_price.py 里日期是硬编码的 "2026-10-30"（start/end 与 as_of），月末跑前必须改成 2026-11-30
-D:\Project\qlib\.venv\Scripts\python.exe tools\real_price.py
+.venv\Scripts\python.exe tools\real_price.py
 
 :: 4) 对比当前持仓：谁掉出 top40 → 要换掉的名单；谁是新进 top20 → 要买进的名单
 :: 5) 按 A 口径算换仓金额与成本（买 0.05% / 卖 0.15%，每笔最低 5 元）

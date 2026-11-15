@@ -8,7 +8,7 @@
 
 ## 用法
 ```cmd
-cd /d D:\\Project\\qlib
+cd /d <repo>
 .venv\\Scripts\\python.exe tools\\verify_sw_industry.py
 ```
 """

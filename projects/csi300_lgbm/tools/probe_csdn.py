@@ -2,6 +2,12 @@
 
 import asyncio
 
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[3])
+
 
 async def main():
     from playwright.async_api import async_playwright
@@ -22,7 +28,7 @@ async def main():
                       .slice(0,20)};
         }""")
         print("内容管理:", info)
-        await pg.screenshot(path=r"D:\Project\qlib\projects\csi300_lgbm\docs\post\draft_shots\csdn_manage.png")
+        await pg.screenshot(path=_ROOT + r"/projects/csi300_lgbm/docs/post/draft_shots/csdn_manage.png")
 
         clicked = await pg.evaluate("""() => {
           const els = Array.from(document.querySelectorAll('a,span,li,div'))
@@ -42,7 +48,7 @@ async def main():
                       .slice(0,12)};
         }""")
         print("草稿页:", after)
-        await pg.screenshot(path=r"D:\Project\qlib\projects\csi300_lgbm\docs\post\draft_shots\csdn_drafts.png")
+        await pg.screenshot(path=_ROOT + r"/projects/csi300_lgbm/docs/post/draft_shots/csdn_drafts.png")
         await pg.close()
         await b.close()
 

@@ -8,7 +8,13 @@ import csv
 import qlib
 from qlib.data import D
 
-PROVIDER_URI = r"D:\Project\qlib\qlib_data\cn_data_2026"
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[2])
+
+PROVIDER_URI = _ROOT + r"/qlib_data/cn_data_2026"
 CODES = {"SZ002230": "科大讯飞", "SH600418": "江淮汽车", "SH000300": "沪深300"}
 START, END = "2026-09-15", "2026-10-30"
 
@@ -35,7 +41,7 @@ def main():
         print(f"区间: {cl.index[0].date()} {base:.4f} → {cl.index[-1].date()} {last:.4f}"
               f"  = {(last / base - 1) * 100:+.2f}%")
 
-    with open(r"D:\Project\qlib\projects\q3_2026\price_recent.csv", "w",
+    with open(_ROOT + r"/projects/q3_2026/price_recent.csv", "w",
               newline="", encoding="utf-8-sig") as f:
         w = csv.writer(f)
         w.writerow(["name", "code", "date", "close", "pct"])

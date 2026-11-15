@@ -25,7 +25,7 @@
 ## 复现
 
 ```cmd
-cd /d D:\Project\qlib\docs\wechat_trend_combo
+cd /d docs\wechat_trend_combo
 ..\..\.venv\Scripts\python.exe make_cover.py        :: 封面
 ..\..\.venv\Scripts\python.exe make_source.py       :: → src\article.md + src\img\
 ..\..\.venv\Scripts\python.exe fix_bold.py          :: 修加粗里的句末标点 / 查跨行加粗

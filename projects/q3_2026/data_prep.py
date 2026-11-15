@@ -9,7 +9,13 @@ import json
 import qlib
 from qlib.data import D
 
-OUT = r"D:\Project\qlib\projects\q3_2026\data.json"
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[2])
+
+OUT = _ROOT + r"/projects/q3_2026/data.json"
 Y = 1e8  # 亿
 
 
@@ -131,7 +137,7 @@ import json
 import qlib
 from qlib.data import D
 
-OUT = r"D:\Project\qlib\projects\q3_2026\data.json"
+OUT = _ROOT + r"/projects/q3_2026/data.json"
 Y = 1e8
 
 
@@ -149,7 +155,7 @@ def derive(d):
 
 
 def fetch_prices():
-    qlib.init(provider_uri=r"D:\Project\qlib\qlib_data\cn_data_2026", region="cn")
+    qlib.init(provider_uri=_ROOT + r"/qlib_data/cn_data_2026", region="cn")
     df = D.features(["SZ002230", "SH600418", "SH000300"], ["$close", "$factor"],
                     start_time="2026-09-15", end_time="2026-10-30", freq="day")
     df.index.names = ["instrument", "datetime"]

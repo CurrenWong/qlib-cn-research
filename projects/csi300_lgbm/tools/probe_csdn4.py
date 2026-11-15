@@ -2,6 +2,12 @@
 
 import asyncio
 
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[3])
+
 
 async def main():
     from playwright.async_api import async_playwright
@@ -46,7 +52,7 @@ async def main():
             }""")
             for r in rows:
                 print("  行:", r["href"], "|", r["txt"], "|", r["acts"][:8])
-            await pg.screenshot(path=r"D:\Project\qlib\projects\csi300_lgbm\docs\post\draft_shots\csdn_ours.png")
+            await pg.screenshot(path=_ROOT + r"/projects/csi300_lgbm/docs/post/draft_shots/csdn_ours.png")
         else:
             print("翻完也没命中")
         await pg.close()

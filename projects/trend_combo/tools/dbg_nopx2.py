@@ -4,8 +4,14 @@ import re
 from collections import Counter
 from pathlib import Path
 
-LGBM = Path(r"D:\Project\qlib\projects\csi300_lgbm")
-QLIB = Path(r"D:\Project\qlib\qlib_data\cn_data_2026")
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[3])
+
+LGBM = Path(_ROOT + r"/projects/csi300_lgbm")
+QLIB = Path(_ROOT + r"/qlib_data/cn_data_2026")
 LOG = LGBM / "results" / "update_data.log"
 
 txt = LOG.read_text(encoding="utf-8", errors="replace")

@@ -40,8 +40,8 @@
 
 ```cmd
 :: 每日一条命令（更新 600418 + 沪深300 到最新交易日）
-cd /d D:\Project\qlib
-.venv\Scripts\python.exe tools\update_symbol_bins.py --dir D:\Project\qlib\qlib_data\cn_data_2026
+cd /d <repo>
+.venv\Scripts\python.exe tools\update_symbol_bins.py --dir qlib_data\cn_data_2026
 
 :: 先看会改什么，不落盘
 .venv\Scripts\python.exe tools\update_symbol_bins.py --dir ... --dry-run
@@ -98,10 +98,10 @@ GET https://web.ifzq.gtimg.cn/appstock/app/kline/kline?param=sh600418,day,,,640
 
 ```cmd
 :: 平时用这个（快、安全、不碰历史）
-.venv\Scripts\python.exe tools\append_latest_bars.py --dir D:\Project\qlib\qlib_data\cn_data_2026
+.venv\Scripts\python.exe tools\append_latest_bars.py --dir qlib_data\cn_data_2026
 
 :: 一旦发生分红送股（factor 变了），必须用全历史重写模式
-.venv\Scripts\python.exe tools\update_symbol_bins.py --dir D:\Project\qlib\qlib_data\cn_data_2026
+.venv\Scripts\python.exe tools\update_symbol_bins.py --dir qlib_data\cn_data_2026
 ```
 
 | 场景 | 用哪个 | 原因 |
@@ -125,7 +125,7 @@ SH000300 校准 ×0.001018 → 追加 1 天，共 5297 天
 ```cmd
 schtasks /Create /SC WEEKLY /D MON,TUE,WED,THU,FRI /ST 18:30 ^
   /TN "qlib_daily_update" ^
-  /TR "cmd /c cd /d D:\Project\qlib && .venv\Scripts\python.exe tools\update_symbol_bins.py --dir D:\Project\qlib\qlib_data\cn_data_2026 >> logs\update.log 2>&1"
+  /TR "cmd /c cd /d <repo> && .venv\Scripts\python.exe tools\update_symbol_bins.py --dir qlib_data\cn_data_2026 >> logs\update.log 2>&1"
 ```
 
 - 18:30 跑（A 股 15:00 收盘，行情接口一般 16:00 后稳定）
@@ -251,10 +251,10 @@ chenditc 的 `close.bin = 不复权价 × factor`，而第三方"前复权"在�
 手动更新就两条命令（普通交易日只跑第一条）：
 
 ```cmd
-cd /d D:\Project\qlib
+cd /d <repo>
 :: 普通交易日：只追加当天，历史零改动
-.venv\Scripts\python.exe tools\append_latest_bars.py --dir D:\Project\qlib\qlib_data\cn_data_2026
+.venv\Scripts\python.exe tools\append_latest_bars.py --dir qlib_data\cn_data_2026
 
 :: 分红送股后：factor 变了，必须全历史重写
-.venv\Scripts\python.exe tools\update_symbol_bins.py --dir D:\Project\qlib\qlib_data\cn_data_2026
+.venv\Scripts\python.exe tools\update_symbol_bins.py --dir qlib_data\cn_data_2026
 ```

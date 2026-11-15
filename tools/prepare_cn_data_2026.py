@@ -8,7 +8,7 @@
 它会：
   1. 用 manifest 里的 SHA256 + 大小校验压缩包（不通过直接退出，绝不拿坏数据）
   2. 打印 tar 内顶层结构（确认是 calendars/features/instruments 还是多一层目录）
-  3. 解压到 D:\\Project\\qlib\\qlib_data\\cn_data_2026（已存在则跳过解压）
+  3. 解压到 qlib_data\\cn_data_2026（已存在则跳过解压）
   4. 用 qlib 打开验证：日历区间、600418 行数与最后价格、instruments 数量
 """
 
@@ -22,15 +22,21 @@ import tarfile
 
 import requests
 
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[1])
+
 TAG = "2026-10-27"
 BASE = f"https://github.com/chenditc/investment_data/releases/download/{TAG}"
 MANIFEST_URL = f"{BASE}/qlib_bin.manifest.json"
 
-DATA_DIR = r"D:\Project\qlib\data"
+DATA_DIR = _ROOT + r"/data"
 DEFAULT_SRC = os.path.join(DATA_DIR, f"qlib_bin_{TAG}.tar.gz")
-TARGET = r"D:\Project\qlib\qlib_data\cn_data_2026"
+TARGET = _ROOT + r"/qlib_data/cn_data_2026"
 
-PROVIDER = r"D:\Project\qlib\qlib_data\cn_data_2026"
+PROVIDER = _ROOT + r"/qlib_data/cn_data_2026"
 
 
 def sha256_of(path):
@@ -121,7 +127,7 @@ def validate():
     print("\n" + "=" * 70)
     print("步骤 4/4：用 qlib 验证数据")
     print("=" * 70)
-    sys.path.insert(0, r"D:\Project\qlib")
+    sys.path.insert(0, _ROOT)
     import pandas as pd
 
     import qlib

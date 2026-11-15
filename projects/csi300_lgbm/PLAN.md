@@ -1,8 +1,8 @@
 # PLAN —— 沪深300 × LightGBM 选股策略（训练 / 回测 / 最新推荐）
 
-项目目录：`D:\Project\qlib\projects\csi300_lgbm\`
-数据源：`D:\Project\qlib\qlib_data\cn_data_2026`（最新 **2026-10-30**，上周五收盘，本项目开工时是周一开盘前）
-解释器：`D:\Project\qlib\.venv\Scripts\python.exe`（pyqlib 0.9.8 / lightgbm 4.7.0）
+项目目录：`projects\csi300_lgbm\`
+数据源：`qlib_data\cn_data_2026`（最新 **2026-10-30**，上周五收盘，本项目开工时是周一开盘前）
+解释器：`.venv\Scripts\python.exe`（pyqlib 0.9.8 / lightgbm 4.7.0）
 
 ---
 

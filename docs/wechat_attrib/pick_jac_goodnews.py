@@ -4,7 +4,13 @@ from pathlib import Path
 
 import pandas as pd
 
-D = Path(r"D:\Project\qlib\projects\jac_600418\news_attribution")
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[2])
+
+D = Path(_ROOT + r"/projects/jac_600418/news_attribution")
 
 ev = pd.read_csv(D / "events.csv")
 ev["date"] = ev["date"].astype(str)

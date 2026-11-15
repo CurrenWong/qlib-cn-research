@@ -59,7 +59,7 @@ https://baijiahao.baidu.com/builder/rc/edit?type=news&article_id=188043610946660
 
 https://juejin.cn/editor/drafts/7701991107366928393
 
-封面走 `--cover D:\Project\qlib\docs\wechat_attrib\dist\juejin\cover.png`（绝对路径），CLI 显示 `封面: (本地图片)`。
+封面走 `--cover docs\wechat_attrib\dist\juejin\cover.png`（绝对路径），CLI 显示 `封面: (本地图片)`。
 
 ### ⚠ B站专栏 — 0/7（已知故障，未修复）
 
@@ -106,7 +106,7 @@ B站草稿里的 7 张图位置是空的，要人工在编辑器里插 `dist\bil
 
 ```bash
 python skills/multi-platform-post/scripts/publish.py \
-  --dist D:/Project/qlib/docs/wechat_attrib/dist --platforms bilibili
+  --dist docs/wechat_attrib/dist --platforms bilibili
 ```
 
 仍需人工：标签（量化/股票/数据分析/qlib/投资分析，≤5）、分区（技术）、封面。

@@ -4,6 +4,12 @@ from pathlib import Path
 
 import matplotlib
 
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[2])
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
@@ -12,7 +18,7 @@ import pandas as pd
 plt.rcParams["font.sans-serif"] = ["Microsoft YaHei", "SimHei", "DejaVu Sans"]
 plt.rcParams["axes.unicode_minus"] = False
 
-ROOT = Path(r"D:\Project\qlib")
+ROOT = Path(_ROOT)
 OUT = ROOT / "docs" / "wechat" / "img"
 OUT.mkdir(parents=True, exist_ok=True)
 

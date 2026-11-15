@@ -6,8 +6,14 @@ import time
 
 import requests
 
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[1])
+
 URL = "https://github.com/SunsetWolf/qlib_dataset/releases/download/v2/qlib_data_cn_1d_latest.zip"
-DEST = r"D:\Project\qlib\data\qlib_data_cn_1d_latest.zip"
+DEST = _ROOT + r"/data/qlib_data_cn_1d_latest.zip"
 
 os.makedirs(os.path.dirname(DEST), exist_ok=True)
 

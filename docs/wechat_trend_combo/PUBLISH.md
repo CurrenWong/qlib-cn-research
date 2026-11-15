@@ -57,7 +57,7 @@ img 标签 8 / mmbiz.qpic.cn 8 / data-src 8 / table 7 / h2 橙色竖线 8 / stro
 ## 复现与坑
 
 ```cmd
-cd /d D:\Project\qlib\docs\wechat_trend_combo
+cd /d docs\wechat_trend_combo
 ..\..\.venv\Scripts\python.exe make_cover.py && ..\..\.venv\Scripts\python.exe make_source.py
 ..\..\.venv\Scripts\python.exe fix_bold.py            :: 加粗里的句末标点 / 跨行加粗（本次修掉 12 处）
 ..\..\.venv\Scripts\python.exe build_html.py && ..\..\.venv\Scripts\python.exe html2png.py

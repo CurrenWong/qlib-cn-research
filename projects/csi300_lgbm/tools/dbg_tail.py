@@ -5,9 +5,15 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[3])
+
 
 def main():
-    DATA = Path(r"D:\Project\qlib\qlib_data\cn_data_2026")
+    DATA = Path(_ROOT + r"/qlib_data/cn_data_2026")
     cal = (DATA / "calendars" / "day.txt").read_text().split()
     print("日历最后 6 天:", cal[-6:], "总天数", len(cal))
     for s in ["sh600000", "sh600418", "sz002241", "sh000300"]:

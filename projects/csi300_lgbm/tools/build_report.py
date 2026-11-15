@@ -324,7 +324,7 @@ qlib 的日历到 2026-10-30，但 300 只成分股里 <b>298 只的行情只到
 
 <h3>C. 复现命令</h3>
 <div class="card kv">
-<pre style="margin:0;white-space:pre-wrap;line-height:1.9">cd /d D:\\Project\\qlib\\projects\\csi300_lgbm\\tools
+<pre style="margin:0;white-space:pre-wrap;line-height:1.9">cd /d projects\\csi300_lgbm\\tools
 ..\\..\\..\\.venv\\Scripts\\python.exe build_dataset.py      # 取数 → 30 特征 + 标签
 ..\\..\\..\\.venv\\Scripts\\python.exe train_select.py       # 超参搜索 + walk-forward + 选型
 ..\\..\\..\\.venv\\Scripts\\python.exe backtest.py           # 组合回测 vs 4 基线 + 零成本对照

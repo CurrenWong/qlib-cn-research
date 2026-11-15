@@ -7,5 +7,5 @@
   img/fig4_limit.png  |  涨停次日有 1%~2% 超额，但 20 天后归零；跌停次日继续跌
   img/fig1_panorama.png  |  两个标的 18 年归一化走势与全部事件点（对数轴）
 
-已写入 D:\Project\qlib\docs\wechat_attrib\article.html
-已写入 D:\Project\qlib\docs\wechat_attrib\wechat_body.html
+已写入 docs\wechat_attrib\article.html
+已写入 docs\wechat_attrib\wechat_body.html

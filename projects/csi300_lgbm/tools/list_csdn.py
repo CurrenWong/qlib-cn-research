@@ -1,7 +1,7 @@
 import pathlib
 import re
 
-d = pathlib.Path(r"C:\Users\curre\.copaw\workspaces\J6c4mu\dist\csi300_lgbm\logs")
+d = pathlib.Path(r"<multi-platform-dist>\dist\csi300_lgbm\logs")
 
 
 def read_any(p):

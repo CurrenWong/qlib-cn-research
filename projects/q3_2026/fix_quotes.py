@@ -2,7 +2,13 @@
 """把正文里的直引号成对替换成中文引号（只处理成对的短引号段）。"""
 import re
 
-P = r"D:\Project\qlib\projects\q3_2026\article.md"
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[2])
+
+P = _ROOT + r"/projects/q3_2026/article.md"
 t = open(P, encoding="utf-8").read()
 
 before = t.count('"')

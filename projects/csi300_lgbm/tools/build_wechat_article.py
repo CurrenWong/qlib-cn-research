@@ -12,7 +12,13 @@ from pathlib import Path
 import markdown
 from bs4 import BeautifulSoup
 
-POST = Path(r"D:\Project\qlib\projects\csi300_lgbm\docs\post")
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[3])
+
+POST = Path(_ROOT + r"/projects/csi300_lgbm/docs/post")
 
 P = ("margin:1.05em 0;font-size:16px;line-height:1.9;color:#2E2E33;"
      "letter-spacing:.3px;text-align:justify;")

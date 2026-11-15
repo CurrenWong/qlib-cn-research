@@ -47,7 +47,7 @@ article.md（公众号真源，带【插图 N：…】标记）
 ## 复现
 
 ```cmd
-cd /d D:\Project\qlib\docs\wechat_attrib
+cd /d docs\wechat_attrib
 set "PYTHONWARNINGS=ignore"
 
 :: 1) 两标的对撞表

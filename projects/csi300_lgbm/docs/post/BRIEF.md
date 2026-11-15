@@ -8,9 +8,9 @@
 
 | 项 | 路径 |
 |---|---|
-| 正文（真根源，带 front matter） | `D:\Project\qlib\projects\csi300_lgbm\docs\post\article.md` |
-| 正文配图（10 张） | `D:\Project\qlib\projects\csi300_lgbm\docs\post\img\` |
-| 封面 | `D:\Project\qlib\projects\csi300_lgbm\docs\post\cover.png`（1080×864） |
+| 正文（真根源，带 front matter） | `projects\csi300_lgbm\docs\post\article.md` |
+| 正文配图（10 张） | `projects\csi300_lgbm\docs\post\img\` |
+| 封面 | `projects\csi300_lgbm\docs\post\cover.png`（1080×864） |
 
 正文里的图片引用写的是 `img/xxx.png` 相对路径，和 `article.md` 同级——`adapt.py` 会自动拷贝，不用手动 xcopy。
 

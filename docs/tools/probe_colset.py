@@ -5,9 +5,15 @@ from qlib.constant import REG_CN
 from qlib.contrib.data.handler import Alpha158
 from qlib.data.dataset import DatasetH
 
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[2])
+
 
 def main():
-    qlib.init(provider_uri=r"D:\Project\qlib\qlib_data\cn_data", region=REG_CN)
+    qlib.init(provider_uri=_ROOT + r"/qlib_data/cn_data", region=REG_CN)
     h = Alpha158(
         instruments="csi300", start_time="2018-01-01", end_time="2020-08-01",
         fit_start_time="2018-01-01", fit_end_time="2019-12-31",

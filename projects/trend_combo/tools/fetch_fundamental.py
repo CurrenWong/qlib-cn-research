@@ -25,6 +25,12 @@ from pathlib import Path
 import pandas as pd
 import requests
 
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[3])
+
 HERE = Path(__file__).resolve().parent
 PROJ = HERE.parent
 DATA = PROJ / "data"
@@ -162,7 +168,7 @@ def main():
     if args.symbols:
         syms = [s.strip().upper() for s in args.symbols.split(",") if s.strip()]
     else:
-        feats = pd.read_parquet(r"D:\Project\qlib\projects\csi300_lgbm\data\features.parquet",
+        feats = pd.read_parquet(_ROOT + r"/projects/csi300_lgbm/data/features.parquet",
                                 columns=["symbol"])
         syms = sorted(feats["symbol"].unique().tolist())
     if args.limit:

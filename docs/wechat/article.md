@@ -237,7 +237,7 @@
 
 ```bash
 # 环境：pyqlib 0.9.8 + 日更数据（chenditc/investment_data 2026-10-27）
-set JAC_PROVIDER=D:\Project\qlib\qlib_data\cn_data_2026
+set JAC_PROVIDER=qlib_data\cn_data_2026
 set JAC_RESULTS=results_A
 
 # 选型（walk-forward）+ 回测

@@ -22,7 +22,7 @@ SH600418  原始价比值 MAD 0.000000 | qlib vs 腾讯不复权 日收益差均
 
 ## 用法
 ```cmd
-cd /d D:\\Project\\qlib
+cd /d <repo>
 .venv\\Scripts\\python.exe tools\\verify_fetched_prices.py
 .venv\\Scripts\\python.exe tools\\verify_fetched_prices.py --file data\\prices\\daily_tencent.parquet
 ```

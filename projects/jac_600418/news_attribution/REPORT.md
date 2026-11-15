@@ -22,7 +22,7 @@
 
 | 项 | 结果 |
 |---|---|
-| 来源 | `D:\Project\qlib\qlib_data\cn_data_2026`（日历 2000-01-04 ~ 2026-10-28，6497 天）|
+| 来源 | `qlib_data\cn_data_2026`（日历 2000-01-04 ~ 2026-10-28，6497 天）|
 | 字段 | `close / adjclose / factor / volume / amount / high / low`（`features/sh600418/*.day.bin`）|
 | 收益口径 | `adjclose.pct_change()`（与 `close.pct_change()` 完全一致）|
 | 基准 | 沪深300（`sh000300`），超额 = 个股日收益 − 指数日收益 |
@@ -237,7 +237,7 @@
 ## 7. 复现方式
 
 ```cmd
-cd /d D:\Project\qlib\projects\jac_600418\news_attribution
+cd /d projects\jac_600418\news_attribution
 
 :: 1) 抓新闻与公告（落 news_cache/）
 ..\..\..\.venv\Scripts\python.exe fetch_all.py

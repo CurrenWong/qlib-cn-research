@@ -7,6 +7,12 @@ import qlib
 import requests
 from qlib.data import D
 
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[2])
+
 API = "http://www.cninfo.com.cn/new/hisAnnouncement/query"
 H = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
      "Referer": "http://www.cninfo.com.cn/new/disclosure/stock",
@@ -38,7 +44,7 @@ def main():
                 break
 
     print("\n========== 2026 年股价区间（实际成交价）==========")
-    qlib.init(provider_uri=r"D:\Project\qlib\qlib_data\cn_data_2026", region="cn")
+    qlib.init(provider_uri=_ROOT + r"/qlib_data/cn_data_2026", region="cn")
     df = D.features(["SZ002230", "SH600418", "SH000300"],
                     ["$close", "$factor"], start_time="2026-01-01",
                     end_time="2026-10-30", freq="day")

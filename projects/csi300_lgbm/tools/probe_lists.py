@@ -2,6 +2,12 @@
 
 import asyncio
 
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[3])
+
 CANDS = {
     "juejin": [
         "https://juejin.cn/editor/drafts",
@@ -52,7 +58,7 @@ async def main():
                     print("=" * 10, name, url)
                     print("   ", info)
                     if info["hasTitle"] or info["delCount"]:
-                        await pg.screenshot(path=fr"D:\Project\qlib\projects\csi300_lgbm\docs\post\draft_shots\{name}_list.png")
+                        await pg.screenshot(path=f_ROOT + r"/projects/csi300_lgbm/docs/post/draft_shots/{name}_list.png")
                         print("    → 截图已存")
                         await pg.close()
                         break

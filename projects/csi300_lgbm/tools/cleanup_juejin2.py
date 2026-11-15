@@ -2,6 +2,12 @@
 
 import asyncio
 
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[3])
+
 URL = "https://juejin.cn/editor/drafts"
 TARGET_TITLE = "沪深300 × LightGBM 选股复盘"   # 第一轮的长标题稿（要删）
 
@@ -76,7 +82,7 @@ async def main():
                       .map(e => e.textContent.trim().slice(0,40))};
         }""")
         print("复核:", left)
-        await pg.screenshot(path=r"D:\Project\qlib\projects\csi300_lgbm\docs\post\draft_shots\juejin_after2.png")
+        await pg.screenshot(path=_ROOT + r"/projects/csi300_lgbm/docs/post/draft_shots/juejin_after2.png")
         await pg.close()
         await b.close()
 

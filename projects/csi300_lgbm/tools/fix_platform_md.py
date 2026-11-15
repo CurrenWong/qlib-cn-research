@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 
 dist = Path(sys.argv[1] if len(sys.argv) > 1 else
-            r"C:\Users\curre\.copaw\workspaces\J6c4mu\dist\csi300_lgbm")
+            r"<multi-platform-dist>\dist\csi300_lgbm")
 
 STRIP_BOLD = ["csdn", "bilibili"]
 DROP_QUOTE = ["baijiahao"]

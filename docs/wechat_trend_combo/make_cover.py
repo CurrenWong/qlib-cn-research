@@ -4,6 +4,12 @@ from pathlib import Path
 
 import matplotlib
 
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[2])
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
@@ -15,7 +21,7 @@ plt.rcParams["axes.unicode_minus"] = False
 HERE = Path(__file__).resolve().parent
 OUT = HERE / "img"
 OUT.mkdir(exist_ok=True)
-NAV = Path(r"D:\Project\qlib\projects\trend_combo\results\nav_curves.parquet")
+NAV = Path(_ROOT + r"/projects/trend_combo/results/nav_curves.parquet")
 
 fig = plt.figure(figsize=(10.8, 8.64), dpi=100)
 ax = fig.add_axes([0, 0, 1, 1])

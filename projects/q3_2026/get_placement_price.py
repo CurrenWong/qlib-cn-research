@@ -6,6 +6,12 @@ import re
 import pdfplumber
 import requests
 
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[2])
+
 API = "http://www.cninfo.com.cn/new/hisAnnouncement/query"
 H = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
      "Referer": "http://www.cninfo.com.cn/new/disclosure/stock",
@@ -33,8 +39,8 @@ if target:
     pdf = requests.get(url, headers={"User-Agent": H["User-Agent"],
                                      "Referer": "http://www.cninfo.com.cn/"},
                        timeout=120).content
-    open(r"D:\Project\qlib\projects\q3_2026\pdf\600418_placement.pdf", "wb").write(pdf)
-    with pdfplumber.open(r"D:\Project\qlib\projects\q3_2026\pdf\600418_placement.pdf") as f:
+    open(_ROOT + r"/projects/q3_2026/pdf/600418_placement.pdf", "wb").write(pdf)
+    with pdfplumber.open(_ROOT + r"/projects/q3_2026/pdf/600418_placement.pdf") as f:
         txt = "\n".join((p.extract_text() or "") for p in f.pages[:6])
     print("=" * 60)
     for line in txt.splitlines():

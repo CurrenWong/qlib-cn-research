@@ -1,6 +1,12 @@
 import pandas as pd
 
-P = r"D:\Project\qlib\projects\trend_combo\results"
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[3])
+
+P = _ROOT + r"/projects/trend_combo/results"
 g = pd.read_csv(P + r"\weight_grid_icw.csv")
 cols = ["wp", "wf", "we", "train_ic_f5", "valid_ic_f5", "valid_icir_f5",
         "test_ic_f5", "test_icir_f5", "test_ic_f20", "test_icir_f20"]

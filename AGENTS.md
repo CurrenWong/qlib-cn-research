@@ -1,4 +1,4 @@
-# AGENTS.md —— D:\Project\qlib 项目工作手册
+# AGENTS.md —— <repo> 项目工作手册
 
 > 这份文件是给**在这个仓库里干活的 agent（含我自己）**看的：环境硬约束、数据怎么维护、策略协议、踩过的坑、以及不许做的事。
 > 事实优先于描述；凡是和代码/输出对不上的，以代码为准，并回来改这份文件。
@@ -21,14 +21,14 @@
 
 | 项 | 值 |
 |---|---|
-| 解释器 | `D:\Project\qlib\.venv\Scripts\python.exe`（uv 建，Python 3.12.12）|
+| 解释器 | `.venv\Scripts\python.exe`（uv 建，Python 3.12.12）|
 | qlib | pyqlib **0.9.8 @ commit 5435523**，从 GitHub 装（PyPI 版不装）|
 | 额外依赖 | **`pip-system-certs` 必须装**（见 §3 的 Watt Toolkit 坑）|
 | shell | cmd.exe；`&&` / `&` 都能连写，但 `>` 重定向的目录必须**事先存在** |
 | 数据下载 | 官方脚本不支持续传 → 用 `tools/fetch_data.py`（Range 续传）|
 
 ```cmd
-cd /d D:\Project\qlib
+cd /d <repo>
 .venv\Scripts\python.exe <脚本>
 ```
 
@@ -39,7 +39,7 @@ cd /d D:\Project\qlib
 ## 2. 目录地图
 
 ```
-D:\Project\qlib\                        ← 2026-11-13 起是 git 仓库（只有代码/文档，数据不进）
+                        ← 2026-11-13 起是 git 仓库（只有代码/文档，数据不进）
 ├── .venv\                     uv 虚拟环境（唯一解释器，**不进 git**）
 ├── qlib_data\
 │   ├── cn_data\               旧数据（Microsoft 示例快照，日历到 2020-09-25）
@@ -110,7 +110,7 @@ docs 里 png 29 MB —— 都能由脚本重建（`tools/` + `DATA_UPDATE.md`）
 策略侧用环境变量切，**不要改代码默认值**：
 
 ```cmd
-set "JAC_PROVIDER=D:\Project\qlib\qlib_data\cn_data_2026"
+set "JAC_PROVIDER=qlib_data\cn_data_2026"
 set "JAC_DATA_END=2026-12-31"
 ```
 
@@ -124,8 +124,8 @@ set "JAC_DATA_END=2026-12-31"
 | `verify_update.py` / `verify_production_data.py` | 更新后校验 | 重叠区间对账、停牌 NaN 一致性 |
 
 ```cmd
-cd /d D:\Project\qlib
-.venv\Scripts\python.exe tools\append_latest_bars.py --dir D:\Project\qlib\qlib_data\cn_data_2026
+cd /d <repo>
+.venv\Scripts\python.exe tools\append_latest_bars.py --dir qlib_data\cn_data_2026
 ```
 
 **规矩**：
@@ -201,7 +201,7 @@ cd /d D:\Project\qlib
 **现成工具**（2026-11-13 新增，源自一篇公众号文章的 Tushare 代码，原图有 8 处硬伤已修）：
 
 ```cmd
-cd /d D:\Project\qlib
+cd /d <repo>
 .venv\Scripts\python.exe tools\check_tushare.py                   :: token 体检（认证 vs 权限分开测）
 .venv\Scripts\python.exe tools\fetch_stock_prices.py --source tencent --since 2024-01-01
 .venv\Scripts\python.exe tools\fetch_sw_industry.py            :: 申万一级行业成分（PIT）
@@ -251,8 +251,8 @@ cd /d D:\Project\qlib
 ### 5.5 常用命令
 
 ```cmd
-cd /d D:\Project\qlib\projects\jac_600418
-set "JAC_PROVIDER=D:\Project\qlib\qlib_data\cn_data_2026"
+cd /d projects\jac_600418
+set "JAC_PROVIDER=qlib_data\cn_data_2026"
 set "JAC_DATA_END=2026-12-31"
 set "PYTHONWARNINGS=ignore"      :: qlib 的 RuntimeWarning 会淹没输出
 
@@ -566,7 +566,7 @@ docs\wechat_trend_combo\article.md          公众号真源（【插图 N：…�
 
 ```cmd
 :: 环境自检
-cd /d D:\Project\qlib && .venv\Scripts\python.exe -c "import qlib;print(qlib.__version__)"
+cd /d <repo> && .venv\Scripts\python.exe -c "import qlib;print(qlib.__version__)"
 
 :: 抓取链自检 / Tushare token 体检
 .venv\Scripts\python.exe tools\selftest_fetch.py
@@ -595,7 +595,7 @@ cd /d D:\Project\qlib && .venv\Scripts\python.exe -c "import qlib;print(qlib.__v
 .venv\Scripts\python.exe docs\wechat\make_preview.py
 
 :: 沪深300×LightGBM 组合（projects\csi300_lgbm）
-cd /d D:\Project\qlib\projects\csi300_lgbm
+cd /d projects\csi300_lgbm
 ..\..\.venv\Scripts\python.exe tools\rank_latest.py 20     :: 最新 top20 → results/picks_K20.json
 ..\..\.venv\Scripts\python.exe tools\real_price.py        :: 还原真实价 → picks_K20_price.json（日期硬编码，月末跑前要改）
 ..\..\.venv\Scripts\python.exe tools\pnl_monday.py        :: 算「信号日→今天」的三种口径盈亏
@@ -604,7 +604,7 @@ cd /d D:\Project\qlib\projects\csi300_lgbm
 :: 操作手册：projects\csi300_lgbm\report\track_pnl_README.md
 
 ;; 基本面 × 价量 混合打分框架（projects\trend_combo）
-cd /d D:\Project\qlib\projects\trend_combo
+cd /d projects\trend_combo
 ..\..\.venv\Scripts\python.exe tools\fetch_fundamental.py   :: 抓东财 F10 → data\fund_*.parquet（约 6.5 分钟）
 ..\..\.venv\Scripts\python.exe tools\build_panel.py         :: PIT 对齐（披露日 as-of）→ data\panel_merged.parquet
 ..\..\.venv\Scripts\python.exe tools\composite.py          :: 标准化 + 分域 → data\scores.parquet

@@ -11,7 +11,7 @@
   - 若某只周一停牌（无 K 线）→ 标出
 
 用法：
-    D:\\Project\\qlib\\.venv\\Scripts\\python.exe tools\\pnl_monday.py
+    .venv\\Scripts\\python.exe tools\\pnl_monday.py
 """
 
 import json

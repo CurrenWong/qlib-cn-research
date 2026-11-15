@@ -25,7 +25,7 @@
 ## 复现
 
 ```cmd
-cd D:\Project\qlib\projects\bias_post
+cd projects\bias_post
 ..\..\.venv\Scripts\python.exe make_cover.py       # 封面
 ..\..\.venv\Scripts\python.exe check_article.py     # 数字自检，必须 0 失败
 ..\..\.venv\Scripts\python.exe make_source.py       # 多平台真源

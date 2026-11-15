@@ -8,7 +8,13 @@ from pathlib import Path
 
 from playwright.sync_api import sync_playwright
 
-OUT = Path(r"D:\Project\qlib\projects\csi300_lgbm\docs\post\draft_shots")
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[3])
+
+OUT = Path(_ROOT + r"/projects/csi300_lgbm/docs/post/draft_shots")
 OUT.mkdir(parents=True, exist_ok=True)
 
 PAGES = {

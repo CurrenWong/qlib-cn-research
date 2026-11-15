@@ -1,8 +1,8 @@
 # 发布回执 · qlib 基本面 + 高频价量混合打分（45 因子）
 
 - 标题：方向定错了，信号就是反的：基本面 + 高频价量的混合打分（28 字）
-- 真根源：`D:\Project\qlib\docs\wechat_trend_combo\src\article.md`（**正文一字未改**）
-- 适配产物：`D:\Project\qlib\docs\wechat_trend_combo\dist\trend_combo\`
+- 真根源：`docs\wechat_trend_combo\src\article.md`（**正文一字未改**）
+- 适配产物：`docs\wechat_trend_combo\dist\trend_combo\`
 - 日期：2026-11-05　状态：**5/5 平台草稿箱已建，未公开发布**
 
 > 数据来源：本次 CLI 的实际输出，逐平台落在 `dist\trend_combo\publish-<platform>.log`。

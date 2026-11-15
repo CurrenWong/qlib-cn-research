@@ -1,6 +1,6 @@
 # Qlib 使用手册（v0.9.8 / Windows 实测版）
 
-> 本机环境：`D:\Project\qlib`，venv Python 3.12.12，pyqlib **0.9.8**（git `5435523`），数据 `qlib_data\cn_data`（2007-01-04 ~ 2020-09-25）
+> 本机环境：`<repo>`，venv Python 3.12.12，pyqlib **0.9.8**（git `5435523`），数据 `qlib_data\cn_data`（2007-01-04 ~ 2020-09-25）
 > 所有 API 签名、参数、字段口径均从**已安装的包**里扒出来核对过；`snippets\` 下三份代码**实跑通过**。
 > 配套：环境安装见 [../README.md](../README.md)，完整策略案例见 [../projects/jac_600418/README.md](../projects/jac_600418/README.md)。
 
@@ -33,7 +33,7 @@ import qlib
 from qlib.constant import REG_CN
 from qlib.data import D
 
-qlib.init(provider_uri=r"D:\Project\qlib\qlib_data\cn_data", region=REG_CN)
+qlib.init(provider_uri=r"qlib_data\cn_data", region=REG_CN)
 
 df = D.features(
     ["SH600000"],
@@ -497,7 +497,7 @@ with R.start(experiment_name="my_exp"):
 
 ```yaml
 qlib_init:
-    provider_uri: "D:/Project/qlib/qlib_data/cn_data"
+    provider_uri: "qlib_data/cn_data"
     region: cn
 market: &market csi300
 benchmark: &benchmark SH000300

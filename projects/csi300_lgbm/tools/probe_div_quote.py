@@ -5,6 +5,12 @@
 import json
 import urllib.request
 
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[3])
+
 UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.64; Win64; x64) AppleWebKit/537.36 "
                     "(KHTML, like Gecko) Chrome/120.0 Safari/537.36",
       "Referer": "https://gu.qq.com/"}
@@ -23,7 +29,7 @@ def get(url, headers=None, timeout=25):
 
 
 def main():
-    picks = json.loads(open(r"D:\Project\qlib\projects\csi300_lgbm\results\picks_K20_price.json",
+    picks = json.loads(open(_ROOT + r"/projects/csi300_lgbm/results/picks_K20_price.json",
                             encoding="utf-8").read())
     rows = picks["rows"]
     codes = [r["symbol"] for r in rows]

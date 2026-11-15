@@ -19,6 +19,12 @@ from pathlib import Path
 
 import pandas as pd
 
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[3])
+
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
@@ -96,7 +102,7 @@ def build_daily_frame() -> pd.Series:
     """完整交易日的超额收益序列（002230 - 沪深300）。"""
     import numpy as np
 
-    qlib_dir = Path(r"D:\Project\qlib\qlib_data\cn_data_2026")
+    qlib_dir = Path(_ROOT + r"/qlib_data/cn_data_2026")
     calendar = [x.strip() for x in (qlib_dir / "calendars" / "day.txt").read_text().splitlines() if x.strip()]
 
     def load(sym, field):

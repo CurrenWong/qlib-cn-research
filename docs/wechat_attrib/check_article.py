@@ -135,7 +135,7 @@ for token in ["1347", "4665", "603", "30.1%", "22.3%", "94.1%", "66.7%", "23.4%"
     has(f"含「{token}」", token)
 
 # ---- 不该出现的：代码路径 / 复现承诺 ----
-for token in ["D:\\Project", "check_report.py", "一键复跑", "复现"]:
+for token in ["<repo>", "D:", "check_report.py", "一键复跑", "复现"]:
     checks.append((f"不含「{token}」", token, "-",
                    "OK" if token not in ART else "STILL_PRESENT"))
 

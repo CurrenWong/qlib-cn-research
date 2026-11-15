@@ -6,8 +6,14 @@ from pathlib import Path
 
 import numpy as np
 
-LOG = Path(r"D:\Project\qlib\projects\csi300_lgbm\results\update_data.log")
-DATA = Path(r"D:\Project\qlib\qlib_data\cn_data_2026")
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[3])
+
+LOG = Path(_ROOT + r"/projects/csi300_lgbm/results/update_data.log")
+DATA = Path(_ROOT + r"/qlib_data/cn_data_2026")
 cal = (DATA / "calendars" / "day.txt").read_text().split()
 
 txt = LOG.read_text(encoding="utf-8", errors="replace").replace("\r", "")
@@ -46,7 +52,7 @@ def end_date(sym):
     return cal[start + (size - 4) // 4 - 1]
 
 
-latest = (Path(r"D:\Project\qlib\projects\csi300_lgbm\data\csi300_latest.txt")
+latest = (Path(_ROOT + r"/projects/csi300_lgbm/data/csi300_latest.txt")
           .read_text(encoding="utf-8").split())
 lag = [(s, end_date(s)) for s in latest if end_date(s) != "2026-10-30"]
 print("\n300 只中末日不是 2026-10-30 的:", lag)

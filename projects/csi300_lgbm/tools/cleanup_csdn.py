@@ -2,6 +2,12 @@
 
 import asyncio
 
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[3])
+
 KEEP = "169919034"          # pub6：10 张图里成功 9 张（只差 fig1_nav）
 TITLE = "沪深300"
 
@@ -69,7 +75,7 @@ async def main():
               return out;
             }""", aid)
             print("   删除尝试", aid, res)
-        await pg.screenshot(path=r"D:\Project\qlib\projects\csi300_lgbm\docs\post\draft_shots\csdn_drafts2.png")
+        await pg.screenshot(path=_ROOT + r"/projects/csi300_lgbm/docs/post/draft_shots/csdn_drafts2.png")
         await pg.close()
         await b.close()
 

@@ -11,8 +11,14 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[3])
+
 HERE = Path(__file__).resolve().parent
-QLIB = Path(r"D:\Project\qlib\qlib_data\cn_data_2026")
+QLIB = Path(_ROOT + r"/qlib_data/cn_data_2026")
 OUT = HERE / "analysis.json"
 
 

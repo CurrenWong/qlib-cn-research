@@ -30,7 +30,7 @@
 
 ## 用法
 ```cmd
-cd /d D:\\Project\\qlib
+cd /d <repo>
 :: 图片原版（Tushare 行情，需 token）
 .venv\\Scripts\\python.exe tools\\fetch_stock_prices.py --source tushare --since 2020-01-01 --until 2026-11-12
 :: 免 token 源（腾讯，双域名轮换 + 响应缓存）
@@ -64,6 +64,12 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[1])
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from tushare_common import (  # noqa: E402
@@ -513,7 +519,7 @@ def main() -> int:
                     help="tushare=图片原版（需 token）；tencent=腾讯前复权（免 token）")
     ap.add_argument("--token", default=None, help="Tushare token（默认读环境变量 TUSHARE_TOKEN）")
     ap.add_argument("--symbols", default="", help="逗号分隔的 qlib 代码；留空则用本地 all.txt 全量")
-    ap.add_argument("--universe-file", default=r"D:\Project\qlib\qlib_data\cn_data_2026\instruments\all.txt")
+    ap.add_argument("--universe-file", default=_ROOT + r"/qlib_data/cn_data_2026/instruments/all.txt")
     ap.add_argument("--since", default="2020-01-01")
     ap.add_argument("--until", default=None, help="默认取今天")
     ap.add_argument("--out-dir", default=str(OUT_DIR))

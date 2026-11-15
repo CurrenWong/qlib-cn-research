@@ -3,6 +3,12 @@ import pandas as pd
 
 import model_core as mc
 
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[3])
+
 ctx = mc.load_all()
 dates = ctx["dates"]
 close = ctx["close"]
@@ -24,7 +30,7 @@ for i in range(last - 8, last + 1):
     print(f"  {dates[i].date()}: NaN {int(np.isnan(close[i, pool]).sum()):3d}/{len(pool)}")
 
 # 原始 parquet 检查
-p = pd.read_parquet(r"D:\Project\qlib\projects\csi300_lgbm\data\features.parquet",
+p = pd.read_parquet(_ROOT + r"/projects/csi300_lgbm/data/features.parquet",
                     columns=["datetime", "symbol", "close"])
 p["datetime"] = pd.to_datetime(p["datetime"])
 sub = p[(p["symbol"].isin(["SZ002241", "SH601857"])) & (p["datetime"] >= "2026-10-20")]

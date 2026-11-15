@@ -3,11 +3,11 @@
 原始截图 1440×52000
 底部背景色: (237, 237, 237)
 内容底边: 20986px（背景 52000px）
-整篇长图: D:\Project\qlib\docs\wechat_attrib\shots\article_full.png  (1440, 20986)  3752 KB
+整篇长图: docs\wechat_attrib\shots\article_full.png  (1440, 20986)  3752 KB
   分页 1: y=0~3600  650 KB
   分页 2: y=3600~7200  613 KB
   分页 3: y=7200~10800  712 KB
   分页 4: y=10800~14400  616 KB
   分页 5: y=14400~18000  702 KB
   分页 6: y=18000~20986  459 KB
-共 6 页 -> D:\Project\qlib\docs\wechat_attrib\shots
+共 6 页 -> docs\wechat_attrib\shots

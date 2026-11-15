@@ -7,6 +7,12 @@ from pathlib import Path
 
 import os
 
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[2])
+
 ROOT = Path(__file__).resolve().parent
 # 结果目录可用环境变量切换，避免新旧数据的结果混在一起
 RESULTS = Path(os.environ.get("JAC_RESULTS", str(ROOT / "results")))
@@ -15,8 +21,8 @@ RESULTS.mkdir(parents=True, exist_ok=True)
 # ---------------------------------------------------------------- 数据
 # 数据源可用环境变量切换：
 #   旧数据（2020-09 快照）  : 不设 JAC_PROVIDER，用默认值
-#   新数据（2026-10 日更版）: JAC_PROVIDER=D:\Project\qlib\qlib_data\cn_data_2026
-PROVIDER_URI = os.environ.get("JAC_PROVIDER", r"D:\Project\qlib\qlib_data\cn_data")
+#   新数据（2026-10 日更版）: JAC_PROVIDER=qlib_data\cn_data_2026
+PROVIDER_URI = os.environ.get("JAC_PROVIDER", _ROOT + r"/qlib_data/cn_data")
 REGION = "cn"
 
 INSTRUMENT = "SH600418"   # 江淮汽车

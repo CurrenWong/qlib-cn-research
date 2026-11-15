@@ -1,6 +1,6 @@
 import pathlib
 
-p = pathlib.Path(r"C:\Users\curre\.copaw\workspaces\J6c4mu\dist\csi300_lgbm\csdn\article.md")
+p = pathlib.Path(r"<multi-platform-dist>\dist\csi300_lgbm\csdn\article.md")
 s = p.read_text(encoding="utf-8")
 n = s.count("cover.png")
 s = s.replace("![](cover.png)\n\n", "").replace("![](cover.png)\n", "").replace("![](cover.png)", "")

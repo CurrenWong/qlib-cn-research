@@ -88,10 +88,10 @@
 
 | 平台 | 日志 |
 |---|---|
-| 知乎 | `D:\Project\qlib\projects\q3_2026\dist\logs\zhihu.log` |
-| CSDN（首次） | `D:\Project\qlib\projects\q3_2026\dist\logs\csdn.log` |
-| CSDN（重试） | `D:\Project\qlib\projects\q3_2026\dist\logs\csdn_retry.log` |
-| 百家号 | `D:\Project\qlib\projects\q3_2026\dist\logs\baijiahao.log` |
-| 掘金 | `D:\Project\qlib\projects\q3_2026\dist\logs\juejin.log` |
-| B站 | `D:\Project\qlib\projects\q3_2026\dist\logs\bilibili.log` |
-| 预演 | `D:\Project\qlib\projects\q3_2026\dist\logs\dry-run.log` |
+| 知乎 | `projects\q3_2026\dist\logs\zhihu.log` |
+| CSDN（首次） | `projects\q3_2026\dist\logs\csdn.log` |
+| CSDN（重试） | `projects\q3_2026\dist\logs\csdn_retry.log` |
+| 百家号 | `projects\q3_2026\dist\logs\baijiahao.log` |
+| 掘金 | `projects\q3_2026\dist\logs\juejin.log` |
+| B站 | `projects\q3_2026\dist\logs\bilibili.log` |
+| 预演 | `projects\q3_2026\dist\logs\dry-run.log` |

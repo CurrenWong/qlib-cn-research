@@ -7,9 +7,15 @@
 import subprocess
 import sys
 
-OLD = r"D:\Project\qlib\qlib_data\cn_data"
-NEW = r"D:\Project\qlib\qlib_data\cn_data_2026"
-PY = r"D:\Project\qlib\.venv\Scripts\python.exe"
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[1])
+
+OLD = _ROOT + r"/qlib_data/cn_data"
+NEW = _ROOT + r"/qlib_data/cn_data_2026"
+PY = _ROOT + r"/.venv/Scripts/python.exe"
 
 SNIPPET = r'''
 import sys, json

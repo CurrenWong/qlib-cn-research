@@ -2,7 +2,7 @@
 
 用途：追踪期间每天收盘后验证 track_pnl.py 取的价格没有接口层面的偏差。
 用法：
-    D:\\Project\\qlib\\.venv\\Scripts\\python.exe tools\\verify_closes.py 2026-11-04
+    .venv\\Scripts\\python.exe tools\\verify_closes.py 2026-11-04
 不带参数则用 track_positions_latest.csv 里最新的日期。
 """
 

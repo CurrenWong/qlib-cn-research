@@ -195,7 +195,7 @@ Top 10 近 6 个月走势（qlib 前复权价，起点=100）。
 
 
 
-cd /d D:\Project\qlib\projects\csi300_lgbm\tools ..\..\..\.venv\Scripts\python.exe build_dataset.py # 取数 → 30 特征 + 标签 ..\..\..\.venv\Scripts\python.exe train_select.py # 超参搜索 + walk-forward + 选型 ..\..\..\.venv\Scripts\python.exe backtest.py # 组合回测 vs 4 基线 + 零成本对照 ..\..\..\.venv\Scripts\python.exe variants.py # 全配置附录 + MA60 过滤变体 ..\..\..\.venv\Scripts\python.exe diag_signal.py # 信号分档诊断 ..\..\..\.venv\Scripts\python.exe rank_latest.py # 最终模型 → Top10 + 理由 ..\..\..\.venv\Scripts\python.exe make_figures.py # 8 张配图 ..\..\..\.venv\Scripts\python.exe build_report.py # 本报告 ..\..\..\.venv\Scripts\python.exe check_report.py # 自检（数字与切分一致性）
+cd /d projects\csi300_lgbm\tools ..\..\..\.venv\Scripts\python.exe build_dataset.py # 取数 → 30 特征 + 标签 ..\..\..\.venv\Scripts\python.exe train_select.py # 超参搜索 + walk-forward + 选型 ..\..\..\.venv\Scripts\python.exe backtest.py # 组合回测 vs 4 基线 + 零成本对照 ..\..\..\.venv\Scripts\python.exe variants.py # 全配置附录 + MA60 过滤变体 ..\..\..\.venv\Scripts\python.exe diag_signal.py # 信号分档诊断 ..\..\..\.venv\Scripts\python.exe rank_latest.py # 最终模型 → Top10 + 理由 ..\..\..\.venv\Scripts\python.exe make_figures.py # 8 张配图 ..\..\..\.venv\Scripts\python.exe build_report.py # 本报告 ..\..\..\.venv\Scripts\python.exe check_report.py # 自检（数字与切分一致性）
 
 
 

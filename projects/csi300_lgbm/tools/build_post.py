@@ -209,7 +209,7 @@ out = front + lead + body1 + "\n\n" + part2 + "\n\n" + appendix.strip() + "\n"
 
 # 复现命令换成完整版（含组合调整那几条）
 new_code = """```bash
-cd /d D:\\Project\\qlib\\projects\\csi300_lgbm\\tools
+cd /d projects\\csi300_lgbm\\tools
 
 ..\\..\\..\\.venv\\Scripts\\python.exe build_dataset.py    # 取数 → 30 特征 + 标签
 ..\\..\\..\\.venv\\Scripts\\python.exe train_select.py      # 超参搜索 + walk-forward + 选型

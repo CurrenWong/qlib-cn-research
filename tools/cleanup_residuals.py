@@ -3,18 +3,24 @@
 import os
 import shutil
 
+import os as _os
+from pathlib import Path as _Path
+
+# 仓库根目录：优先环境变量 QLIB_ROOT，否则按本文件位置往上推
+_ROOT = _os.environ.get("QLIB_ROOT") or str(_Path(__file__).resolve().parents[1])
+
 TARGETS = [
-    r"D:\Project\qlib\data\qlib_bin_2026-10-27.tar.gz",   # 46MB 单线程残片
-    r"D:\Project\qlib\data\parts_2026-10-27",             # 16 个分段残片
-    r"C:\Users\curre\Downloads\qlib_bin.tar.gz",          # 543MB 原始压缩包（已解压）
+    _ROOT + r"/data/qlib_bin_2026-10-27.tar.gz",   # 46MB 单线程残片
+    _ROOT + r"/data/parts_2026-10-27",             # 16 个分段残片
+    str(_Path.home() / "Downloads" / "qlib_bin.tar.gz"),  # 543MB 原始压缩包（已解压）
 ]
 
 KEEP = [
-    (r"D:\Project\qlib\projects\jac_600418\results_2026",
+    (_ROOT + r"/projects/jac_600418/results_2026",
      "第 12.5 节「选型不稳定」的证据（新数据上重跑 walk-forward 的结果）"),
-    (r"D:\Project\qlib\data\qlib_data_cn_1d_latest.zip",
+    (_ROOT + r"/data/qlib_data_cn_1d_latest.zip",
      "主数据集的原始压缩包（187MB，可作备份；重下很慢）"),
-    (r"D:\Project\qlib\qlib_data\cn_data_2026",
+    (_ROOT + r"/qlib_data/cn_data_2026",
      "已解压的新数据集，正在使用"),
 ]
 
