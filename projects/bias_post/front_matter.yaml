@@ -1,0 +1,15 @@
+# 多平台分发的 front matter（真根源头部参数）
+# 改这里 → 重新跑 make_source.py → 再 adapt → 再 publish
+title: "31 个行业算一遍乖离率：传媒最拥挤，通信最疼，我的策略在测试期亏了 2%"
+summary: "31 个行业乖离率热力图 + 三策略结局"
+tags: [量化, 数据分析, qlib, A股, 投资]
+category: "技术"
+cover: "img/cover.png"
+keywords: [乖离率, BIAS, 申万一级行业, qlib, LightGBM, 回测, 行业轮动]
+platform_notes:
+  zhihu: "知乎版：把 31 个行业的『位置』算清楚，再自己推翻一遍——先怀疑数据，再下结论。"
+  csdn: "CSDN 版：乖离率四行代码 + 申万指数取数口径 + 分位数写法，工程细节可复现。"
+  juejin: "掘金版：图多，重点在『两个负因子混合成正收益』和『等权回测 vs 整手下单』的落差。"
+  baijiahao: "百家号版：从『六周 26 个行业下跌、头尾差 37 个百分点』切入，讲分化。"
+  bilibili: "B站专栏版：按四张图的顺序讲，短句、每段一个结论。"
+footer_note: "工具与校验脚本在私有仓库 qlib-cn-research；数据截至 2026-11-11。"

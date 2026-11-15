@@ -1,0 +1,68 @@
+{
+  "platform": "zhihu",
+  "platform_name": "知乎",
+  "title": "31 个行业算一遍乖离率：传媒最拥挤，通信最疼，我的策略在测试期亏了 2%",
+  "title_length": 37,
+  "title_limit": 100,
+  "title_truncated": false,
+  "title_head_keywords_ok": true,
+  "summary": "31 个行业乖离率热力图 + 三策略结局",
+  "summary_length": 20,
+  "summary_limit": null,
+  "tags": [
+    "量化",
+    "数据分析",
+    "qlib",
+    "A股",
+    "投资"
+  ],
+  "category": "技术",
+  "cover": "cover.png",
+  "cover_mode": "manual",
+  "formula_strategy": "image",
+  "body_format": "html",
+  "auto_fields": [
+    "标题",
+    "正文",
+    "图片上传到平台图床"
+  ],
+  "manual_fields": [
+    {
+      "field": "话题标签",
+      "value": [
+        "量化",
+        "数据分析",
+        "qlib",
+        "A股",
+        "投资"
+      ],
+      "where": "知乎 编辑器右侧「话题」——必须选真实存在的话题，手输会搜不到",
+      "limit": "建议 5 个以内"
+    },
+    {
+      "field": "摘要",
+      "value": "31 个行业乖离率热力图 + 三策略结局",
+      "where": "知乎 编辑器摘要栏（留空则自动生成）",
+      "limit": "无硬上限"
+    },
+    {
+      "field": "封面",
+      "value": "cover.png",
+      "where": "知乎 编辑器封面设置（适配器不传封面）",
+      "limit": "无"
+    },
+    {
+      "field": "分类/专栏",
+      "value": "技术",
+      "where": "知乎 编辑器分类栏",
+      "limit": "无"
+    }
+  ],
+  "after_publish": "草稿箱人工确认发布",
+  "editor_url": "https://zhuanlan.zhihu.com/p/{id}/edit",
+  "notes": [
+    "正文由适配器转成知乎 HTML；表格被转成 data-draft-node 结构，style 属性被清掉",
+    "图片自动转存 zhimg.com（OSS 中转）"
+  ],
+  "warnings": []
+}

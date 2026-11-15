@@ -1,0 +1,286 @@
+<!DOCTYPE html><html lang='zh-CN'><head><meta charset='utf-8'><title>bias article (uploaded)</title></head><body style='max-width:677px;margin:0 auto;padding:24px 18px;'><section style="font-size:16px;line-height:1.85;color:#2c2c2c;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;"><h1 style="margin:0 0 18px;font-size:22px;line-height:1.45;font-weight:700;color:#111;letter-spacing:.3px;">31 个行业，一张乖离率热力图：传媒最拥挤，通信最疼，我的策略在测试期亏了 2%</h1>
+<blockquote style="margin:20px 0;padding:12px 16px;background:#F7F7F7;border-left:3px solid #ddd;color:#555;font-size:15px;line-height:1.8;">
+<p style="margin:4px 0;font-size:15px;line-height:1.8;color:#555;">2026 年 9 月 30 日到 11 月 11 日，六个交易周。</p>
+<p style="margin:4px 0;font-size:15px;line-height:1.8;color:#555;">申万 31 个一级行业里，<strong style="font-weight:700;color:#000;">26 个下跌</strong>，中位跌幅 <strong style="font-weight:700;color:#000;">-5.16%</strong>；沪深300 同期 <strong style="font-weight:700;color:#000;">-6.47%</strong>。</p>
+<p style="margin:4px 0;font-size:15px;line-height:1.8;color:#555;">但传媒涨了 <strong style="font-weight:700;color:#000;">+10.33%</strong>，通信跌了 <strong style="font-weight:700;color:#000;">-26.98%</strong>。同一段时间、同一个市场，头尾差 <strong style="font-weight:700;color:#000;">37 个百分点</strong>。</p>
+<p style="margin:4px 0;font-size:15px;line-height:1.8;color:#555;">所以这篇不猜方向，只做一件事：把 31 个行业现在离自己的均线有多远，算清楚、画出来。</p>
+</blockquote>
+<p style="margin:32px 0;text-align:center;color:#D8D8D8;letter-spacing:8px;font-size:14px;">• • •</p>
+<section style="border-left:4px solid #E67E22;padding-left:11px;margin:40px 0 18px;"><span style="font-size:19px;font-weight:700;color:#1a1a1a;line-height:1.45;">一、乖离率：一个去掉了量纲的坐标</span></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">公式很短：</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">BIAS_n = (收盘价 − 近 n 日均线) / 近 n 日均线 × 100%</strong></p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">之所以用这个而不是直接比点位：31 个行业指数的绝对水平差得太多。传媒今天收 733 点，食品饮料收 14443 点，差 19 倍。比点位没意义，比「离自己均线多少」才有意义——这是无量纲的，能横向排。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">取四个周期，各有各的含义：</p>
+<section style="margin:20px 0;overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:14px;table-layout:auto;margin:0;">
+<thead>
+<tr>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:left;line-height:1.6;color:#222;">周期</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">大致对应</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">读什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">BIAS6</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">一周半</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">短期情绪，最灵敏也最吵</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">BIAS20</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">一个月</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">趋势是否成立的分水岭</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">BIAS60</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">一个季度</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">中期资金的方向</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">BIAS120</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">半年</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">位置的高度：是刚从顶上下来，还是刚从坑里爬出来</td>
+</tr>
+</tbody>
+</table></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">一个数看不出结构，四个并排才看得出形状。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">核心代码确实只有这几行：</p>
+<section style="margin:20px 0;padding:14px 16px;background:#FAFAFA;border:1px solid #EEE;border-radius:4px;overflow-x:auto;"><pre style="margin:0;padding:0;background:transparent;font-family:Consolas,Monaco,'Courier New',monospace;font-size:13px;line-height:1.8;white-space:pre-wrap;word-break:break-all;color:#333;"><code class="language-python" style="font-family:Consolas,Monaco,'Courier New',monospace;background:transparent;padding:0;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;">def bias(series, n):
+    """乖离率：close 相对 n 日均线的偏离百分比。"""
+    ma = series.rolling(n, min_periods=max(5, n // 2)).mean()
+    return (series - ma) / ma * 100
+
+def percentile_rank(s, window=750):
+    """最新值在过去 window 个交易日里的分位（0~100）。"""
+    tail = s.dropna().tail(window)
+    if len(tail) &lt; 30:
+        return float("nan")
+    return float((tail &lt;= tail.iloc[-1]).mean() * 100)
+</code></pre></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">两点细节：<code style="font-family:Consolas,Monaco,'Courier New',monospace;background:#F5F5F5;padding:1px 4px;border-radius:2px;font-size:14px;color:#333;">min_periods</code> 取半个周期，是让 BIAS120 在数据前端不会整段 NaN（严格要满 120 个点，取一半是取舍——代价是上市不足半年的行业早期数值偏噪）；分位用 <code style="font-family:Consolas,Monaco,'Courier New',monospace;background:#F5F5F5;padding:1px 4px;border-radius:2px;font-size:14px;color:#333;">&lt;=</code> 而不是 <code style="font-family:Consolas,Monaco,'Courier New',monospace;background:#F5F5F5;padding:1px 4px;border-radius:2px;font-size:14px;color:#333;">&lt;</code>，避免最新值正好创历史极值时被算成 0 分位。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">数据用申万官方指数日线，1999 年 12 月 30 日到今天，31 个一级行业、6490 个交易日，每日缓存到本地，重算一遍几秒钟。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">这里有个必须交代的坑：<strong style="font-weight:700;color:#000;">2021 年 12 月 13 日申万做过一次行业重分类</strong>，石油石化这一类「新」行业的历史只到 2021 年底。所以算分位数时用的是各自能拿到的近 3 年（约 750 个交易日），没有跨分类拼接——拼出来的历史是假的。</p>
+<p style="margin:32px 0;text-align:center;color:#D8D8D8;letter-spacing:8px;font-size:14px;">• • •</p>
+<section style="border-left:4px solid #E67E22;padding-left:11px;margin:40px 0 18px;"><span style="font-size:19px;font-weight:700;color:#1a1a1a;line-height:1.45;">二、截面：三个读数</span></section>
+<p style="margin:22px 0 6px;text-align:center;"><img data-src="http://mmbiz.qpic.cn/sz_mmbiz_png/8aETljw86fwXEjRbuIDxXN7Aoiaat6g8LYm1oMYRlxo5jusDz2icoqibyrR0c00hEPAIib2UnsqQLhJVcSv9ws7rR1pS3WAF1CuVrb8UIutR1fo/0?from=appmsg" style="max-width:100%;display:block;margin:0 auto;border-radius:2px;"/></p><p style="margin:6px 0 24px;text-align:center;font-size:13px;color:#999;line-height:1.6;">申万 31 个一级行业的四周期乖离率（2026-11-11）。红=在均线上方，蓝=下方，颜色深浅是偏离幅度</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">第一眼看到的是两极。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">读数一：传媒是唯一一个四个周期全正的行业。</strong> +2.6 / +7.4 / +7.3 / +6.6。它的 BIAS20 在近 3 年的 750 个交易日里排第 <strong style="font-weight:700;color:#000;">92</strong> 百分位。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">这句话的准确含义不是「传媒便宜」，而是：<strong style="font-weight:700;color:#000;">它已经连续两个月待在均线上方，而这种状态在过去三年里很少出现。</strong> 位置高，拥挤，这是中性的描述，不是卖出信号。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">读数二：通信最疼。</strong> +6.66 / -3.91 / <strong style="font-weight:700;color:#000;">-23.50</strong> / <strong style="font-weight:700;color:#000;">-32.77</strong>。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">短周期已经翻红，长周期还埋在 -33% 的深坑里。这个形状——短正长负——是「超跌之后第一波修复」的典型长相，不是反转确认。它头上还压着三条均线，每一条都是解套盘。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">读数三：石油石化最冷。</strong> BIAS20 -3.86，分位 <strong style="font-weight:700;color:#000;">8.4</strong>，全市场最低。旁边是煤炭（-2.58，分位 21）和美容护理（-2.99，分位 29）。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">冷同样不代表要涨。它只说明「离自己的均线很远」，而在一个多数行业都在下跌的月份里，冷是常态，不是例外。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">顺带两个值得记的组合：</p>
+<ul style="margin:15px 0;padding-left:24px;font-size:16px;line-height:1.85;color:#2c2c2c;">
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">银行</strong> BIAS60 +3.84、BIAS120 +7.34，<strong style="font-weight:700;color:#000;">食品饮料</strong> +3.27 / +3.50——防御的钱在往这两处集中，而且是中期以上的周期在抬；</li>
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">机械设备</strong> BIAS6 +2.67，但 BIAS120 -15.05——和通信同一个结构：短期急弹，长期仍在坑里。</li>
+</ul>
+<p style="margin:32px 0;text-align:center;color:#D8D8D8;letter-spacing:8px;font-size:14px;">• • •</p>
+<section style="border-left:4px solid #E67E22;padding-left:11px;margin:40px 0 18px;"><span style="font-size:19px;font-weight:700;color:#1a1a1a;line-height:1.45;">三、时间：看斜率和持续，不看点位</span></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">单张截面图只给了「此刻」。把最近 60 个交易日的 BIAS20 排开，能看出另一层信息。</p>
+<p style="margin:22px 0 6px;text-align:center;"><img data-src="http://mmbiz.qpic.cn/sz_mmbiz_png/8aETljw86fwicr4X3lEdkvdnRgWXO13wORe6BVdSgZpet6GgOAHAKt9z7poctlJaibZsX6eMgfcIL1acfkKBlADc4cpx5K6nczU1rm841pibZ4/0?from=appmsg" style="max-width:100%;display:block;margin:0 auto;border-radius:2px;"/></p><p style="margin:6px 0 24px;text-align:center;font-size:13px;color:#999;line-height:1.6;">近 60 个交易日 31 个行业的 BIAS20 演变，横轴为交易日，越红=离均线越远在上方，越蓝=越远在下方</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">三个观察：</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">通信那条深蓝色的带，从 9 月中旬一路压到 11 月，中间没有一列回正。</strong> 这不是一根阴线的事，是持续六周的失血。等到 11 月 BIAS6 才转正——也就是说，最早的一点止跌迹象出现在最近一两周。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">电子在 10 月下旬砸出整张图里最深的那片蓝</strong>，11 月上旬才开始收窄。深度和宽度都比通信集中：跌得急，但持续时间短。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">食品饮料在最右边两列翻红，传媒在右侧反复红蓝交替。</strong> 后者说明它已经在高位来回震荡，不是单边推进——这跟分位 92 是一致的。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">一句话：点位告诉你现在多远，斜率告诉你还在不在恶化。</p>
+<p style="margin:32px 0;text-align:center;color:#D8D8D8;letter-spacing:8px;font-size:14px;">• • •</p>
+<section style="border-left:4px solid #E67E22;padding-left:11px;margin:40px 0 18px;"><span style="font-size:19px;font-weight:700;color:#1a1a1a;line-height:1.45;">四、分位：把绝对值翻译成稀有度</span></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">BIAS20 = -3.9%，到底算「贵」还是「便宜」？这取决于这个行业平时乖离多大。所以再算一层：把当前的 BIAS20 丢进它自己近 750 个交易日的历史里，看排第几。</p>
+<p style="margin:22px 0 6px;text-align:center;"><img data-src="http://mmbiz.qpic.cn/mmbiz_png/8aETljw86fyKAOtyWQiaYh6nibHRy9haYucB7RibF7mowJ7bn5xRrkRTJMOCg2LsTaWjRrpVTQO8GwGJeViciaFOsD6Dpt1xUxmU83sYulEcuhGw/0?from=appmsg" style="max-width:100%;display:block;margin:0 auto;border-radius:2px;"/></p><p style="margin:6px 0 24px;text-align:center;font-size:13px;color:#999;line-height:1.6;">当前 BIAS20 在各自近 3 年历史中的分位。左端 = 相对自己最冷，右端 = 最热</p>
+<ul style="margin:15px 0;padding-left:24px;font-size:16px;line-height:1.85;color:#2c2c2c;">
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">最热：传媒 <strong style="font-weight:700;color:#000;">92</strong>、纺织服饰 <strong style="font-weight:700;color:#000;">86</strong>、汽车 <strong style="font-weight:700;color:#000;">81</strong>、家用电器 <strong style="font-weight:700;color:#000;">81</strong>、食品饮料 <strong style="font-weight:700;color:#000;">76</strong></li>
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">最冷：石油石化 <strong style="font-weight:700;color:#000;">9</strong>、通信 <strong style="font-weight:700;color:#000;">17</strong>、煤炭 <strong style="font-weight:700;color:#000;">21</strong>、美容护理 <strong style="font-weight:700;color:#000;">29</strong>、综合 <strong style="font-weight:700;color:#000;">30</strong></li>
+</ul>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">这张图的用处是防误判。比如通信 BIAS20 只有 -3.9%，看着「不算太差」，但它的分位是 17——意思是相对于它自己，现在确实在低位。反过来，传媒 +7.4% 的绝对值也不算夸张，但分位 92 说明这种热度三年少见。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">绝对值是横着看，分位是竖着看。两个维度一起，才知道自己站在地图的哪里。</p>
+<p style="margin:32px 0;text-align:center;color:#D8D8D8;letter-spacing:8px;font-size:14px;">• • •</p>
+<section style="border-left:4px solid #E67E22;padding-left:11px;margin:40px 0 18px;"><span style="font-size:19px;font-weight:700;color:#1a1a1a;line-height:1.45;">五、先自己怀疑一遍，再下结论</span></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">上面这些数看着太戏剧化：一个行业六周跌 27%，另一个涨 10%。第一反应应该是「脚本是不是算错了」。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">所以我做了三条互相独立的核对：</p>
+<ol style="margin:15px 0;padding-left:24px;font-size:16px;line-height:1.85;color:#2c2c2c;">
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">直接用收盘价算区间涨跌</strong>（不经过任何均线逻辑）：31 个行业 5 涨 26 跌，中位 -5.16%，同期沪深300 -6.47%。方向一致，量级合理。</li>
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">头尾对得上</strong>：通信 -26.98%、电子 -18.18%，对面是传媒 +10.33%、食品饮料 +6.06%。乖离率如果算错，原始涨跌幅不会跟着一起错。</li>
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">两张图互相印证</strong>：截面图上 BIAS20 排名靠前的（传媒、汽车、纺织服饰），在涨跌幅榜上也靠前；分位图第 92 位的传媒，在时间图上最右侧也是红的。</li>
+</ol>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">三条都过，结论是：<strong style="font-weight:700;color:#000;">这是真实分化，不是数据错误。</strong></p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">这一节其实比结论更重要。一个人算出一堆漂亮的图之后，最容易做的事就是相信它。先把「我可能错了」这条路走完，剩下的才敢用。</p>
+<p style="margin:32px 0;text-align:center;color:#D8D8D8;letter-spacing:8px;font-size:14px;">• • •</p>
+<section style="border-left:4px solid #E67E22;padding-left:11px;margin:40px 0 18px;"><span style="font-size:19px;font-weight:700;color:#1a1a1a;line-height:1.45;">六、但指标不是信号：同一个仓库里的三个策略</span></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">位置描述清楚了，接下来是更难的问题——<strong style="font-weight:700;color:#000;">这个位置能不能赚钱？</strong></p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">我把同一个仓库里跑过的三个策略摊开，全部用同一套成本假设：买 0.05%、卖 0.15%、每笔最低 5 元、100 万账户。</p>
+<h3 style="margin:28px 0 12px;font-size:17px;font-weight:700;color:#1a1a1a;line-height:1.5;">6.1 沪深300 × LightGBM：验证期 IR 1.22，测试期 -0.07</h3>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">30 个价量特征、月度调仓、等权 top10，训练 2016-2019 / 验证 2020-2022 / 测试 2023-2026。超参、topK、调仓频率<strong style="font-weight:700;color:#000;">只在验证期选</strong>，测试期只跑一次。</p>
+<section style="margin:20px 0;overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:14px;table-layout:auto;margin:0;">
+<thead>
+<tr>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:left;line-height:1.6;color:#222;">口径</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">年化</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">夏普</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">IR</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">最大回撤</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">验证期 2020-2022</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">+20.86%</strong></td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">0.70</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">+122.39%</strong></td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-28.31%</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">测试期 2023-2026</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">-2.13%</strong></td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-0.07</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">-7.17%</strong></td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">-50.74%</strong></td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">测试期·零成本对照</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-0.02%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-0.00</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+2.42%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-50.01%</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">测试期·300 只等权不动</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+2.74%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">0.16</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+36.99%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-25.13%</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">测试期·沪深300 买入持有</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+0.65%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">0.04</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">—</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-24.80%</td>
+</tr>
+</tbody>
+</table></section>
+<p style="margin:22px 0 6px;text-align:center;"><img data-src="http://mmbiz.qpic.cn/mmbiz_png/8aETljw86fyY2yojibUjichtXdhMxfLIficza7JWHprsFk1ZP8oAicLH83spRI6XW0SlzmxFrKibJu5gTPOClpFOJKQwCUGOfP6Dppic4wz0iaLF3k/0?from=appmsg" style="max-width:100%;display:block;margin:0 auto;border-radius:2px;"/></p><p style="margin:6px 0 24px;text-align:center;font-size:13px;color:#999;line-height:1.6;">同一套模型的两段人生。左：验证期（选型只用这一段）；右：测试期（冻结后一次性评估）</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">同一个模型，同一批特征，从 +20.86% 到 -2.13%。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">但<strong style="font-weight:700;color:#000;">排序信号本身是真的</strong>：按预测分位分档，预测越靠前、未来 5 日平均收益越高，两期都单调——验证期前 3% 档 +0.441% vs 池内平均 +0.081%，测试期 +0.371% vs +0.099%。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">所以能说的准确的话是：<strong style="font-weight:700;color:#000;">模型会排序，但「只买排最前的 10 只并集中持有」这套组合，在测试期不成立。</strong></p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">还有两处细节值得单独拎出来：</p>
+<ul style="margin:15px 0;padding-left:24px;font-size:16px;line-height:1.85;color:#2c2c2c;">
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">成本每年吃掉约 2 个百分点</strong>。零成本对照 -0.02%，含成本 -2.13%。策略本来就不赚钱的时候，成本是那根压倒的稻草。</li>
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">10 只名单里 6 只近 20 日跌幅超过 25%，最深 -52.7%</strong>。模型在 2023 年之后学到的东西是「超跌反弹」——而这套逻辑在 2020-2022 有效，在之后大部分时间无效。</li>
+</ul>
+<h3 style="margin:28px 0 12px;font-size:17px;font-weight:700;color:#1a1a1a;line-height:1.5;">6.2 多因子混合：两个单项都是负的，混合才转正</h3>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">第二个策略换了思路：不赌单一信号，把价量（权重 0.65）、基本面（0.30）、事件（0.05）混成一个分，选 top50、40 个交易日调仓、单行业不超过 3 只。</p>
+<section style="margin:20px 0;overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:14px;table-layout:auto;margin:0;">
+<thead>
+<tr>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:left;line-height:1.6;color:#222;">组合</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">年化</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">IR</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">最大回撤</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">成本/年</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">混合分 top50（验证期选参）</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">+5.84%</strong></td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">0.68</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-28.97%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">1.05%</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">同上·零成本对照</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+6.87%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">0.82</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-28.40%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">0</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">纯价量 top20 月调</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">-0.98%</strong></td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-0.09</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-35.33%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">2.03%</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">纯基本面 top20 月调</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">-3.33%</strong></td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-0.31</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-42.54%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">0.51%</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">混合分 top20（单行业≤3）</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+7.54%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">0.53</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-33.63%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">2.06%</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">沪深300 买入持有</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+0.65%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">—</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-24.80%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">0</td>
+</tr>
+</tbody>
+</table></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">这是这一整篇里我最想让人看到的一张表：<strong style="font-weight:700;color:#000;">纯价量 -0.98%，纯基本面 -3.33%，两项都亏；混在一起 +5.84%。</strong></p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">两个单独的坏信号，组合起来是个正收益——前提是它们错的地方不一样。价量在震荡里挨打，基本面在风格切换里挨打，时间错开了，组合才有意义。这也顺便解释了为什么「找一个完美因子」这条路长期走不通。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">另外：「单行业不超过 3 只」这条约束把年化从 6.84% 抬到 7.54%，换手没变。约束本身就是一种 alpha。</p>
+<h3 style="margin:28px 0 12px;font-size:17px;font-weight:700;color:#1a1a1a;line-height:1.5;">6.3 实盘 20 只，两天 -4.43%：一个 100 股的坑</h3>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">2026-10-30 收盘出名单，11-02 开盘买入，11-03 收盘结算。</p>
+<section style="margin:20px 0;overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:14px;table-layout:auto;margin:0;">
+<thead>
+<tr>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:left;line-height:1.6;color:#222;">口径</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">投入</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">市值</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">盈亏</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">收益率</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">A（每只约 1 万，补到整手）</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">256,525</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">245,171</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">-11,354</strong></td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">-4.43%</strong></td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">A + 交易成本（40 笔）</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">256,525</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">245,171</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-12,050</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">-4.70%</strong></td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">沪深300 同期（11-02 开→11-03 收）</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">—</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">—</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">—</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+0.07%</td>
+</tr>
+</tbody>
+</table></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">两天 -4.4% 有运气成分，但里面藏着一个真正的 bug，而且这个 bug 只有真下单才会暴露：</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">预算 20 万，每只约 1 万——做不到。</strong> 天孚通信一手 15,002 元，芯原股份一手 19,852 元，东山精密一手 18,200 元。为了「每只至少 1 手」，账户只能超配这些高价股，实际投入 <strong style="font-weight:700;color:#000;">256,525 元，比预算多 28%</strong>。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">结果就是：名义上「等权 20 只」，实际上高价高波动股被悄悄加了权重。天孚通信两天 <strong style="font-weight:700;color:#000;">-17.60%</strong>，一只就把整个组合拖下去。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">回测里「等权买入 20 只」是一行代码；实盘里它是 100 股的最小交易单位。</p>
+<p style="margin:32px 0;text-align:center;color:#D8D8D8;letter-spacing:8px;font-size:14px;">• • •</p>
+<section style="border-left:4px solid #E67E22;padding-left:11px;margin:40px 0 18px;"><span style="font-size:19px;font-weight:700;color:#1a1a1a;line-height:1.45;">七、四条可以带走的结论</span></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">1. 乖离率描述位置，不预测方向。</strong></p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">它回答的是「离均线多远、这个距离在历史上算不算稀奇」，不回答「明天涨不涨」。把分位 92 当成卖出信号，或者把分位 9 当成买入信号，都是把它用错了。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">2. 短周期转正 + 长周期深坑，是修复的形态，不是反转的确认。</strong></p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">通信现在就是这张脸：BIAS6 +6.66，BIAS120 -32.77。它可能是机会的开始，也可能是下跌中继。这一层的区别，乖离率给不了，得看量、看资金、看基本面。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">3. 单因子几乎都不赚钱，赚钱的是组合和约束。</strong></p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">价量 -0.98%，基本面 -3.33%，混合 +5.84%，加一条行业上限再抬到 7.54%。如果只记一句：<strong style="font-weight:700;color:#000;">别指望一个因子，指望它们彼此不相关。</strong></p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">4. 选型不能外推。</strong></p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">同一套模型、同样 6 组配置，验证期 IR 最高 1.22 的那组，测试期 IR 是 -0.07。这不是模型坏了，是「用验证期挑出最好的那组」这个动作本身，在测试期会失效——你挑的是那段时间的噪声。</p>
+<p style="margin:32px 0;text-align:center;color:#D8D8D8;letter-spacing:8px;font-size:14px;">• • •</p>
+<section style="border-left:4px solid #E67E22;padding-left:11px;margin:40px 0 18px;"><span style="font-size:19px;font-weight:700;color:#1a1a1a;line-height:1.45;">最后</span></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">整套东西是本地一个脚本：一条命令出三张图，数据每日缓存，重算几秒钟。指标只有四行代码，剩下全是数据清洗和核对。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">如果你也在做类似的事，我的建议是先别急着加因子。先把「我算出来的数是不是真的」这条链走完——原始价、复权口径、交易日历、行业分类变更，每一个都能让你的图很好看且完全错误。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">以上全部是研究记录，不是投资建议。</strong> 数据截至 2026-11-11，之后的行情没有包含在内。</p>
+<p style="margin:32px 0;text-align:center;color:#D8D8D8;letter-spacing:8px;font-size:14px;">• • •</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><em style="font-style:italic;color:#555;">本文用到的工具与校验脚本在私有仓库 <code style="font-family:Consolas,Monaco,'Courier New',monospace;background:#F5F5F5;padding:1px 4px;border-radius:2px;font-size:14px;color:#333;">qlib-cn-research</code> 中；行业数据来自申万官方指数接口，行情来自腾讯行情与本地 qlib 数据。</em></p></section></body></html>
