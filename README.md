@@ -2,6 +2,10 @@
 
 **A 股量化研究环境：数据管道、指标工具、可复现的策略实验。**
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python 3.12](https://img.shields.io/badge/Python-3.12-blue.svg)](requirements.lock.txt)
+[![qlib 0.9.8](https://img.shields.io/badge/qlib-0.9.8-informational.svg)](https://github.com/microsoft/qlib)
+
 用 [qlib](https://github.com/microsoft/qlib) 做 A 股研究，真正花时间的从来不是调模型，是数据。
 这个仓库把三件事放在一起：数据怎么拿、怎么验、怎么用；几个能一眼看懂的行业指标；
 以及若干次**结论算不上好看但足够诚实**的策略实验。
@@ -167,5 +171,7 @@ chenditc）所有，本仓库不包含任何数据文件，只提供获取与校
 
 ## 许可
 
-尚未添加 LICENSE。在明确许可前，默认保留所有权利。
-如果希望他人复用，加一个 MIT 或 Apache-2.0 会更合适——这是仓库维护者要决定的事。
+代码以 **MIT** 许可发布，见 [LICENSE](LICENSE)：可以随意使用、修改、商用，保留版权声明即可。
+
+`docs/` 与 `projects/*/report`、`projects/*/dist` 下的文章正文由本仓库作者撰写，同样按 MIT 授权；
+文中引用的公司财报数据、公告与行情数据的版权归各自来源（巨潮、申万、腾讯等），不在本许可范围内。
