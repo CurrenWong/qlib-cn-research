@@ -11,25 +11,29 @@
 
 | # | 平台 | 草稿 | 链接 | 图 | 缺段 | 加粗 | 封面 |
 |---|---|---|---|---|---|---|---|
-| 1 | 知乎 | ✓ | https://zhuanlan.zhihu.com/p/2107418038874252958/edit | **7/7** | 0 | ⚠️ 3 处待手改 | 手填 |
+| 1 | 知乎 | ✓ | https://zhuanlan.zhihu.com/p/2107418038874252958/edit | **7/7** | 0 | ✅ 已修 | 手填 |
 | 2 | CSDN | ✓ | https://editor.csdn.net/md?articleId=171141543 | **8/8** ✅ | 0 | ✅ 已修 | 自动取首图 |
-| 3 | 掘金 | ✓ | https://juejin.cn/editor/drafts/7710328862060363826 | **7/7** | 0 | ⚠️ 3 处待手改 | 手填（适配器写死空串）|
+| 3 | 掘金 | ✓ | https://juejin.cn/editor/drafts/7710328862060363826 | **7/7** | 0 | ✅ 已修 | 手填（适配器写死空串）|
 | 4 | 百家号 | ✓ | https://baijiahao.baidu.com/builder/rc/edit?type=news&article_id=1882432603247893541 | **7/7** | 0 | ⚠️ 3 处待手改 | 手填 |
-| 5 | B站专栏 | ✓ | https://member.bilibili.com/platform/upload/text/edit?aid=375814 | **7/7** | 0 | ⚠️ 3 处待手改 | 手填（无封面字段）|
+| 5 | B站专栏 | ✓ **新** | https://member.bilibili.com/platform/upload/text/edit?aid=375846 | **7/7** | 0 | ✅ 已修 | 手填（无封面字段）|
 | — | 微信公众号 | ✓ | `media_id 633r9_pjAyxR8atzJ8UNci9_lX6_GdYQH19iquRzt-6A8_CD20NEWTncLPgmLQB5` | 7+封面 | — | ✅ 已修 | 已上传 |
+| ✗ | B站旧稿 | 废弃 | ~~aid=375814~~ | 0 | — | ✗ | **请删掉这份** |
 
-### ⚠️ 两处遗留问题（都不影响数字，只影响观感）
+### 现在的状态（一句话）
 
-**1）知乎 / 掘金 / 百家号 / B站 的正文里有 3 处多余的 `**`**
-（成因：`fix_bold` 的正则跨段吞了加粗标记，详见 `FIX_3_SPOTS.md`）。
-**改法见 [`FIX_3_SPOTS.md`](FIX_3_SPOTS.md)**：3 行、每行删 2 个星号。
-CSDN 与公众号的我已经用脚本就地修好了（见下）。
+**6 个平台都有可用草稿；只剩百家号正文里 3 处多余的 `**`（改法见 [`FIX_3_SPOTS.md`](FIX_3_SPOTS.md)），
+以及删掉 B站那份被我写坏的旧稿 `aid=375814`。**
 
-**2）CSDN 原本有 2 张图没传上去**：`bias_percentile.png`、`rotate.png`，报错
-`Failed to execute 'json' on 'Response': Unexpected end of JSON input`（CSDN `media/uploadimg` 的老毛病）。
-→ **已修**：用 playwright 拦截 `saveArticle` 接口，把 2 张图补传后写回同一份草稿，
-现在 **8/8 图片 sha256 与本地文件逐字节一致，预览面板 8 张全部加载、0 断链**，
-**没有新建第二份草稿**（重跑 publish 会新建草稿 + 撞「文章频繁发布」限流）。
+### 各平台我做了什么
+
+- **公众号**：正文改过 → 重发一份干净草稿（新 media_id），旧稿用 `draft/delete` 删掉；
+- **CSDN**：2 张缺图补传（8/8 sha256 与本地逐字节一致、预览 0 断链）+ 3 处加粗修好，
+  全程拦 `saveArticle` 接口，**没有新建第二份草稿**；
+- **知乎**：拦 `PATCH /api/articles/{id}/draft`，改 `content` 里 3 处加粗，再触发自动保存 → 读回 0 残留；
+- **掘金**：拦 `content_api/v1/article_draft/update`，改 `mark_content` 里 3 处 → 读回 0 残留（168 个 `**` 全成对）；
+- **B站**：旧稿的正文被我的自动化写坏了（丢了 7 张图，见「踩坑」），
+  已用 wechatsync **重新建了一份干净草稿 `aid=375846`**（7/7 图、加粗 0 残留）；
+- **百家号**：没动（页面里正文没 hydrate，硬点保存会把编辑器空状态写回去 —— 这个亏在 B站吃过了）。
 
 ## 校验
 
@@ -94,6 +98,17 @@ markdown 图片引用 8 · HTML <img> 8 · 预览面板 8 张全部加载 · 断
 
 ## 本次踩坑记录
 
+- **【最贵的一条】不要为了「试一下」点编辑器的保存按钮**：B站那次的顺序是
+  「先读稿 → 想直接打 API（endpoint 猜错 404）→ 去编辑器里点『保存为草稿』想抓接口」，
+  结果编辑器正文还没 hydrate 完，保存把**它当时空/纯文本的状态写回去了** ——
+  正文从 8834 字 7 图变成 5643 字 0 图。补救只能靠之前存的 `temp/bili_draft_backup.json`，
+  最后是用 wechatsync **重建了一份新草稿**（`aid=375846`），旧的那份只能废弃。
+  **正确顺序**：先只读地把接口形态摸清楚（HTTP 方法 + 字段名），再决定要不要动手；
+  **凡是「点保存」的动作，必须先把当前正文读回来存盘备份**。
+- **B站的新编辑器保存走 `opus` 结构，不是 `content`**：抓到的 `draft/add` 请求里
+  `arg` 只有 `opus / title / summary / category_id …`，没有 `content` 字段；
+  往 `arg` 里塞 `content` 会被忽略（服务端返回的 `content` 是它自己从 opus 渲染的）。
+  想改正文就得改 `opus` 的模块结构 —— 不值得，重建成新草稿更省事。
 - **CSDN `media/uploadimg` 又是 2 张失败**（上一期是 5/5 全过，这期 6/8）——同一个接口时好时坏，
   报错形态是 `Unexpected end of JSON input`；**不重跑**（会产生废稿 + 限流），
   改用 playwright 拦截 `saveArticle` 接口把图补进**同一份草稿**（`temp/fix_csdn*.py`）。
@@ -112,3 +127,12 @@ markdown 图片引用 8 · HTML <img> 8 · 预览面板 8 张全部加载 · 断
 - **文本创作智能体（澄）最后一步撞了配额**：`MiniMax-M3.1-Flash` 报 `Quota exceeded / Token Plan 用量上限`，
   任务状态 failed——但**实际发布动作在配额耗尽前已经全部完成**（5 个平台草稿 + CSDN 补图），
   只有它自己那份总结没写出来。**配额真不够时要切它的 `active_model` 得用户点头**（AGENTS.md §8）。
+- **各平台的「就地打补丁」接口一览**（本期实测）：
+
+  | 平台 | 拦截哪个请求 | 改哪个字段 | 触发保存的方式 |
+  |---|---|---|---|
+  | CSDN | `POST /blog-console-api/v3/mdeditor/saveArticle` | `markdowncontent` + `content` | 点 `.button-save` |
+  | 知乎 | `PATCH /api/articles/{id}/draft` | `content`（HTML） | 点正文 → 敲空格 → 退格（自动保存） |
+  | 掘金 | `POST /content_api/v1/article_draft/update` | `mark_content` | 点正文 → 敲空格 → 退格（自动保存） |
+  | B站 | `POST /x/dynamic/feed/article/draft/add`（带 article_id=更新） | `opus`（**不是** `content`） | frame 里点「保存为草稿」 |
+  | 公众号 | `POST /cgi-bin/draft/add` | 走自己的 `publish_wechat.py` | — |
