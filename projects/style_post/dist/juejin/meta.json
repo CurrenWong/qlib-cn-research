@@ -65,7 +65,5 @@
     "公式走 Markdown 原生 LaTeX，掘金编辑器直接渲染",
     "适配器写死 cover_image:\"\" → 封面必须手填"
   ],
-  "warnings": [
-    "标签 6 个 > 上限 5 个，已截取前 5 个"
-  ]
+  "warnings": []
 }

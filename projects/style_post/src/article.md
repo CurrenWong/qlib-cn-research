@@ -1,7 +1,7 @@
 ---
 title: "两周亏 8.18%：我把 31 个行业的乖离率算了一遍，问题不在选股"
 summary: "两周亏 8.18%：风格暴露的账单"
-tags: [量化, 数据分析, qlib, A股, 投资, 归因]
+tags: [量化, 数据分析, qlib, A股, 投资]
 category: "技术"
 cover: "img/cover.png"
 keywords: [乖离率, BIAS, 申万一级行业, qlib, LightGBM, 风格暴露, 行业轮动, 组合归因]
