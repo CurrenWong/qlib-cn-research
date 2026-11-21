@@ -9,19 +9,27 @@
 
 ## 汇总
 
-| # | 平台 | 草稿 | 链接 | 图 | 缺段 | 封面 |
-|---|---|---|---|---|---|---|
-| 1 | 知乎 | ✓ | https://zhuanlan.zhihu.com/p/2107418038874252958/edit | **7/7** | 0 | 手填 |
-| 2 | CSDN | ✓ | https://editor.csdn.net/md?articleId=171141543 | **6/8** ⚠️ | 0 | 自动取首图 |
-| 3 | 掘金 | ✓ | https://juejin.cn/editor/drafts/7710328862060363826 | **7/7** | 0 | 手填（适配器写死空串）|
-| 4 | 百家号 | ✓ | https://baijiahao.baidu.com/builder/rc/edit?type=news&article_id=1882432603247893541 | **7/7** | 0 | 手填 |
-| 5 | B站专栏 | ✓ | https://member.bilibili.com/platform/upload/text/edit?aid=375814 | **7/7** | 0 | 手填（无封面字段）|
-| — | 微信公众号 | ✓ | `media_id 633r9_pjAyxR8atzJ8UNcieRQw-k9MVl-HORx7w5ZC_Vj_MQO5R9x3aImGNjWLMQ` | 7+封面 | — | 已上传 |
+| # | 平台 | 草稿 | 链接 | 图 | 缺段 | 加粗 | 封面 |
+|---|---|---|---|---|---|---|---|
+| 1 | 知乎 | ✓ | https://zhuanlan.zhihu.com/p/2107418038874252958/edit | **7/7** | 0 | ⚠️ 3 处待手改 | 手填 |
+| 2 | CSDN | ✓ | https://editor.csdn.net/md?articleId=171141543 | **8/8** ✅ | 0 | ✅ 已修 | 自动取首图 |
+| 3 | 掘金 | ✓ | https://juejin.cn/editor/drafts/7710328862060363826 | **7/7** | 0 | ⚠️ 3 处待手改 | 手填（适配器写死空串）|
+| 4 | 百家号 | ✓ | https://baijiahao.baidu.com/builder/rc/edit?type=news&article_id=1882432603247893541 | **7/7** | 0 | ⚠️ 3 处待手改 | 手填 |
+| 5 | B站专栏 | ✓ | https://member.bilibili.com/platform/upload/text/edit?aid=375814 | **7/7** | 0 | ⚠️ 3 处待手改 | 手填（无封面字段）|
+| — | 微信公众号 | ✓ | `media_id 633r9_pjAyxR8atzJ8UNci9_lX6_GdYQH19iquRzt-6A8_CD20NEWTncLPgmLQB5` | 7+封面 | — | ✅ 已修 | 已上传 |
 
-**⚠️ CSDN 有 2 张图没传上去**：`bias_percentile.png`、`rotate.png`，报错
+### ⚠️ 两处遗留问题（都不影响数字，只影响观感）
+
+**1）知乎 / 掘金 / 百家号 / B站 的正文里有 3 处多余的 `**`**
+（成因：`fix_bold` 的正则跨段吞了加粗标记，详见 `FIX_3_SPOTS.md`）。
+**改法见 [`FIX_3_SPOTS.md`](FIX_3_SPOTS.md)**：3 行、每行删 2 个星号。
+CSDN 与公众号的我已经用脚本就地修好了（见下）。
+
+**2）CSDN 原本有 2 张图没传上去**：`bias_percentile.png`、`rotate.png`，报错
 `Failed to execute 'json' on 'Response': Unexpected end of JSON input`（CSDN `media/uploadimg` 的老毛病）。
-草稿已存在，但正文里这两张是坏的 → **发布前需在 CSDN 编辑器里手动补这 2 张图**。
-**不要为了补图重跑 publish**（会新建第二份草稿 + 撞「文章频繁发布」限流）。
+→ **已修**：用 playwright 拦截 `saveArticle` 接口，把 2 张图补传后写回同一份草稿，
+现在 **8/8 图片 sha256 与本地文件逐字节一致，预览面板 8 张全部加载、0 断链**，
+**没有新建第二份草稿**（重跑 publish 会新建草稿 + 撞「文章频繁发布」限流）。
 
 ## 校验
 
@@ -32,16 +40,25 @@ check_article.py   数字自检 117 项，0 失败      ← 正文每个数都�
 check_dist.py      5 个平台：图 7/8/7/7/7 缺失 0 · h2 9 · 表格行 46 · 代码块 0 · 问题 0 处
 check_numbers.py   数字序列：真源 391 个，5 个平台逐个连续匹配 ✓（只有导语/版权块多出前后缀）
 verify_draft.py    公众号回读：round-trip 1.0000 · 7/7 mmbiz 图 · 6 表 · 9 h2 · 图注 7/7 · 关键句 5/5
+fix_bold_v2.py     加粗标记复检：7 个文件全部「**」偶数、无跨段误吞、数字 400 个不变
 ```
 
 **核图**（从 `dist/publish-*.log` 数 `✓ 上传` / `✗ 失败`）：
 
 ```
 zhihu      ✓ 上传 7   ✗ 失败 0
-csdn       ✓ 上传 6   ✗ 失败 2   ← bias_percentile.png / rotate.png
+csdn       ✓ 上传 6   ✗ 失败 2   ← bias_percentile.png / rotate.png（已就地补传，见上）
 juejin     ✓ 上传 7   ✗ 失败 0
 baijiahao  ✓ 上传 7   ✗ 失败 0
 bilibili   ✓ 上传 7   ✗ 失败 0
+```
+
+**CSDN 补图后终检**（playwright 读回 + 逐张 sha256）：
+
+```
+markdown 图片引用 8 · HTML <img> 8 · 预览面板 8 张全部加载 · 断链 0
+8 张图 HTTP 200，字节数与 sha256 与本地 src/img 逐张一致 ✓
+渲染等价：抹掉编辑器转义/排版差异后，正文与本地稿一致（370 个数字序列完全一致 ✓）
 ```
 
 **结构一致性**：五平台 h2 = 9、表格行 = 46、代码块 = 0，与真源一致；
@@ -53,24 +70,24 @@ bilibili   ✓ 上传 7   ✗ 失败 0
 ## 还要人工做的（按平台）
 
 1. **知乎** `p=2107418038874252958`
+   - **改 3 处多余的 `**`**（见 [`FIX_3_SPOTS.md`](FIX_3_SPOTS.md)）；
    - 话题标签 ≤5：量化 / 数据分析 / qlib / A股 / 投资——**话题必须真实存在**，`qlib` 搜不到就换「量化交易」；
    - 摘要、封面（`img/cover.png`）、专栏（技术）。
 2. **CSDN** `articleId=171141543`
-   - **补 2 张图**（`bias_percentile.png`、`rotate.png`）；
-   - 摘要填「两周亏 8.18%：风格暴露的账单」（17/20 字，已在适配里填好也别删）；
-   - 标签 ≤5、专栏**必须选账号下真实存在的**（否则拒稿）；
+   - 图已补齐、加粗已修，**只差**：摘要「两周亏 8.18%：风格暴露的账单」（17/20 字，已填好别删）、
+     标签 ≤5、专栏**必须选账号下真实存在的**（否则拒稿）；
    - 发布后回查是否真过机审。
 3. **掘金** `drafts/7710328862060363826`
-   - 封面手填（适配器 `cover_image:""` 写死）、标签、分类专栏。
+   - **改 3 处多余的 `**`**；封面手填（适配器 `cover_image:""` 写死）、标签、分类专栏。
 4. **百家号** `article_id=1882432603247893541`
-   - 标签（≤5）、摘要、封面、分类（技术）；标题 34/40 字；
+   - **改 3 处多余的 `**`**；标签（≤5）、摘要、封面、分类（技术）；标题 34/40 字；
    - 发布前看一眼正文尾部版权块有没有被编辑器吃掉。
 5. **B站专栏** `aid=375814`
-   - **封面必须手动传**（适配器 body 里没有封面字段）；
+   - **改 3 处多余的 `**`**；**封面必须手动传**（适配器 body 里没有封面字段）；
    - 正文 7 张图这次**自动上传成功（7/7）**；
    - 分区 `tid` 写死 `4`，按「科技 → 计算机技术」核对。
-6. **微信公众号** `media_id 633r9_pjAyxR8...cLWMQ`
-   - 正文 7 图 + 封面已上传，round-trip 1.0000；
+6. **微信公众号** `media_id 633r9_pjAyxR8...LQB5`
+   - 正文 7 图 + 封面已上传，round-trip 1.0000，加粗已修；
    - **「勾原创」接口设不了，必须在编辑器手动点**；
    - 标题、摘要、封面已填好，确认无误再群发。
 7. **六个平台共同**：确认无误后由 Curren 自己点发布；本流程只到草稿箱。
@@ -78,12 +95,20 @@ bilibili   ✓ 上传 7   ✗ 失败 0
 ## 本次踩坑记录
 
 - **CSDN `media/uploadimg` 又是 2 张失败**（上一期是 5/5 全过，这期 6/8）——同一个接口时好时坏，
-  报错形态是 `Unexpected end of JSON input`；**不重跑**（会产生废稿 + 限流），改由人工补图。
+  报错形态是 `Unexpected end of JSON input`；**不重跑**（会产生废稿 + 限流），
+  改用 playwright 拦截 `saveArticle` 接口把图补进**同一份草稿**（`temp/fix_csdn*.py`）。
+- **CSDN 的 markdown 会把裸星号转义成 `\*\*`**：补加粗时要注意 markdown 与 HTML 两个字段各修一遍；
+  而且**改 markdown 后再存一次**，编辑器会用 markdown 重新渲染 HTML（第一遍改 HTML 会被覆盖回去）。
+- **`fix_bold` 的正则会跨段吞加粗**：`\*\*(.+?)([。，；！？：])\*\*` 的 `(.+?)` 能跨过已闭合的 `**`，
+  把两段加粗之间的内容整段卷进去（本期坏了 3 处）。**正确写法**：先按 `\*\*(.+?)\*\*` 切出加粗片段，
+  再把片段**结尾**的标点挪出去（`fix_bold_v2.py`）。
 - **`publish-report.md` 被逐平台覆盖**：发完 5 个平台后，文件里只剩最后一个平台（bilibili）的回执。
   → **事后按日志拼**（本文件就是这么来的）。
 - **核图的正确姿势**：把 `publish.py` 的 stdout 重定向到 `dist/publish-<平台>.log`
   （`set PYTHONIOENCODING=utf-8` 防 cp936 把 ✓ 写崩），事后从日志数行，一次发布即可拿到图数。
-- **正文加粗里的句末标点要挪到加粗外**（本期 14 处，`fix_bold.py`），改前后数字序列 400 个一致。
 - **`front_matter.summary` 压到 20 字以内**（本期「两周亏 8.18%：风格暴露的账单」），
   CSDN 摘要硬上限 20 字，写长了只能截成带省略号的残句。
 - **公众号草稿改了正文就要删旧稿**（`draft/delete`）：同名两份草稿会让人不知道该发哪份。
+- **文本创作智能体（澄）最后一步撞了配额**：`MiniMax-M3.1-Flash` 报 `Quota exceeded / Token Plan 用量上限`，
+  任务状态 failed——但**实际发布动作在配额耗尽前已经全部完成**（5 个平台草稿 + CSDN 补图），
+  只有它自己那份总结没写出来。**配额真不够时要切它的 `active_model` 得用户点头**（AGENTS.md §8）。

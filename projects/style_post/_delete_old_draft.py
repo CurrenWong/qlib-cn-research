@@ -7,7 +7,7 @@ import requests
 API = "https://api.weixin.qq.com/cgi-bin"
 APPID = os.environ["WECHAT_APP_ID"]
 SECRET = os.environ["WECHAT_APP_SECRET"]
-OLD = "633r9_pjAyxR8atzJ8UNcgJo2uvDu1YC9i75WSKdNhapgLm_mPrHnAVuSvHtfvRo"
+OLD = "633r9_pjAyxR8atzJ8UNcieRQw-k9MVl-HORx7w5ZC_Vj_MQO5R9x3aImGNjWLMQ"
 
 
 def post(url, **kw):

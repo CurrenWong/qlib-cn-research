@@ -24,14 +24,16 @@
 | `front_matter.yaml` | 多平台头部参数 + 各平台导语（`summary` ≤ 20 字，CSDN 硬上限）|
 | `make_source.py` | `article.md` → `src/article.md` + `src/img/`（沿用 bias_post 的单向生成）|
 | `make_cover.py` | 封面 1080×864：净值曲线 + 31 行业 BIAS120 色条（都是真实数据）|
-| `fix_bold.py` | 把加粗里的句末标点挪到加粗外（14 处），改前后数字序列必须一致 |
+| `fix_bold.py` / `fix_bold_v2.py` | 加粗句末标点外移；**v2 是修好的算法**（v1 的正则会跨段吞加粗，见 AGENTS.md §8.3 坑 33）|
+| `check_bold_scan.py` | 扫描加粗标记是否被弄坏（`**` 奇数行、数字被卷进加粗）|
 | `check_article.py` | **数字自检 117 项**：从源文件重新读数，核对正文每个数 |
-| `check_dist.py` | 核验 5 个分发包（图片引用 / h2 / 表格 / 代码块）|
+| `check_dist.py` | 核验 5 个分发包（期望值从真源现算，不写死）|
+| `check_numbers.py` | 核对 5 个分发包的**数字序列**与真源逐个一致 |
 | `publish_wechat.py` | 公众号草稿箱（API 直传，7 图 + 封面）|
 | `verify_draft.py` | 回读草稿核对：round-trip 纯文本一致 + 图/表/h2/图注/关键句 |
 | `_delete_old_draft.py` | 删掉被取代的旧草稿（正文改过就删，避免同名两份）|
 | `img/` | 7 张正文图 + cover.png |
-| `dist/` | 各平台草稿源 + `publish-report.md`（由文本创作智能体生成）|
+| `dist/` | 各平台草稿源 + `publish-report.md` + `FIX_3_SPOTS.md`（由文本创作智能体生成）|
 
 ## 复现
 
@@ -74,3 +76,9 @@ cd /d <repo>
 
 见 [`dist/publish-report.md`](dist/publish-report.md)。**全部停在草稿箱，没有任何一份被公开发布**
 （发布动作留给 Curren）。
+
+- 公众号草稿：`media_id 633r9_pjAyxR8atzJ8UNci9_lX6_GdYQH19iquRzt-6A8_CD20NEWTncLPgmLQB5`
+  （round-trip 1.0000 · 7/7 图 · 图注 7/7 · 关键句 5/5）
+- 5 个平台草稿见回执表；**CSDN 的图与加粗已由脚本就地修好**，
+  其余 4 个平台正文里还有 3 处多余的 `**`，改法见 [`dist/FIX_3_SPOTS.md`](dist/FIX_3_SPOTS.md)，
+  或者让我重新建一份干净草稿（代价是草稿箱里会有两份）。
