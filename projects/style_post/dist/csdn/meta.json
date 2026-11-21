@@ -1,0 +1,65 @@
+{
+  "platform": "csdn",
+  "platform_name": "CSDN",
+  "title": "两周亏 8.18%：我把 31 个行业的乖离率算了一遍，问题不在选股",
+  "title_length": 34,
+  "title_limit": 64,
+  "title_truncated": false,
+  "title_head_keywords_ok": true,
+  "summary": "两周亏 8.18%：风格暴露的账单",
+  "summary_length": 17,
+  "summary_limit": 20,
+  "tags": [
+    "量化",
+    "数据分析",
+    "qlib",
+    "A股",
+    "投资"
+  ],
+  "category": "技术",
+  "cover": "cover.png",
+  "cover_mode": "first_image",
+  "formula_strategy": "latex",
+  "body_format": "markdown",
+  "auto_fields": [
+    "标题",
+    "正文",
+    "图片上传到平台图床"
+  ],
+  "manual_fields": [
+    {
+      "field": "标签",
+      "value": [
+        "量化",
+        "数据分析",
+        "qlib",
+        "A股",
+        "投资"
+      ],
+      "where": "CSDN 编辑器标签栏",
+      "limit": "最多 5 个，逗号分隔"
+    },
+    {
+      "field": "摘要",
+      "value": "两周亏 8.18%：风格暴露的账单",
+      "where": "CSDN 编辑器摘要栏",
+      "limit": "硬上限 20 字，超了报 45004"
+    },
+    {
+      "field": "分类/专栏",
+      "value": "技术",
+      "where": "CSDN 编辑器分类栏——必须选账号下真实存在的专栏，否则被拒",
+      "limit": "无"
+    }
+  ],
+  "after_publish": "草稿箱人工确认发布；发布后回查是否真过机审",
+  "editor_url": "https://editor.csdn.net/md/",
+  "notes": [
+    "适配器按 Markdown 落库（markdowncontent），正文必须是 Markdown",
+    "图片走 media/uploadimg，正文图压到 200KB / 1200px 宽内",
+    "标签/分类/封面在适配器里是写死的空串，必须手填"
+  ],
+  "warnings": [
+    "标签 6 个 > 上限 5 个，已截取前 5 个"
+  ]
+}

@@ -1,0 +1,456 @@
+<!DOCTYPE html><html lang='zh-CN'><head><meta charset='utf-8'><title>style attribution article (uploaded)</title></head><body style='max-width:677px;margin:0 auto;padding:24px 18px;'><section style="font-size:16px;line-height:1.85;color:#2c2c2c;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;"><h1 style="margin:0 0 18px;font-size:22px;line-height:1.45;font-weight:700;color:#111;letter-spacing:.3px;">两周亏 8.18%：我把 31 个行业的乖离率算了一遍，问题不在选股</h1>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">11 月 2 日开盘，我按模型信号买了 20 只沪深 300 成分股，每只约一万元，总成本 <strong style="font-weight:700;color:#000;">256,525 元</strong>（25.65 万）。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">11 月 20 日收盘，这个组合的总资产是 <strong style="font-weight:700;color:#000;">235,555 元</strong>（23.56 万），浮亏 <strong style="font-weight:700;color:#000;">8.18%</strong>。20 只里 <strong style="font-weight:700;color:#000;">8 盈 12 亏</strong>。同期沪深 300 是 <strong style="font-weight:700;color:#000;">-1.28%</strong>，也就是说，我的组合跑输了 <strong style="font-weight:700;color:#000;">6.89 个百分点</strong>。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">两周前它是浮盈的。11 月 11 日那天，组合还有 <strong style="font-weight:700;color:#000;">+4.19%</strong>，比沪深 300 多赚 2.45 个点。之后 8 个交易日一路回落，把浮盈吐光还倒欠。11 月 16 日起超额转负，连着 5 个交易日跑输。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">问题很自然：<strong style="font-weight:700;color:#000;">是模型不行，还是哪里出错了</strong>？</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">我先去查数据。查完发现，模型没坏，行情也没取错——是我的组合犯了一个很典型的错：<strong style="font-weight:700;color:#000;">它把 58.6% 的仓位，压在了当周跌得最狠、离均线最远的两三个行业上</strong>。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">这篇文章把这次归因的过程完整写下来，顺带把「乖离率」这个指标讲清楚：它怎么算、怎么用，以及为什么它能在 15 个交易日里告诉我钱丢在哪了。</p>
+<p style="margin:32px 0;text-align:center;color:#D8D8D8;letter-spacing:8px;font-size:14px;">• • •</p>
+<section style="border-left:4px solid #E67E22;padding-left:11px;margin:40px 0 18px;"><span style="font-size:19px;font-weight:700;color:#1a1a1a;line-height:1.45;">一、先看数字：15 个交易日里发生了什么</span></section>
+<p style="margin:22px 0 6px;text-align:center;"><img data-src="http://mmbiz.qpic.cn/mmbiz_png/8aETljw86fwUVr84FchicILiaeSpDNcTJYrGia8qMmx1kEoUiby0NbLFbdOzmliaNjRxzwbqlgLzujibfGZm1KtWxqiauicSHO1PYJmmvKLEic1DADcU/0?from=appmsg" style="max-width:100%;display:block;margin:0 auto;border-radius:2px;"/></p><p style="margin:6px 0 24px;text-align:center;font-size:13px;color:#999;line-height:1.6;">组合累计收益（对建仓成本）vs 沪深300（以 11-02 开盘价为基准）。红色区间为跑输区间。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">这条曲线的形状本身就很有信息量：</p>
+<section style="margin:20px 0;overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:14px;table-layout:auto;margin:0;">
+<thead>
+<tr>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:left;line-height:1.6;color:#222;">交易日</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">组合累计收益</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">沪深300（开起）</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">超额</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">11-03</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-4.43%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+0.07%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-4.50pct</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">11-05</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+0.86%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+2.68%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-1.82pct</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">11-11</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">+4.19%</strong></td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+1.74%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">+2.45pct</strong></td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">11-13</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+0.57%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+0.26%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+0.31pct</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">11-16</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-3.45%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-0.65%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-2.79pct</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">11-18</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-3.68%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-0.55%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-3.13pct</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">11-20</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">-8.18%</strong></td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-1.28%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">-6.89pct</strong></td>
+</tr>
+</tbody>
+</table></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">关键在于：<strong style="font-weight:700;color:#000;">亏损不是均匀发生的</strong>。11-16 之后的 5 个交易日，组合依次是 -3.45%、-4.76%、-3.68%、-5.50%、-8.18%，每天都跑输沪深 300。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">「每天都跑输、而且越跑越远」——这种形态基本排除了「某一天踩雷」，指向的是<strong style="font-weight:700;color:#000;">持续的、系统性的暴露</strong>。要找答案，就不能看单只股票，得看它们共同属于哪一类资产。</p>
+<p style="margin:32px 0;text-align:center;color:#D8D8D8;letter-spacing:8px;font-size:14px;">• • •</p>
+<section style="border-left:4px solid #E67E22;padding-left:11px;margin:40px 0 18px;"><span style="font-size:19px;font-weight:700;color:#1a1a1a;line-height:1.45;">二、亏损长什么样：通信电子链集体回吐</span></section>
+<p style="margin:22px 0 6px;text-align:center;"><img data-src="http://mmbiz.qpic.cn/mmbiz_png/8aETljw86fyiaJGTfv13DeSZ1kic5zpq55f3xE6OzDU7kVplvHFfWIWadlfbpFUiaWX3t2X053YTSGLLIiaI7aYkVTJUBFR8ugfjplBzxrXicFn0/0?from=appmsg" style="max-width:100%;display:block;margin:0 auto;border-radius:2px;"/></p><p style="margin:6px 0 24px;text-align:center;font-size:13px;color:#999;line-height:1.6;">20 只持仓累计盈亏（2026-11-20），按累计收益率排序，括号内为权重。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">把 20 只持仓摊开看，分布很不平均：</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">跌得最狠的五只，全是同一条产业链上的</strong>：</p>
+<section style="margin:20px 0;overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:14px;table-layout:auto;margin:0;">
+<thead>
+<tr>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:left;line-height:1.6;color:#222;">名称</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">代码</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">申万一级</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">累计收益</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">权重</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">天孚通信</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">SZ300394</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">通信</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">-31.89%</strong></td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">4.3%</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">东山精密</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">SZ002384</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">电子</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-25.71%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">5.8%</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">芯原股份</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">SH688521</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">电子</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-22.53%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">6.5%</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">三环集团</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">SZ300408</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">电子</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-21.38%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">5.3%</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">工业富联</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">SH601138</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">电子</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-17.71%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">4.7%</td>
+</tr>
+</tbody>
+</table></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">赚到的五只，另一个样</strong>：</p>
+<section style="margin:20px 0;overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:14px;table-layout:auto;margin:0;">
+<thead>
+<tr>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:left;line-height:1.6;color:#222;">名称</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">代码</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">申万一级</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">累计收益</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">权重</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">北京银行</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">SH601169</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">银行</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+7.92%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">4.8%</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">川投能源</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">SH600674</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">公用事业</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+7.77%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">4.9%</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">平安银行</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">SZ000001</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">银行</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+5.34%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">4.7%</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">国电电力</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">SH600795</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">公用事业</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+4.31%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">4.5%</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">中国电信</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">SH601728</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">通信</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+3.97%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">4.7%</td>
+</tr>
+</tbody>
+</table></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">20 只票、5 个行业、单票最大权重 7.13%（豪威集团）——单看每一条都很「分散」。但收益的分布告诉我：<strong style="font-weight:700;color:#000;">这不是分散，是同一个赌注押了 20 次</strong>。</p>
+<blockquote style="margin:20px 0;padding:12px 16px;background:#F7F7F7;border-left:3px solid #ddd;color:#555;font-size:15px;line-height:1.8;">
+<p style="margin:4px 0;font-size:15px;line-height:1.8;color:#555;">顺带说一个细节：中信银行 11-20 除权除息，每股派 0.203 元。我持有 18 天，按 A 股红利税规则（持股 ≤1 个月 20%）税后拿到 178.64 元。这笔钱单独计入现金，<strong style="font-weight:700;color:#000;">不算亏损</strong>——组合累计税后现金分红 <strong style="font-weight:700;color:#000;">275 元</strong>。很多净值脚本把除权当天直接记成「跳空下跌」，那才是真正会算错的地方。</p>
+</blockquote>
+<p style="margin:32px 0;text-align:center;color:#D8D8D8;letter-spacing:8px;font-size:14px;">• • •</p>
+<section style="border-left:4px solid #E67E22;padding-left:11px;margin:40px 0 18px;"><span style="font-size:19px;font-weight:700;color:#1a1a1a;line-height:1.45;">三、按行业拆：58.6% 的仓位压在两个行业上</span></section>
+<p style="margin:22px 0 6px;text-align:center;"><img data-src="http://mmbiz.qpic.cn/mmbiz_png/8aETljw86fyTUoRk565pNoUibCbq6Tk6hIZGbDccIhibE76ib5GwUibFD9kcWRe9oBkpvXdfmmqdjSzTz7gY661qAK3PMMb9ZQmhUkRNfmibdSok/0?from=appmsg" style="max-width:100%;display:block;margin:0 auto;border-radius:2px;"/></p><p style="margin:6px 0 24px;text-align:center;font-size:13px;color:#999;line-height:1.6;">横轴＝行业当前 BIAS120，纵轴＝组合在该行业的权重，气泡大小＝权重。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">把 20 只持仓按申万一级行业归类，答案就直白了：</p>
+<section style="margin:20px 0;overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:14px;table-layout:auto;margin:0;">
+<thead>
+<tr>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:left;line-height:1.6;color:#222;">申万一级</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">只数</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">权重</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">盈亏(元)</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">平均收益</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">BIAS20</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">BIAS120</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">电子</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">7</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">39.5%</strong></td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-16,231</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-14.16%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-8.54%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">-32.87%</strong></td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">通信</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">4</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">19.1%</strong></td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-5,685</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-9.74%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-14.38%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">-43.84%</strong></td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">机械设备</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">2</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">9.1%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-2,668</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-11.34%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-11.88%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-27.87%</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">公用事业</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">2</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">9.4%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+1,265</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+6.04%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+0.36%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-3.29%</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">银行</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">5</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">23.0%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+2,074</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+3.99%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+4.15%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">+11.90%</strong></td>
+</tr>
+</tbody>
+</table></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">电子 + 通信 = 58.6% 的权重，亏了 21,916 元</strong>；银行 + 公用事业 = 32.3% 的权重，赚了 3,339 元。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">到这里为止，还只是「事实」。真正的问题是：<strong style="font-weight:700;color:#000;">电子和通信为什么一起跌？银行和公用事业为什么一起涨</strong>？</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">答案不在个股，在行业。而衡量「一个行业现在处在什么位置」的现成指标，就是乖离率。</p>
+<p style="margin:32px 0;text-align:center;color:#D8D8D8;letter-spacing:8px;font-size:14px;">• • •</p>
+<section style="border-left:4px solid #E67E22;padding-left:11px;margin:40px 0 18px;"><span style="font-size:19px;font-weight:700;color:#1a1a1a;line-height:1.45;">四、乖离率：把「跌得多」变成「离均线多远」</span></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">乖离率（BIAS）就是收盘价对均线的偏离：</p>
+<blockquote style="margin:20px 0;padding:12px 16px;background:#F7F7F7;border-left:3px solid #ddd;color:#555;font-size:15px;line-height:1.8;">
+<p style="margin:4px 0;font-size:15px;line-height:1.8;color:#555;"><strong style="font-weight:700;color:#000;">BIAS_n = (收盘价 − MA_n) / MA_n × 100%</strong></p>
+</blockquote>
+<ul style="margin:15px 0;padding-left:24px;font-size:16px;line-height:1.85;color:#2c2c2c;">
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">BIAS &gt; 0</strong>：价格在 n 日均线<strong style="font-weight:700;color:#000;">之上</strong>，强势/偏热；</li>
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">BIAS &lt; 0</strong>：价格在均线<strong style="font-weight:700;color:#000;">之下</strong>，弱势/偏冷；</li>
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">绝对值越大，越极端。</li>
+</ul>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">它比「涨跌幅」好用的地方在于<strong style="font-weight:700;color:#000;">标准化</strong>：不同行业的点位、波动率天差地别，直接比涨跌幅没有意义；BIAS 把它们统一到「离自己的均线多远」这一个尺度上。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">我按 6 / 20 / 60 / 120 个交易日四个周期，把申万 31 个一级行业全算了一遍：</p>
+<p style="margin:22px 0 6px;text-align:center;"><img data-src="http://mmbiz.qpic.cn/mmbiz_png/8aETljw86fwLZ04QnCVuxiabNZ8PqQwWu5kYCqGFI90fahjxq199e81LDmxs6qxV1bFtLQVibbYWryTJia27M5iawnQQR62zZ8eOqm8dQiaO3aOg/0?from=appmsg" style="max-width:100%;display:block;margin:0 auto;border-radius:2px;"/></p><p style="margin:6px 0 24px;text-align:center;font-size:13px;color:#999;line-height:1.6;">31 个申万一级行业 × 4 个周期的当前乖离率（2026-11-20）。红＝在均线上方，蓝＝在均线下方。</p>
+<p style="margin:22px 0 6px;text-align:center;"><img data-src="http://mmbiz.qpic.cn/mmbiz_png/8aETljw86fw6nqhvSHjSUjmOXgGpKLmxVJTMgQ52Mkz1DbkibH5pg8X80pRf3Lypj5icciaESXibeO6icvaEzKUt6hpOicljmPDZTcHjA81m3MS8M/0?from=appmsg" style="max-width:100%;display:block;margin:0 auto;border-radius:2px;"/></p><p style="margin:6px 0 24px;text-align:center;font-size:13px;color:#999;line-height:1.6;">近 60 个交易日 BIAS20 轮动路径：看谁在高位、谁在低位、什么时候切换的。</p>
+<p style="margin:22px 0 6px;text-align:center;"><img data-src="http://mmbiz.qpic.cn/mmbiz_png/8aETljw86fw72JBTLia0PFAxJJlGeRias8mWSIXFibFfYOlCppB2ZL75g3P2FbOj0iaOqLoiaTM0V1Q4pEQ7pInLSlCKicAP6BrHOMcmGZnyGCGDA/0?from=appmsg" style="max-width:100%;display:block;margin:0 auto;border-radius:2px;"/></p><p style="margin:6px 0 24px;text-align:center;font-size:13px;color:#999;line-height:1.6;">当前 BIAS20 在近三年（约 750 个交易日）里的分位：&gt;80 极热，&lt;20 极冷。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">11 月 20 日的读数：</p>
+<section style="margin:20px 0;overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:14px;table-layout:auto;margin:0;">
+<thead>
+<tr>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:left;line-height:1.6;color:#222;">最热（BIAS20）</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">BIAS20</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">BIAS120</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">分位</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">最冷（BIAS20）</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">BIAS20</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">BIAS120</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">分位</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">银行</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+4.15%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+11.90%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">95</strong></td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">国防军工</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-10.48%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-20.47%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">1</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">家用电器</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+2.24%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+1.84%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">81</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">传媒</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-11.54%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-12.42%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">1</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">食品饮料</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+1.90%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+6.23%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">80</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">综合</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-11.59%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-26.19%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">2</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">公用事业</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+0.36%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-3.29%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">52</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">有色金属</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-11.88%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-27.97%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">1</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">非银金融</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-0.31%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-5.06%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">50</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">机械设备</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-11.88%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-27.87%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">1</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">交通运输</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-0.49%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-0.50%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">38</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">通信</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">-14.38%</strong></td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">-43.84%</strong></td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">3</td>
+</tr>
+</tbody>
+</table></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">现在把我组合的持仓行业对上去：</p>
+<ul style="margin:15px 0;padding-left:24px;font-size:16px;line-height:1.85;color:#2c2c2c;">
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">通信</strong>（19.1% 权重）：BIAS120 <strong style="font-weight:700;color:#000;">-43.8%</strong>，31 个行业里离 120 日均线最远的一个，分位只有 3；</li>
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">电子</strong>（39.5% 权重）：BIAS120 <strong style="font-weight:700;color:#000;">-32.9%</strong>，第二冷；</li>
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">银行</strong>（23.0% 权重）：BIAS120 <strong style="font-weight:700;color:#000;">+11.9%</strong>，分位 95<strong style="font-weight:700;color:#000;">，最热的一个</strong>。</li>
+</ul>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">我组合的重仓，恰好是两个最冷的行业；赚钱的那批，恰好是最热的行业。这不是巧合——<strong style="font-weight:700;color:#000;">乖离率极端的方向，就是那一周行情的方向</strong>。</p>
+<p style="margin:32px 0;text-align:center;color:#D8D8D8;letter-spacing:8px;font-size:14px;">• • •</p>
+<section style="border-left:4px solid #E67E22;padding-left:11px;margin:40px 0 18px;"><span style="font-size:19px;font-weight:700;color:#1a1a1a;line-height:1.45;">五、关键证据：传媒 9 天从「最拥挤」翻到「最超卖」</span></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">如果只看一个横截面，还可以说「电子通信本来就弱」。但时间线上有更硬的证据。</p>
+<p style="margin:22px 0 6px;text-align:center;"><img data-src="http://mmbiz.qpic.cn/mmbiz_png/8aETljw86fxqgTDBcwwubrjr7ibvkzV2efI0XuaeYWWLSYxL8Tl4wK4KQMoOQ7T0QglnzACVYvZpAFkZwXI6JrBwmHnsFEEgHicFiciaWeLopt8/0?from=appmsg" style="max-width:100%;display:block;margin:0 auto;border-radius:2px;"/></p><p style="margin:6px 0 24px;text-align:center;font-size:13px;color:#999;line-height:1.6;">近 30 个交易日行业指数归一化走势（申万一级，起点＝100）。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">11 月 11 日那天，传媒的乖离率是 <strong style="font-weight:700;color:#000;">+7.66%</strong>，是 31 个行业里<strong style="font-weight:700;color:#000;">唯一四个周期全部为正</strong>的（传媒、农林牧渔、银行），BIAS20 的历史分位 <strong style="font-weight:700;color:#000;">93</strong>——最拥挤的状态。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">11 月 20 日，传媒变成 <strong style="font-weight:700;color:#000;">-11.54%</strong>，四个周期<strong style="font-weight:700;color:#000;">全部为负</strong>，分位 <strong style="font-weight:700;color:#000;">1</strong>。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">9 个自然日，从「最拥挤」翻到「最超卖」</strong>。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">这两周的 BIAS20 变动榜：</p>
+<section style="margin:20px 0;overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:14px;table-layout:auto;margin:0;">
+<thead>
+<tr>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:left;line-height:1.6;color:#222;">行业</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">BIAS20 @11-13</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">BIAS20 @11-20</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">变动</th>
+<th style="border:1px solid #E3E3E3;padding:8px 10px;background:#F5F5F5;font-weight:600;font-size:14px;text-align:center;line-height:1.6;color:#222;">当前分位</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">传媒</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+3.26%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-11.54%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">-14.81pct</strong></td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">1</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">机械设备</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-2.74%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-11.88%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-9.15pct</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">1</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">商贸零售</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-0.29%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-8.98%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-8.69pct</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">1</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">国防军工</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-1.96%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-10.48%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-8.52pct</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">1</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">纺织服饰</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+1.08%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-7.21%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">-8.29pct</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">2</td>
+</tr>
+<tr>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:left;line-height:1.6;color:#2c2c2c;">银行</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+2.37%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+4.15%</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;">+1.78pct</td>
+<td style="border:1px solid #E3E3E3;padding:8px 10px;font-size:14px;text-align:center;line-height:1.6;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">95</strong></td>
+</tr>
+</tbody>
+</table></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">传媒不是纸上数字。11 月 5 日到 11 月 20 日，成分股里芒果超媒 <strong style="font-weight:700;color:#000;">-17.2%</strong>、完美世界 <strong style="font-weight:700;color:#000;">-22.6%</strong>、光线传媒 <strong style="font-weight:700;color:#000;">-19.7%</strong>——我另外用腾讯的日线核对过，与行业指数对得上。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">同一个板块可以在 9 天里从最拥挤翻到最超卖。<strong style="font-weight:700;color:#000;">而我的模型，恰好在翻牌前两天把仓位放在了那一侧</strong>。</p>
+<p style="margin:32px 0;text-align:center;color:#D8D8D8;letter-spacing:8px;font-size:14px;">• • •</p>
+<section style="border-left:4px solid #E67E22;padding-left:11px;margin:40px 0 18px;"><span style="font-size:19px;font-weight:700;color:#1a1a1a;line-height:1.45;">六、把两件事对上：超额就是风格暴露的账单</span></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">现在可以把整个故事串起来了：</p>
+<ol style="margin:15px 0;padding-left:24px;font-size:16px;line-height:1.85;color:#2c2c2c;">
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">模型选的是「预测收益最高的股票」</strong>；</li>
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">但这些股票高度相关——20 只票的预测里，都压着同一个因子：<strong style="font-weight:700;color:#000;">AI 算力 / 光通信 / 电子产业链</strong>；</li>
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">这个因子当周正在从「最拥挤」翻向「最超卖」；</li>
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">于是组合的 58.6% 权重集体回吐 21,916 元，把前面 9 个交易日赚到的 +2.45pct 超额一次性抹掉，还倒欠 6.89 个点。</li>
+</ol>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">所以这不是「模型失效」，是「风险模型缺位」</strong>。 我有一个选股模型（预测谁会涨），但没有一个约束模型（不许把所有钱压在同一个方向上）。这两件事缺一不可。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">还有一个更朴素的教训：<strong style="font-weight:700;color:#000;">单看每只股票，每一只都在 4%~7% 的权重上，看起来「风险可控」；但组合的真实风险不在单票，在票与票之间那层看不见的相关性</strong>。 BIAS120 &lt; -25% 的行业暴露，就是识别这层相关性的现成指标。</p>
+<p style="margin:32px 0;text-align:center;color:#D8D8D8;letter-spacing:8px;font-size:14px;">• • •</p>
+<section style="border-left:4px solid #E67E22;padding-left:11px;margin:40px 0 18px;"><span style="font-size:19px;font-weight:700;color:#1a1a1a;line-height:1.45;">七、怎么办：给组合加一条风格约束</span></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">既然病根找到了，处方就不复杂。下次建仓（11 月 30 日调仓日）我会加三条硬约束：</p>
+<ol style="margin:15px 0;padding-left:24px;font-size:16px;line-height:1.85;color:#2c2c2c;">
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">行业权重上限</strong>：任一申万一级行业权重不超过 15%<strong style="font-weight:700;color:#000;">；BIAS120 &gt; +20% 的（极热的）行业合计不超过 20%</strong>——不给已经在历史高位的东西加仓；</li>
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">相关性约束</strong>：把持仓两两 60 日收益相关系数矩阵拉出来，强制最大相关簇（比如 AI 算力链）合计权重不超过 30%；</li>
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">调仓前先看 BIAS</strong>：如果某个行业 BIAS120 已经 &lt; -30%（极度超卖）<strong style="font-weight:700;color:#000;">，不要因为它跌了就砍</strong>——11-20 的通信和电子恰恰是全市场最超卖的两个，而我亏得最多的天孚通信正属于这里。</li>
+</ol>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">第 3 条尤其重要：<strong style="font-weight:700;color:#000;">风格暴露的账要在买入时用仓位上限支付，不是在卖出时用亏损支付</strong>。</p>
+<p style="margin:32px 0;text-align:center;color:#D8D8D8;letter-spacing:8px;font-size:14px;">• • •</p>
+<section style="border-left:4px solid #E67E22;padding-left:11px;margin:40px 0 18px;"><span style="font-size:19px;font-weight:700;color:#1a1a1a;line-height:1.45;">八、数据与方法（可复现）</span></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">数据来源</strong></p>
+<ul style="margin:15px 0;padding-left:24px;font-size:16px;line-height:1.85;color:#2c2c2c;">
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">个股行情：腾讯不复权日线；分红用东方财富 <code style="font-family:Consolas,Monaco,'Courier New',monospace;background:#F5F5F5;padding:1px 4px;border-radius:2px;font-size:14px;color:#333;">RPT_SHAREBONUS_DET</code> 单独取除权日与每 10 股派息，红利税按持有期差别化（≤1 个月 20% / 1 个月~1 年 10% / &gt;1 年 0%）；</li>
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">行业指数：申万宏源研究 <code style="font-family:Consolas,Monaco,'Courier New',monospace;background:#F5F5F5;padding:1px 4px;border-radius:2px;font-size:14px;color:#333;">index_publish/trend</code> 接口，31 个一级行业，1999-12-30 ~ 2026-11-20 共 6504 个交易日；</li>
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">行业归属：申万官方 PIT 成分表（5222 只，as-of 对齐）；</li>
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">乖离率：与开源版 <code style="font-family:Consolas,Monaco,'Courier New',monospace;background:#F5F5F5;padding:1px 4px;border-radius:2px;font-size:14px;color:#333;">industry_bias_heatmap.py</code> <strong style="font-weight:700;color:#000;">同一份代码</strong>算的，周期 6/20/60/120，分位取近 750 个交易日。</li>
+</ul>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">交叉校验</strong>（这一步不能省）</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">11 月 20 日的收盘价，我用<strong style="font-weight:700;color:#000;">东方财富 push2 接口独立复核了 6 只标的</strong>：天孚通信 102.18、芯原股份 76.90、东山精密 67.60、中信银行 9.66、蓝思科技 22.98、沪深300 3954.57——与腾讯的数据<strong style="font-weight:700;color:#000;">逐位一致</strong>。行业指数的涨跌则用成分股独立验证（传媒 11-05→11-20：芒果超媒 -17.2%、完美世界 -22.6%、光线传媒 -19.7%）。</p>
+<blockquote style="margin:20px 0;padding:12px 16px;background:#F7F7F7;border-left:3px solid #ddd;color:#555;font-size:15px;line-height:1.8;">
+<p style="margin:4px 0;font-size:15px;line-height:1.8;color:#555;">写这一句不是为了显得严谨，是因为我第一版把沪深300 从 9 月 30 日到 11 月 11 日的涨跌幅写成 -8.2%，重算之后是 <strong style="font-weight:700;color:#000;">-6.47%</strong><strong style="font-weight:700;color:#000;">。数字必须来自实际输出，不能凭印象写</strong>——这是给自己立的规矩，也是这套东西唯一能站得住的原因。</p>
+</blockquote>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;"><strong style="font-weight:700;color:#000;">几个踩过的坑</strong></p>
+<ul style="margin:15px 0;padding-left:24px;font-size:16px;line-height:1.85;color:#2c2c2c;">
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">腾讯的不复权 <code style="font-family:Consolas,Monaco,'Courier New',monospace;background:#F5F5F5;padding:1px 4px;border-radius:2px;font-size:14px;color:#333;">kline</code> 和前复权 <code style="font-family:Consolas,Monaco,'Courier New',monospace;background:#F5F5F5;padding:1px 4px;border-radius:2px;font-size:14px;color:#333;">fqkline</code> 是两个接口，<strong style="font-weight:700;color:#000;">混用会得出方向相反的结论</strong>（除权跳空会被当成暴跌）；</li>
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">除权日会凭空造出「假事件」，必须用分红表单独处理；</li>
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">停牌日的价格如果前向填充，「价格处于 250 日最高」这类因子会恒为 1，直接把僵尸股顶到因子上限；</li>
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">权重网格里「某域权重=0」不等于「不看这一域」，<code style="font-family:Consolas,Monaco,'Courier New',monospace;background:#F5F5F5;padding:1px 4px;border-radius:2px;font-size:14px;color:#333;">0 × NaN = NaN</code> 会把整行样本踢掉。</li>
+</ul>
+<p style="margin:32px 0;text-align:center;color:#D8D8D8;letter-spacing:8px;font-size:14px;">• • •</p>
+<section style="border-left:4px solid #E67E22;padding-left:11px;margin:40px 0 18px;"><span style="font-size:19px;font-weight:700;color:#1a1a1a;line-height:1.45;">写在最后</span></section>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">先把话说清楚：<strong style="font-weight:700;color:#000;">15 个交易日、20 只股票，样本量根本不够对「模型好不好」下判断</strong>。 这篇文章能支持的只有两件事：</p>
+<ol style="margin:15px 0;padding-left:24px;font-size:16px;line-height:1.85;color:#2c2c2c;">
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">组合的超额损失来自<strong style="font-weight:700;color:#000;">行业风格暴露</strong>，这是可验证、可归因的，不是玄学；</li>
+<li style="margin:8px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">乖离率是一个<strong style="font-weight:700;color:#000;">可以提前用</strong>的指标——它不是用来解释亏损的，是用来<strong style="font-weight:700;color:#000;">在买入前就限制亏损</strong>的。</li>
+</ol>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">至于「下周该买什么」，我不想给。<strong style="font-weight:700;color:#000;">样本量不够、模型没资格、我也还没赚到钱</strong>。 我只是把这次亏钱的账单拆开、算清楚、写成可复现的流程——包括它错在哪一步。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">工具和校验脚本都开源了（<code style="font-family:Consolas,Monaco,'Courier New',monospace;background:#F5F5F5;padding:1px 4px;border-radius:2px;font-size:14px;color:#333;">qlib-cn-research</code>）。如果你也在做类似的事，欢迎拿自己的数据跑一遍；如果你只想看结论：<strong style="font-weight:700;color:#000;">看组合的行业权重表，和那张 BIAS120 截面图</strong>。</p>
+<p style="margin:15px 0;font-size:16px;line-height:1.85;color:#2c2c2c;">不构成投资建议。数据截至 2026-11-20 收盘。</p></section></body></html>

@@ -1,0 +1,71 @@
+{
+  "platform": "juejin",
+  "platform_name": "掘金",
+  "title": "两周亏 8.18%：我把 31 个行业的乖离率算了一遍，问题不在选股",
+  "title_length": 34,
+  "title_limit": 50,
+  "title_truncated": false,
+  "title_head_keywords_ok": true,
+  "summary": "两周亏 8.18%：风格暴露的账单",
+  "summary_length": 17,
+  "summary_limit": null,
+  "tags": [
+    "量化",
+    "数据分析",
+    "qlib",
+    "A股",
+    "投资"
+  ],
+  "category": "技术",
+  "cover": "cover.png",
+  "cover_mode": "manual",
+  "formula_strategy": "latex",
+  "body_format": "markdown",
+  "auto_fields": [
+    "标题",
+    "正文",
+    "图片上传到平台图床"
+  ],
+  "manual_fields": [
+    {
+      "field": "标签",
+      "value": [
+        "量化",
+        "数据分析",
+        "qlib",
+        "A股",
+        "投资"
+      ],
+      "where": "掘金 编辑器标签栏",
+      "limit": "最多 5 个，逗号分隔"
+    },
+    {
+      "field": "摘要",
+      "value": "两周亏 8.18%：风格暴露的账单",
+      "where": "掘金 编辑器摘要栏（留空则自动生成）",
+      "limit": "无硬上限"
+    },
+    {
+      "field": "封面",
+      "value": "cover.png",
+      "where": "掘金 编辑器封面设置（适配器不传封面）",
+      "limit": "无"
+    },
+    {
+      "field": "分类/专栏",
+      "value": "技术",
+      "where": "掘金 编辑器分类栏",
+      "limit": "无"
+    }
+  ],
+  "after_publish": "草稿箱人工确认发布",
+  "editor_url": "https://juejin.cn/editor/drafts",
+  "notes": [
+    "第二批平台（Q2 决策：知乎 + CSDN 先行）",
+    "公式走 Markdown 原生 LaTeX，掘金编辑器直接渲染",
+    "适配器写死 cover_image:\"\" → 封面必须手填"
+  ],
+  "warnings": [
+    "标签 6 个 > 上限 5 个，已截取前 5 个"
+  ]
+}

@@ -580,6 +580,36 @@ docs\wechat_trend_combo\article.md          公众号真源（【插图 N：…�
 - 公众号草稿核验用 `verify_draft_attrib.py`（纯文本长度 local/render 必须一致）；
 - 结果与人工待办见 `docs/wechat_trend_combo/PUBLISH.md`。
 
+### 8.3 公众号长文：策略收益 × 行业乖离率归因（`projects\style_post\`）
+
+第三篇公众号长文（2026-11-21），素材来自 `projects\csi300_lgbm\report\update_20261120\`：
+实盘组合 15 个交易日 -8.18%、超额 -6.89pct，用申万一级乖离率归因到**风格暴露**。
+
+```
+projects\style_post\article.md        公众号真源（【插图 N：…】标记，7 图 6 表 9 h2）
+  ├─ make_cover.py ─→ img\cover.png   封面 1080×864（净值曲线 + 31 行业 BIAS120 色条）
+  ├─ make_source.py ─→ src\article.md 多平台真根源（front matter + 标准 markdown 图片）
+  ├─ fix_bold.py ─→ 加粗句末标点外移   14 处，改前后数字序列必须一致（400 个数）
+  ├─ check_article.py ─→ 数字自检     117 项，从源文件复算正文每个数
+  ├─ publish_wechat.py ─→ 公众号草稿  7 图 + 封面
+  ├─ verify_draft.py ─→ 回读核对      round-trip 纯文本一致 + 图/表/h2/图注/关键句
+  └─ 委派澄（multi-platform-post）─→ dist\<平台>\ 草稿
+```
+
+- **公众号与多平台是两条路**：公众号用 API 自己建草稿；知乎/CSDN/掘金/百家号/B站由澄建草稿；
+- **正文改过就要删旧草稿**（`_delete_old_draft.py`）：同名两份草稿会让人不知道该发哪份；
+- 本期新增坑：
+
+29. **报告正文里写死的数字会跟着数据一起过期**：上一版写「20 只股票、8 个行业」，
+    实际按 `map.parquet` 分组只有 **5 个**行业（电子/通信/机械设备/公用事业/银行）——
+    写报告的脚本里凡是「个数」都要现算（`len(grp)`），别手敲。
+30. **数字自检能抓到这类错**：正文写「8 个行业」→ 自检直接失败（实际 5 个），
+    这种错误肉眼很难发现，但一次 `groupby` 就能验；
+31. **公众号回读校验要先把 HTML 实体还原**（`html.unescape`）：
+    图注里的 `<20 极冷` 在 HTML 里是 `&lt;20 极冷`，用原字符串比对会误判成「图注缺失」；
+32. **`front_matter.summary` 要 ≤ 20 字**：CSDN 摘要硬上限 20 字，
+    写长了 adapt 只能截成带省略号的残句（上一期就是这么做的）。
+
 ---
 
 ## 9. 工作约定

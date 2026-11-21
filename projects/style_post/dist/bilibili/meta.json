@@ -1,0 +1,71 @@
+{
+  "platform": "bilibili",
+  "platform_name": "哔哩哔哩专栏",
+  "title": "两周亏 8.18%：我把 31 个行业的乖离率算了一遍，问题不在选股",
+  "title_length": 34,
+  "title_limit": 40,
+  "title_truncated": false,
+  "title_head_keywords_ok": true,
+  "summary": "两周亏 8.18%：风格暴露的账单",
+  "summary_length": 17,
+  "summary_limit": null,
+  "tags": [
+    "量化",
+    "数据分析",
+    "qlib",
+    "A股",
+    "投资"
+  ],
+  "category": "技术",
+  "cover": "cover.png",
+  "cover_mode": "manual",
+  "formula_strategy": "latex",
+  "body_format": "markdown",
+  "auto_fields": [
+    "标题",
+    "正文",
+    "图片上传到平台图床"
+  ],
+  "manual_fields": [
+    {
+      "field": "标签",
+      "value": [
+        "量化",
+        "数据分析",
+        "qlib",
+        "A股",
+        "投资"
+      ],
+      "where": "哔哩哔哩专栏 编辑器标签栏",
+      "limit": "最多 5 个，逗号分隔"
+    },
+    {
+      "field": "摘要",
+      "value": "两周亏 8.18%：风格暴露的账单",
+      "where": "哔哩哔哩专栏 编辑器摘要栏（留空则自动生成）",
+      "limit": "无硬上限"
+    },
+    {
+      "field": "封面",
+      "value": "cover.png",
+      "where": "哔哩哔哩专栏 编辑器封面设置（适配器不传封面）",
+      "limit": "无"
+    },
+    {
+      "field": "分类/专栏",
+      "value": "技术",
+      "where": "哔哩哔哩专栏 编辑器分类栏",
+      "limit": "无"
+    }
+  ],
+  "after_publish": "草稿箱人工确认发布",
+  "editor_url": "https://member.bilibili.com/platform/upload/text/edit",
+  "notes": [
+    "B站走专栏编辑器，标题上限按 40 字控",
+    "公式保留 LaTeX（专栏编辑器是否渲染需人工确认）",
+    "保存 body 无封面字段 → 封面必须手填；分区 tid 写死 \"4\"，要换分区得在编辑器改"
+  ],
+  "warnings": [
+    "标签 6 个 > 上限 5 个，已截取前 5 个"
+  ]
+}
