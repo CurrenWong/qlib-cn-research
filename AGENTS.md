@@ -434,6 +434,43 @@ set "PYTHONWARNINGS=ignore"      :: qlib 的 RuntimeWarning 会淹没输出
     坑：等权目标要**固定在名义预算**上，不能跟着缩水后的实际投入走，否则越裁越少（会缩到 8 万）。
     实盘那 20 只是旧规则建的仓、已买入不能改；**11-30 调仓起改用新规则**。
 
+### 5.9 周度更新报告「策略收益 × 行业乖离率」（2026-11-21 新增）
+
+一条命令把**实盘组合净值**和**申万一级行业乖离率**拼成一份 HTML→PNG 报告，
+用来回答「这周跑输到底是模型不行还是风格不对」。
+
+```cmd
+cd /d <repo>
+.venv\Scripts\python.exe projects\csi300_lgbm\tools\track_pnl.py        :: ① 重跑组合净值（腾讯不复权）
+.venv\Scripts\python.exe tools\industry_bias_heatmap.py --refresh        :: ② 刷新行业日线 + 三张乖离率图
+.venv\Scripts\python.exe projects\csi300_lgbm\tools\build_update_report.py   :: ③ 出 HTML（数字全部现算）
+.venv\Scripts\python.exe projects\csi300_lgbm\tools\render_update_png.py     :: ④ headless Chrome 截 PNG
+```
+
+产物在 `projects\csi300_lgbm\report\update_20261120\`（html + img/ + 全图 + 3 张分页）。
+
+**为什么要这么拼**：策略净值是**结果**，行业乖离率是**原因**——单看净值只能知道亏了，
+单看乖离率不知道组合死在哪。两者叠起来才看得到**风格暴露**（组合重仓的行业恰好是乖离率最极端的那批）。
+
+**2026-11-20 首期结论**（组合 -8.18% / 沪深300 -1.28% / 超额 -6.89pct）：
+电子 39.5% 权重（BIAS120 -32.9%）+ 通信 19.1%（BIAS120 -43.8%）= 58.6% 权重压在最超卖的两个行业；
+银行 23.0%（BIAS120 +11.9%，分位 95，最热）反而全赚。11-11 时传媒还是「唯一四周期全正、分位 93 最拥挤」，
+到 11-20 变成四周期全负、分位 1 —— **一周从最拥挤翻到最超卖**。
+
+**写报告的规矩（别偷懒）**：所有数字**现算不写死**（含"一周前"的对比值也从面板重算），
+否则下次重跑就会自相矛盾；行业 → 股票映射用 `data\sw_industry\map.parquet`；
+乖离率口径直接 `import tools\industry_bias_heatmap` 复用，**不另写一份**。
+
+**新增的坑**
+
+26. **`panel.apply(bias)` 返回的是 DataFrame**（行=日期，列=行业），
+    所以 `bm[20].iloc[-1]` 是**一行 Series**，`bm[20].iloc[-1]["传媒"]` 才是标量；
+    写 `all(bm[20].iloc[i][p] > 0 ...)` 会把整行拿去做布尔判断 → `ValueError: truth value of an array is ambiguous`。
+27. **报告里别写死"组合持仓行业"**：用 `grp[grp.weight > 0]` 现算，
+    否则会把权重 0 的行业（如传媒、计算机）写成"组合持有"，结论就错了。
+28. `projects\csi300_lgbm\tools\` 下的脚本算 `REPO` 要 **`PROJ.parent.parent`**：
+    `tools` → `csi300_lgbm` → `projects` → `<repo>`，少一层就会 import 不到 `tools\` 里的公共脚本。
+
 ---
 
 ## 6. qlib 踩坑清单（Windows + 0.9.8 实测）
